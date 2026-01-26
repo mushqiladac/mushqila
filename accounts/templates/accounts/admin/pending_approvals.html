@@ -1,0 +1,136 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Pending Approvals - Mushqila B2B Travel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h2 mb-2">
+                        <i class="fas fa-user-clock me-2 text-warning"></i>Pending Approvals
+                    </h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'accounts:admin_dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Pending Approvals</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <span class="badge bg-warning fs-6">
+                        <i class="fas fa-users me-1"></i>{{ total_pending }} Pending
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Users List -->
+    <div class="row">
+        {% for user in pending_users %}
+        <div class="col-xl-4 col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="avatar avatar-lg me-3">
+                            <div class="avatar-initial rounded-circle bg-warning text-white">
+                                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="card-title mb-1">{{ user.get_full_name }}</h5>
+                            <p class="text-muted small mb-0">
+                                <i class="fas fa-envelope me-1"></i>{{ user.email }}
+                            </p>
+                            <p class="text-muted small mb-0">
+                                <i class="fas fa-phone me-1"></i>{{ user.phone|default:"-" }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-info">{{ user.get_user_type_display }}</span>
+                        <span class="badge bg-warning">{{ user.get_status_display }}</span>
+                        {% if user.created_at|timesince %}
+                        <small class="text-muted d-block mt-1">
+                            Registered {{ user.created_at|timesince }} ago
+                        </small>
+                        {% endif %}
+                    </div>
+                    
+                    {% if user.company_name_en or user.company_name_ar %}
+                    <div class="mb-3">
+                        <h6 class="small text-muted mb-1">Company</h6>
+                        <p class="mb-0">{{ user.company_name_en|default:user.company_name_ar }}</p>
+                        {% if user.company_registration %}
+                        <small class="text-muted">CR: {{ user.company_registration }}</small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    <div class="btn-group w-100">
+                        <button class="btn btn-success user-action" 
+                                data-action="approve" 
+                                data-user-id="{{ user.id }}">
+                            <i class="fas fa-check me-1"></i>Approve
+                        </button>
+                        <button class="btn btn-warning user-action" 
+                                data-action="review" 
+                                data-user-id="{{ user.id }}">
+                            <i class="fas fa-search me-1"></i>Review
+                        </button>
+                        <button class="btn btn-danger user-action" 
+                                data-action="reject" 
+                                data-user-id="{{ user.id }}">
+                            <i class="fas fa-times me-1"></i>Reject
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h4>No Pending Approvals</h4>
+                    <p class="text-muted">All users have been approved.</p>
+                    <a href="{% url 'accounts:user_list' %}" class="btn btn-primary">
+                        <i class="fas fa-users me-2"></i>View All Users
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Same user action script as before
+    document.querySelectorAll('.user-action').forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.dataset.action;
+            const userId = this.dataset.userId;
+            
+            if (action === 'reject') {
+                const reason = prompt('Enter reason for rejection:');
+                if (!reason) return;
+                performUserAction(userId, action, reason);
+            } else {
+                performUserAction(userId, action);
+            }
+        });
+    });
+    
+    function performUserAction(userId, action, reason = '') {
+        // Same AJAX function as before
+    }
+</script>
+{% endblock %}

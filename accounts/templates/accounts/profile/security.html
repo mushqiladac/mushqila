@@ -1,0 +1,1907 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Security Settings - Mushqila B2B Travel{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom Variables */
+    :root {
+        --primary-color: #4361ee;
+        --primary-light: #4895ef;
+        --secondary-color: #3f37c9;
+        --success-color: #4cc9f0;
+        --warning-color: #f72585;
+        --danger-color: #7209b7;
+        --light-color: #f8f9fa;
+        --dark-color: #212529;
+        --security-level-low: #dc3545;
+        --security-level-medium: #ffc107;
+        --security-level-high: #28a745;
+        --security-level-very-high: #17a2b8;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes glow {
+        0% { box-shadow: 0 0 5px rgba(67, 97, 238, 0.5); }
+        100% { box-shadow: 0 0 20px rgba(67, 97, 238, 0.8); }
+    }
+
+    /* Main Layout */
+    .security-container {
+        min-height: calc(100vh - 70px);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+    }
+
+    /* Header */
+    .page-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.5s ease-out;
+        border-left: 5px solid var(--primary-color);
+    }
+
+    .page-title {
+        color: var(--dark-color);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .page-subtitle {
+        color: #6c757d;
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    /* Security Overview */
+    .security-overview {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        animation: slideIn 0.6s ease-out 0.1s both;
+    }
+
+    .overview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f2f5;
+    }
+
+    .overview-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .security-score {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin: 1rem 0;
+    }
+
+    .score-low { color: var(--security-level-low); }
+    .score-medium { color: var(--security-level-medium); }
+    .score-high { color: var(--security-level-high); }
+    .score-very-high { color: var(--security-level-very-high); }
+
+    .security-level {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .level-badge {
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .level-low {
+        background: rgba(220, 53, 69, 0.1);
+        color: var(--security-level-low);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .level-medium {
+        background: rgba(255, 193, 7, 0.1);
+        color: var(--security-level-medium);
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .level-high {
+        background: rgba(40, 167, 69, 0.1);
+        color: var(--security-level-high);
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .level-very-high {
+        background: rgba(23, 162, 184, 0.1);
+        color: var(--security-level-very-high);
+        border: 1px solid rgba(23, 162, 184, 0.3);
+    }
+
+    .security-progress {
+        margin: 1.5rem 0;
+    }
+
+    .progress-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition: width 1s ease-out;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .security-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.75rem;
+        border-radius: 10px;
+        background: #f8f9fa;
+    }
+
+    .feature-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .feature-enabled .feature-icon {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .feature-disabled .feature-icon {
+        background: linear-gradient(135deg, #dc3545, #e4606d);
+    }
+
+    .feature-info {
+        flex: 1;
+    }
+
+    .feature-name {
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.1rem;
+    }
+
+    .feature-status {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+
+    /* Security Cards */
+    .security-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .security-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        animation: fadeIn 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .security-card:nth-child(1) { animation-delay: 0.2s; }
+    .security-card:nth-child(2) { animation-delay: 0.3s; }
+    .security-card:nth-child(3) { animation-delay: 0.4s; }
+    .security-card:nth-child(4) { animation-delay: 0.5s; }
+
+    .security-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f2f5;
+    }
+
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .card-1 .card-icon { background: linear-gradient(135deg, #dc3545, #e4606d); }
+    .card-2 .card-icon { background: linear-gradient(135deg, #17a2b8, #39c0ed); }
+    .card-3 .card-icon { background: linear-gradient(135deg, #ffc107, #ffca2c); }
+    .card-4 .card-icon { background: linear-gradient(135deg, #28a745, #20c997); }
+
+    .card-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0;
+        flex: 1;
+    }
+
+    .card-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .status-inactive {
+        background: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+        border: 1px solid rgba(108, 117, 125, 0.3);
+    }
+
+    .status-warning {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+
+    .card-content {
+        margin-bottom: 1.5rem;
+    }
+
+    .security-info {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .security-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .metric-item {
+        text-align: center;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .metric-label {
+        font-size: 0.75rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .action-btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+        border: none;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-enable {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+    }
+
+    .btn-disable {
+        background: #e9ecef;
+        color: var(--dark-color);
+    }
+
+    .btn-configure {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .btn-view {
+        background: #6c757d;
+        color: white;
+    }
+
+    /* Password Strength Meter */
+    .password-strength {
+        margin: 1.5rem 0;
+    }
+
+    .strength-meter {
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+        position: relative;
+    }
+
+    .strength-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .strength-0 { width: 0%; background: var(--security-level-low); }
+    .strength-1 { width: 25%; background: var(--security-level-low); }
+    .strength-2 { width: 50%; background: var(--security-level-medium); }
+    .strength-3 { width: 75%; background: var(--security-level-high); }
+    .strength-4 { width: 100%; background: var(--security-level-very-high); }
+
+    .strength-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .strength-text {
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .strength-requirements {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .requirement-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .requirement-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .requirement-met {
+        color: #28a745;
+    }
+
+    .requirement-not-met {
+        color: #dc3545;
+    }
+
+    /* IP Whitelist */
+    .ip-list {
+        margin: 1.5rem 0;
+    }
+
+    .ip-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .ip-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+
+    .ip-info {
+        flex: 1;
+    }
+
+    .ip-address {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .ip-details {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .ip-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .ip-btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .ip-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .btn-edit {
+        background: #17a2b8;
+    }
+
+    .btn-delete {
+        background: #dc3545;
+    }
+
+    /* Login History */
+    .login-history {
+        max-height: 300px;
+        overflow-y: auto;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+
+    .history-item {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .history-item:last-child {
+        border-bottom: none;
+    }
+
+    .history-item:hover {
+        background: #f8f9fa;
+    }
+
+    .history-success {
+        border-left: 4px solid #28a745;
+    }
+
+    .history-failed {
+        border-left: 4px solid #dc3545;
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .history-status {
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-success {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+
+    .status-failed {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .history-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    /* Forms */
+    .security-form {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control.custom {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-control.custom:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }
+
+    .form-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+
+    /* Switches */
+    .form-switch.custom {
+        padding-left: 0;
+        margin-bottom: 1rem;
+    }
+
+    .form-switch.custom .form-check-input {
+        width: 3.5em;
+        height: 1.8em;
+        margin-right: 0.75rem;
+        border: 2px solid #cbd5e0;
+        background-color: #e2e8f0;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+        float: none;
+    }
+
+    .form-switch.custom .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-switch.custom .form-check-input:focus {
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        border-color: var(--primary-color);
+    }
+
+    .switch-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .switch-description {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    /* Buttons */
+    .btn-primary-custom {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+        color: white;
+    }
+
+    .btn-primary-custom::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-primary-custom:hover::before {
+        left: 100%;
+    }
+
+    .btn-danger-custom {
+        background: linear-gradient(135deg, #dc3545, #e4606d);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    /* Alerts */
+    .alert-custom {
+        border-radius: 12px;
+        border: none;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+        animation: slideIn 0.5s ease-out;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d1fae5, #ecfdf5);
+        border-left: 4px solid #10b981;
+        color: #065f46;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #fee2e2, #fef2f2);
+        border-left: 4px solid #dc2626;
+        color: #7f1d1d;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #fef3c7, #fffbeb);
+        border-left: 4px solid #f59e0b;
+        color: #92400e;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #dbeafe, #eff6ff);
+        border-left: 4px solid #3b82f6;
+        color: #1e40af;
+    }
+
+    /* Toast Container */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .toast-custom {
+        background: white;
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        margin-bottom: 1rem;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin: 1.5rem 0;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        color: #adb5bd;
+        margin-bottom: 1rem;
+    }
+
+    .empty-title {
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .empty-text {
+        color: #6c757d;
+        font-size: 0.9rem;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .security-container {
+            padding: 1rem;
+        }
+        
+        .page-header {
+            padding: 1rem;
+        }
+        
+        .security-overview,
+        .security-card {
+            padding: 1.25rem;
+        }
+        
+        .security-cards-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .security-features {
+            grid-template-columns: 1fr;
+        }
+        
+        .security-metrics {
+            grid-template-columns: 1fr;
+        }
+        
+        .card-actions {
+            flex-direction: column;
+        }
+        
+        .action-btn {
+            width: 100%;
+        }
+        
+        .ip-actions {
+            flex-direction: column;
+        }
+        
+        .history-details {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+        .security-container {
+            background: white !important;
+            padding: 0 !important;
+        }
+        
+        .page-header,
+        .security-overview,
+        .security-card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            margin-bottom: 20px !important;
+            page-break-inside: avoid;
+        }
+        
+        .btn,
+        .action-btn,
+        .ip-btn,
+        .form-switch {
+            display: none !important;
+        }
+        
+        .security-form {
+            border: 1px solid #ddd !important;
+            background: white !important;
+        }
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="security-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-shield-alt me-2"></i>Security Settings
+                </h1>
+                <p class="page-subtitle">
+                    Manage your account security settings, login sessions, and authentication methods.
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert-custom alert-{{ message.tags }}">
+            <div class="d-flex align-items-center">
+                <i class="fas 
+                    {% if message.tags == 'success' %}fa-check-circle 
+                    {% elif message.tags == 'error' %}fa-exclamation-triangle 
+                    {% elif message.tags == 'warning' %}fa-exclamation-circle
+                    {% else %}fa-info-circle{% endif %} 
+                    me-3 fs-4">
+                </i>
+                <div class="flex-grow-1">{{ message }}</div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Security Overview -->
+    <div class="security-overview">
+        <div class="overview-header">
+            <h3 class="overview-title">
+                <i class="fas fa-chart-line text-primary"></i>
+                Security Overview
+            </h3>
+            <div class="last-updated">
+                <small class="text-muted">
+                    <i class="fas fa-clock me-1"></i>
+                    Updated: {{ last_updated|date:"M d, Y H:i" }}
+                </small>
+            </div>
+        </div>
+        
+        <div class="security-score {% if security_score >= 80 %}score-very-high{% elif security_score >= 60 %}score-high{% elif security_score >= 40 %}score-medium{% else %}score-low{% endif %}">
+            {{ security_score }}/100
+        </div>
+        
+        <div class="security-level">
+            <span class="level-badge {% if security_score >= 80 %}level-very-high{% elif security_score >= 60 %}level-high{% elif security_score >= 40 %}level-medium{% else %}level-low{% endif %}">
+                {% if security_score >= 80 %}
+                    Very High Security
+                {% elif security_score >= 60 %}
+                    High Security
+                {% elif security_score >= 40 %}
+                    Medium Security
+                {% else %}
+                    Low Security
+                {% endif %}
+            </span>
+        </div>
+        
+        <div class="security-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="securityProgress" style="width: {{ security_score }}%"></div>
+            </div>
+            <div class="progress-labels">
+                <span>Low</span>
+                <span>Medium</span>
+                <span>High</span>
+                <span>Very High</span>
+            </div>
+        </div>
+        
+        <div class="security-features">
+            {% for feature in security_features %}
+            <div class="feature-item {% if feature.enabled %}feature-enabled{% else %}feature-disabled{% endif %}">
+                <div class="feature-icon">
+                    <i class="{{ feature.icon }}"></i>
+                </div>
+                <div class="feature-info">
+                    <div class="feature-name">{{ feature.name }}</div>
+                    <div class="feature-status">
+                        {% if feature.enabled %}
+                            <i class="fas fa-check-circle text-success me-1"></i>Enabled
+                        {% else %}
+                            <i class="fas fa-times-circle text-danger me-1"></i>Disabled
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Security Cards Grid -->
+    <div class="security-cards-grid">
+        <!-- Password Security Card -->
+        <div class="security-card card-1">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h4 class="card-title">Password Security</h4>
+                <span class="card-status status-{% if password_age_days <= 30 %}active{% else %}warning{% endif %}">
+                    {% if password_age_days <= 30 %}Strong{% else %}Needs Update{% endif %}
+                </span>
+            </div>
+            
+            <div class="card-content">
+                <p class="security-info">
+                    Your password was last changed {{ password_age_days }} days ago.
+                    {% if password_age_days > 90 %}
+                    <strong class="text-danger">Consider changing your password for better security.</strong>
+                    {% endif %}
+                </p>
+                
+                <div class="security-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value">{{ password_age_days }}</div>
+                        <div class="metric-label">Days Old</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{% if password_strength == 'strong' %}Strong{% elif password_strength == 'medium' %}Medium{% else %}Weak{% endif %}</div>
+                        <div class="metric-label">Strength</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-actions">
+                <button class="action-btn btn-enable" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="fas fa-edit me-1"></i>Change Password
+                </button>
+                <a href="{% url 'accounts:password_reset' %}" class="action-btn btn-view">
+                    <i class="fas fa-redo me-1"></i>Reset Password
+                </a>
+            </div>
+        </div>
+
+        <!-- Two-Factor Authentication Card -->
+        <div class="security-card card-2">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4 class="card-title">2FA Authentication</h4>
+                <span class="card-status {% if two_factor_enabled %}status-active{% else %}status-inactive{% endif %}">
+                    {% if two_factor_enabled %}Active{% else %}Inactive{% endif %}
+                </span>
+            </div>
+            
+            <div class="card-content">
+                <p class="security-info">
+                    Two-factor authentication adds an extra layer of security to your account.
+                    {% if not two_factor_enabled %}
+                    <strong class="text-warning">Enable 2FA for enhanced security.</strong>
+                    {% endif %}
+                </p>
+                
+                <div class="security-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value">{{ two_factor_method|default:"None" }}</div>
+                        <div class="metric-label">Method</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{{ two_factor_last_used|default:"Never" }}</div>
+                        <div class="metric-label">Last Used</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-actions">
+                {% if two_factor_enabled %}
+                <form method="post" action="{% url 'accounts:disable_2fa' %}" class="w-100">
+                    {% csrf_token %}
+                    <button type="submit" class="action-btn btn-disable w-100" onclick="return confirm('Are you sure you want to disable 2FA?')">
+                        <i class="fas fa-times me-1"></i>Disable 2FA
+                    </button>
+                </form>
+                {% else %}
+                <button class="action-btn btn-enable" data-bs-toggle="modal" data-bs-target="#enable2FAModal">
+                    <i class="fas fa-shield-alt me-1"></i>Enable 2FA
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Login Sessions Card -->
+        <div class="security-card card-3">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <h4 class="card-title">Login Sessions</h4>
+                <span class="card-status {% if active_sessions > 1 %}status-warning{% else %}status-active{% endif %}">
+                    {{ active_sessions }} Active
+                </span>
+            </div>
+            
+            <div class="card-content">
+                <p class="security-info">
+                    Manage your active login sessions across different devices and locations.
+                </p>
+                
+                <div class="security-metrics">
+                    <div class="metric-item">
+                        <div class="metric-value">{{ active_sessions }}</div>
+                        <div class="metric-label">Active Sessions</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">{{ login_history_count }}</div>
+                        <div class="metric-label">Total Logins</div>
+                    </div>
+                </div>
+                
+                {% if login_history|slice:":3" %}
+                <div class="login-history">
+                    {% for login in login_history|slice:":3" %}
+                    <div class="history-item {% if login.success %}history-success{% else %}history-failed{% endif %}">
+                        <div class="history-header">
+                            <div class="history-location">
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                {{ login.location|default:"Unknown" }}
+                            </div>
+                            <span class="history-status {% if login.success %}status-success{% else %}status-failed{% endif %}">
+                                {% if login.success %}Success{% else %}Failed{% endif %}
+                            </span>
+                        </div>
+                        <div class="history-details">
+                            <div>
+                                <i class="fas fa-globe me-1"></i>
+                                {{ login.ip_address }}
+                            </div>
+                            <div>
+                                <i class="fas fa-clock me-1"></i>
+                                {{ login.created_at|timesince }} ago
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="card-actions">
+                <button class="action-btn btn-view" data-bs-toggle="modal" data-bs-target="#sessionsModal">
+                    <i class="fas fa-eye me-1"></i>View All Sessions
+                </button>
+                <!-- Line 1194 পরিবর্তন করুন -->
+                <form method="post" action="{% url 'accounts:logout' %}" class="w-100">
+                    {% csrf_token %}
+                    <button type="submit" class="action-btn btn-logout-all">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </button>
+                </form>
+
+
+
+            </div>
+        </div>
+
+        <!-- IP Whitelist Card -->
+        <div class="security-card card-4">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-network-wired"></i>
+                </div>
+                <h4 class="card-title">IP Whitelist</h4>
+                <span class="card-status {% if ip_whitelist_enabled %}status-active{% else %}status-inactive{% endif %}">
+                    {% if ip_whitelist_enabled %}Active{% else %}Inactive{% endif %}
+                </span>
+            </div>
+            
+            <div class="card-content">
+                <p class="security-info">
+                    Restrict account access to specific IP addresses for enhanced security.
+                </p>
+                
+                {% if ip_addresses %}
+                <div class="ip-list">
+                    {% for ip in ip_addresses|slice:":2" %}
+                    <div class="ip-item">
+                        <div class="ip-info">
+                            <div class="ip-address">
+                                <i class="fas fa-laptop-house me-1"></i>
+                                {{ ip.ip_address }}
+                            </div>
+                            <div class="ip-details">
+                                <small>
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    Added {{ ip.created_at|date:"M d, Y" }}
+                                    {% if ip.description %}
+                                    • {{ ip.description }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="ip-actions">
+                            <button class="ip-btn btn-edit" onclick="editIP('{{ ip.id }}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="ip-btn btn-delete" onclick="deleteIP('{{ ip.id }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-lock-open"></i>
+                    </div>
+                    <h5 class="empty-title">No IP Restrictions</h5>
+                    <p class="empty-text">Your account can be accessed from any IP address.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="card-actions">
+                <button class="action-btn btn-enable" data-bs-toggle="modal" data-bs-target="#addIPModal">
+                    <i class="fas fa-plus me-1"></i>Add IP Address
+                </button>
+                <button class="action-btn btn-view" data-bs-toggle="modal" data-bs-target="#ipWhitelistModal">
+                    <i class="fas fa-list me-1"></i>Manage Whitelist
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Security Sections -->
+    <div class="row">
+        <!-- Email Security -->
+        <div class="col-md-6 mb-3">
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #6f42c1, #a370f7);">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h4 class="card-title">Email Security</h4>
+                    <span class="card-status {% if user.email_verified %}status-active{% else %}status-warning{% endif %}">
+                        {% if user.email_verified %}Verified{% else %}Not Verified{% endif %}
+                    </span>
+                </div>
+                
+                <div class="card-content">
+                    <p class="security-info">
+                        Email verification adds an extra layer of security and ensures you receive important notifications.
+                    </p>
+                    
+                    <div class="security-form">
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control custom" value="{{ user.email }}" readonly>
+                            <small class="form-text">
+                                {% if user.email_verified %}
+                                <i class="fas fa-check-circle text-success me-1"></i>
+                                Verified on {{ user.email_verified_at|date:"M d, Y" }}
+                                {% else %}
+                                <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+                                Not verified
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-actions">
+                    {% if not user.email_verified %}
+                    <form method="post" action="#" class="w-100">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn btn-enable w-100">
+                            <i class="fas fa-paper-plane me-1"></i>Resend Verification
+                        </button>
+                    </form>
+                    {% else %}
+                    <button class="action-btn btn-disable w-100" disabled>
+                        <i class="fas fa-check-circle me-1"></i>Verified
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Notifications -->
+        <div class="col-md-6 mb-3">
+            <div class="security-card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #fd7e14, #ffa94d);">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h4 class="card-title">Security Notifications</h4>
+                    <span class="card-status status-active">Active</span>
+                </div>
+                
+                <div class="card-content">
+                    <p class="security-info">
+                        Configure how you want to be notified about security events.
+                    </p>
+                    
+                    <div class="security-form">
+                        <div class="form-switch custom">
+                            {{ notification_form.email_notifications }}
+                            <label class="switch-label" for="{{ notification_form.email_notifications.id_for_label }}">
+                                Email Notifications
+                            </label>
+                            <p class="switch-description">
+                                Receive security alerts via email
+                            </p>
+                        </div>
+                        
+                        <div class="form-switch custom">
+                            {{ notification_form.sms_notifications }}
+                            <label class="switch-label" for="{{ notification_form.sms_notifications.id_for_label }}">
+                                SMS Notifications
+                            </label>
+                            <p class="switch-description">
+                                Get instant SMS alerts for critical security events
+                            </p>
+                        </div>
+                        
+                        <div class="form-switch custom">
+                            {{ notification_form.push_notifications }}
+                            <label class="switch-label" for="{{ notification_form.push_notifications.id_for_label }}">
+                                Push Notifications
+                            </label>
+                            <p class="switch-description">
+                                Receive browser push notifications
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-actions">
+                    <button class="action-btn btn-enable w-100" onclick="saveNotificationSettings()">
+                        <i class="fas fa-save me-1"></i>Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Audit Log -->
+    <div class="security-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, #20c997, #3ddc97);">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h4 class="card-title">Security Audit Log</h4>
+            <span class="card-status status-active">Last 30 Days</span>
+        </div>
+        
+        <div class="card-content">
+            <p class="security-info">
+                Review recent security-related activities on your account.
+            </p>
+            
+            {% if security_logs %}
+            <div class="login-history">
+                {% for log in security_logs|slice:":5" %}
+                <div class="history-item">
+                    <div class="history-header">
+                        <div class="history-location">
+                            <i class="fas fa-{{ log.icon }} me-1 text-{{ log.color }}"></i>
+                            {{ log.activity }}
+                        </div>
+                        <span class="history-status status-{{ log.status }}">
+                            {{ log.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="history-details">
+                        <div>
+                            <i class="fas fa-info-circle me-1"></i>
+                            {{ log.description }}
+                        </div>
+                        <div>
+                            <i class="fas fa-clock me-1"></i>
+                            {{ log.created_at|timesince }} ago
+                            {% if log.ip_address %}
+                            • <i class="fas fa-globe me-1"></i>{{ log.ip_address }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h5 class="empty-title">No Security Logs</h5>
+                <p class="empty-text">No security-related activities recorded in the last 30 days.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="card-actions">
+            <a href="{% url 'accounts:activity_log' %}" class="action-btn btn-view w-100">
+                <i class="fas fa-external-link-alt me-1"></i>View Full Audit Log
+            </a>
+        </div>
+    </div>
+
+    <!-- Security Recommendations -->
+    {% if security_recommendations %}
+    <div class="security-card mt-3" style="border-left: 4px solid #ffc107;">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, #ffc107, #ffca2c);">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <h4 class="card-title">Security Recommendations</h4>
+            <span class="card-status status-warning">{{ security_recommendations|length }} Actions</span>
+        </div>
+        
+        <div class="card-content">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Follow these recommendations to improve your account security.
+            </div>
+            
+            <div class="recommendations-list">
+                {% for recommendation in security_recommendations %}
+                <div class="feature-item" style="background: #fff9e6; border: 1px solid #ffeaa7;">
+                    <div class="feature-icon" style="background: #ffc107;">
+                        <i class="fas fa-{{ recommendation.icon }}"></i>
+                    </div>
+                    <div class="feature-info">
+                        <div class="feature-name">{{ recommendation.title }}</div>
+                        <div class="feature-status">{{ recommendation.description }}</div>
+                    </div>
+                    <button class="ip-btn" style="background: #ffc107;" onclick="{{ recommendation.action }}">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modals -->
+
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" id="loadingSpinner">
+    <div class="spinner"></div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize security score animation
+    document.addEventListener('DOMContentLoaded', function() {
+        animateProgressBar();
+        initializePasswordStrength();
+        initializeTooltips();
+    });
+    
+    function animateProgressBar() {
+        const progressBar = document.getElementById('securityProgress');
+        const width = progressBar.style.width;
+        progressBar.style.width = '0%';
+        
+        setTimeout(() => {
+            progressBar.style.transition = 'width 1.5s ease-out';
+            progressBar.style.width = width;
+        }, 300);
+    }
+    
+    function initializePasswordStrength() {
+        const passwordInputs = document.querySelectorAll('input[type="password"]');
+        passwordInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                checkPasswordStrength(this.value, this.id + 'Strength');
+            });
+        });
+    }
+    
+    function checkPasswordStrength(password, targetId) {
+        let strength = 0;
+        const requirements = {
+            length: password.length >= 8,
+            lowercase: /[a-z]/.test(password),
+            uppercase: /[A-Z]/.test(password),
+            numbers: /\d/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+        
+        // Calculate strength
+        if (requirements.length) strength++;
+        if (requirements.lowercase) strength++;
+        if (requirements.uppercase) strength++;
+        if (requirements.numbers) strength++;
+        if (requirements.special) strength++;
+        
+        // Update strength meter
+        const meter = document.getElementById(targetId);
+        if (meter) {
+            meter.className = 'strength-fill strength-' + strength;
+        }
+        
+        // Update requirements list
+        updateRequirements(requirements);
+        
+        return strength;
+    }
+    
+    function updateRequirements(requirements) {
+        const requirementItems = document.querySelectorAll('.requirement-item');
+        requirementItems.forEach(item => {
+            const type = item.getAttribute('data-requirement');
+            if (requirements[type]) {
+                item.classList.add('requirement-met');
+                item.classList.remove('requirement-not-met');
+                item.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i>' + item.textContent.replace(/^[^a-zA-Z]+/, '');
+            } else {
+                item.classList.add('requirement-not-met');
+                item.classList.remove('requirement-met');
+                item.innerHTML = '<i class="fas fa-times-circle text-danger me-2"></i>' + item.textContent.replace(/^[^a-zA-Z]+/, '');
+            }
+        });
+    }
+    
+    function initializeTooltips() {
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(tooltip => {
+            new bootstrap.Tooltip(tooltip);
+        });
+    }
+    
+    // IP Management Functions
+    function editIP(ipId) {
+        showLoading(true);
+        
+        fetch(`/api/security/ip/${ipId}/`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            
+            if (data.success) {
+                // Populate edit modal
+                document.getElementById('editIpId').value = data.ip.id;
+                document.getElementById('editIpAddress').value = data.ip.ip_address;
+                document.getElementById('editIpDescription').value = data.ip.description;
+                
+                // Show edit modal
+                const modal = new bootstrap.Modal(document.getElementById('editIPModal'));
+                modal.show();
+            } else {
+                showToast('Error', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            showToast('Error', 'Failed to load IP details', 'error');
+            console.error('Error:', error);
+        });
+    }
+    
+    function deleteIP(ipId) {
+        if (!confirm('Are you sure you want to remove this IP address from the whitelist?')) {
+            return;
+        }
+        
+        showLoading(true);
+        
+        fetch(`/api/security/ip/${ipId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            
+            if (data.success) {
+                showToast('Success', data.message, 'success');
+                
+                // Remove IP item from list
+                const ipItem = document.querySelector(`[data-ip-id="${ipId}"]`);
+                if (ipItem) {
+                    ipItem.style.opacity = '0.5';
+                    ipItem.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        ipItem.remove();
+                        updateSecurityScore();
+                    }, 300);
+                }
+                
+                // Reload page after delay
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showToast('Error', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            showToast('Error', 'Failed to delete IP address', 'error');
+            console.error('Error:', error);
+        });
+    }
+    
+    // Notification Settings
+    function saveNotificationSettings() {
+        const formData = new FormData();
+        formData.append('email_notifications', document.getElementById('{{ notification_form.email_notifications.id_for_label }}').checked);
+        formData.append('sms_notifications', document.getElementById('{{ notification_form.sms_notifications.id_for_label }}').checked);
+        formData.append('push_notifications', document.getElementById('{{ notification_form.push_notifications.id_for_label }}').checked);
+        
+        showLoading(true);
+        
+        fetch("#", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            
+            if (data.success) {
+                showToast('Success', data.message, 'success');
+                updateSecurityScore();
+            } else {
+                showToast('Error', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            showToast('Error', 'Failed to save settings', 'error');
+            console.error('Error:', error);
+        });
+    }
+    
+    // Security Score Update
+    function updateSecurityScore() {
+        showLoading(true);
+        
+        fetch("#", {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            
+            if (data.success) {
+                // Update security score display
+                const scoreElement = document.querySelector('.security-score');
+                const progressBar = document.getElementById('securityProgress');
+                const levelBadge = document.querySelector('.level-badge');
+                
+                scoreElement.textContent = data.score + '/100';
+                scoreElement.className = 'security-score score-' + data.level;
+                progressBar.style.width = data.score + '%';
+                
+                // Update level badge
+                levelBadge.className = 'level-badge level-' + data.level;
+                levelBadge.textContent = data.level_name;
+                
+                // Update features status
+                data.features.forEach(feature => {
+                    const featureElement = document.querySelector(`[data-feature="${feature.name}"]`);
+                    if (featureElement) {
+                        const statusElement = featureElement.querySelector('.feature-status');
+                        if (feature.enabled) {
+                            featureElement.classList.add('feature-enabled');
+                            featureElement.classList.remove('feature-disabled');
+                            statusElement.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i>Enabled';
+                        } else {
+                            featureElement.classList.add('feature-disabled');
+                            featureElement.classList.remove('feature-enabled');
+                            statusElement.innerHTML = '<i class="fas fa-times-circle text-danger me-1"></i>Disabled';
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            console.error('Error:', error);
+        });
+    }
+    
+    // Session Management
+    function logoutSession(sessionId) {
+        if (!confirm('Log out from this session?')) {
+            return;
+        }
+        
+        showLoading(true);
+        
+        fetch(`/api/security/session/${sessionId}/logout/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            
+            if (data.success) {
+                showToast('Success', data.message, 'success');
+                
+                // Remove session from list
+                const sessionElement = document.querySelector(`[data-session-id="${sessionId}"]`);
+                if (sessionElement) {
+                    sessionElement.remove();
+                }
+                
+                updateSecurityScore();
+            } else {
+                showToast('Error', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            showToast('Error', 'Failed to logout session', 'error');
+            console.error('Error:', error);
+        });
+    }
+    
+    // Utility Functions
+    function showLoading(show) {
+        document.getElementById('loadingSpinner').style.display = show ? 'flex' : 'none';
+    }
+    
+    function showToast(title, message, type = 'info') {
+        const toastId = 'toast-' + Date.now();
+        const iconClass = {
+            'success': 'fa-check-circle',
+            'error': 'fa-exclamation-triangle',
+            'warning': 'fa-exclamation-circle',
+            'info': 'fa-info-circle'
+        }[type];
+        
+        const toastHTML = `
+            <div id="${toastId}" class="toast-custom" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header-custom d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="fas ${iconClass} me-2"></i>
+                        <strong class="me-auto">${title}</strong>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body p-3">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        let container = document.getElementById('toastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+        
+        container.insertAdjacentHTML('beforeend', toastHTML);
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 5000
+        });
+        
+        toast.show();
+        
+        // Remove toast after hiding
+        toastElement.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+    
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + Shift + S for security overview
+        if (e.ctrlKey && e.shiftKey && e.key === 'S') {
+            e.preventDefault();
+            document.querySelector('.security-overview').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Ctrl + P for password change
+        if (e.ctrlKey && e.key === 'p') {
+            e.preventDefault();
+            const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+            modal.show();
+        }
+        
+        // Ctrl + 2 for 2FA settings
+        if (e.ctrlKey && e.key === '2') {
+            e.preventDefault();
+            const modal = new bootstrap.Modal(document.getElementById('enable2FAModal'));
+            modal.show();
+        }
+    });
+    
+    // Auto-refresh security status every 5 minutes
+    setInterval(updateSecurityScore, 300000);
+    
+    // Export security report
+    function exportSecurityReport() {
+        showLoading(true);
+        
+        fetch("#", {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            showLoading(false);
+            
+            if (response.ok) {
+                return response.blob();
+            } else {
+                throw new Error('Failed to export report');
+            }
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Security_Report_{{ user.id }}_${new Date().toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        })
+        .catch(error => {
+            showLoading(false);
+            showToast('Error', 'Failed to export security report', 'error');
+            console.error('Error:', error);
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,1029 @@
+<!-------------- accounts/templates/accounts/financial/payments.html  ------->
+{% extends 'accounts/base.html' %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{% trans "Payment History" %} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">{% trans "Payment History" %}</h1>
+                    <p class="text-muted mb-0">
+                        {% trans "View and manage all your payment transactions" %}
+                    </p>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'deposit' %}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i>{% trans "Make Payment" %}
+                    </a>
+                    <a href="{% url 'wallet' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-wallet me-2"></i>{% trans "Back to Wallet" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% trans "Total Payments" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ stats.total_payments|floatformat:2|intcomma }} SAR
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-credit-card fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                {% trans "Successful" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ stats.successful_payments }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                {% trans "Pending" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ stats.pending_payments }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                {% trans "Last 30 Days" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ stats.last_30_days|floatformat:2|intcomma }} SAR
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-filter me-2"></i>{% trans "Filter Payments" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="GET" id="filterForm">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Payment Status" %}</label>
+                                <select name="status" class="form-select">
+                                    <option value="">{% trans "All Status" %}</option>
+                                    {% for status in status_choices %}
+                                    <option value="{{ status.0 }}" {% if request.GET.status == status.0 %}selected{% endif %}>
+                                        {{ status.1 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Payment Method" %}</label>
+                                <select name="payment_method" class="form-select">
+                                    <option value="">{% trans "All Methods" %}</option>
+                                    {% for method in method_choices %}
+                                    <option value="{{ method.0 }}" {% if request.GET.payment_method == method.0 %}selected{% endif %}>
+                                        {{ method.1 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "From Date" %}</label>
+                                <input type="date" 
+                                       name="date_from" 
+                                       class="form-control" 
+                                       value="{{ request.GET.date_from }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "To Date" %}</label>
+                                <input type="date" 
+                                       name="date_to" 
+                                       class="form-control" 
+                                       value="{{ request.GET.date_to }}">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Search" %}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="search" 
+                                           class="form-control" 
+                                           placeholder="{% trans 'Search by payment ID, reference, description...' %}"
+                                           value="{{ request.GET.search }}">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Min Amount (SAR)" %}</label>
+                                <input type="number" 
+                                       name="min_amount" 
+                                       class="form-control" 
+                                       step="0.01"
+                                       min="0"
+                                       value="{{ request.GET.min_amount }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Max Amount (SAR)" %}</label>
+                                <input type="number" 
+                                       name="max_amount" 
+                                       class="form-control" 
+                                       step="0.01"
+                                       min="0"
+                                       value="{{ request.GET.max_amount }}">
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter me-2"></i>{% trans "Apply Filters" %}
+                                    </button>
+                                    <a href="{% url 'payments' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-2"></i>{% trans "Clear Filters" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment History Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history me-2"></i>{% trans "Payment History" %}
+                    </h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-download me-2"></i>{% trans "Export" %}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="exportToCSV()">
+                                <i class="fas fa-file-csv me-2"></i>{% trans "CSV" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportToPDF()">
+                                <i class="fas fa-file-pdf me-2"></i>{% trans "PDF" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel me-2"></i>{% trans "Excel" %}
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if payments %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="paymentsTable">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Payment ID" %}</th>
+                                    <th>{% trans "Date" %}</th>
+                                    <th>{% trans "Amount" %}</th>
+                                    <th>{% trans "Method" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Type" %}</th>
+                                    <th>{% trans "Reference" %}</th>
+                                    <th>{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr class="payment-row" data-payment-id="{{ payment.payment_id }}">
+                                    <td>
+                                        <strong>{{ payment.payment_id }}</strong>
+                                        {% if payment.description %}
+                                        <br>
+                                        <small class="text-muted">{{ payment.description|truncatechars:30 }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ payment.initiated_at|date:"d M Y" }}
+                                        <br>
+                                        <small class="text-muted">{{ payment.initiated_at|date:"H:i" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="text-end">
+                                            <div class="h6 mb-0">{{ payment.total_amount|floatformat:2|intcomma }} SAR</div>
+                                            <small class="text-muted">
+                                                {% trans "VAT:" %} {{ payment.vat_amount|floatformat:2 }} SAR
+                                            </small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info text-white">
+                                            <i class="fas 
+                                                {% if payment.payment_method == 'bank_transfer' %}fa-university
+                                                {% elif payment.payment_method == 'credit_card' %}fa-credit-card
+                                                {% elif payment.payment_method == 'mada' %}fa-mobile-alt
+                                                {% elif payment.payment_method == 'visa' %}fa-cc-visa
+                                                {% elif payment.payment_method == 'mastercard' %}fa-cc-mastercard
+                                                {% elif payment.payment_method == 'wallet' %}fa-wallet
+                                                {% else %}fa-money-bill{% endif %} me-1">
+                                            </i>
+                                            {{ payment.get_payment_method_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if payment.status == 'success' %}bg-success
+                                            {% elif payment.status == 'pending' %}bg-warning
+                                            {% elif payment.status == 'failed' %}bg-danger
+                                            {% elif payment.status == 'cancelled' %}bg-secondary
+                                            {% elif payment.status == 'refunded' %}bg-info
+                                            {% else %}bg-light text-dark{% endif %}">
+                                            {% if payment.status == 'success' %}
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            {% elif payment.status == 'pending' %}
+                                            <i class="fas fa-clock me-1"></i>
+                                            {% elif payment.status == 'failed' %}
+                                            <i class="fas fa-times-circle me-1"></i>
+                                            {% elif payment.status == 'cancelled' %}
+                                            <i class="fas fa-ban me-1"></i>
+                                            {% elif payment.status == 'refunded' %}
+                                            <i class="fas fa-undo me-1"></i>
+                                            {% endif %}
+                                            {{ payment.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if payment.payment_type == 'deposit' %}bg-primary
+                                            {% elif payment.payment_type == 'withdrawal' %}bg-danger
+                                            {% elif payment.payment_type == 'payment' %}bg-success
+                                            {% elif payment.payment_type == 'refund' %}bg-info
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ payment.get_payment_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if payment.reference_number %}
+                                        <code>{{ payment.reference_number }}</code>
+                                        {% else %}
+                                        <span class="text-muted">{% trans "N/A" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" 
+                                                    class="btn btn-outline-primary view-payment" 
+                                                    data-payment-id="{{ payment.payment_id }}"
+                                                    title="{% trans 'View Details' %}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% if payment.status == 'pending' %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-warning retry-payment" 
+                                                    data-payment-id="{{ payment.payment_id }}"
+                                                    title="{% trans 'Retry Payment' %}">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+                                            {% endif %}
+                                            {% if payment.status == 'success' and payment.payment_type == 'payment' %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-info refund-payment" 
+                                                    data-payment-id="{{ payment.payment_id }}"
+                                                    title="{% trans 'Request Refund' %}">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                            {% endif %}
+                                            {% if payment.status == 'pending' %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-danger cancel-payment" 
+                                                    data-payment-id="{{ payment.payment_id }}"
+                                                    title="{% trans 'Cancel Payment' %}">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if payments.has_other_pages %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if payments.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ payments.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                            </li>
+                            {% endif %}
+                            
+                            {% for i in payments.paginator.page_range %}
+                                {% if payments.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                                {% elif i > payments.number|add:'-3' and i < payments.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if payments.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ payments.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted mb-3">{% trans "No Payments Found" %}</h5>
+                        <p class="text-muted mb-4">
+                            {% trans "You haven't made any payments yet. Start by making a deposit or payment." %}
+                        </p>
+                        <a href="{% url 'deposit' %}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>{% trans "Make Your First Payment" %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Summary Charts -->
+    <div class="row mt-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-pie me-2"></i>{% trans "Payment Methods" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="paymentMethodsChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-bar me-2"></i>{% trans "Monthly Trend" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyTrendChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Detail Modal -->
+<div class="modal fade" id="paymentDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Payment Details" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="paymentDetailContent">
+                <!-- Content loaded via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "Close" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="printPayment">
+                    <i class="fas fa-print me-2"></i>{% trans "Print Receipt" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Payment Modal -->
+<div class="modal fade" id="cancelPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{% trans "Cancel Payment" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>{% trans "Are you sure you want to cancel this payment?" %}</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {% trans "This action cannot be undone. If this is a pending deposit, the funds will not be added to your wallet." %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {% trans "No, Keep Payment" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmCancel">
+                    {% trans "Yes, Cancel Payment" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Retry Payment Modal -->
+<div class="modal fade" id="retryPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-warning">
+                    <i class="fas fa-redo me-2"></i>{% trans "Retry Payment" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>{% trans "Do you want to retry this payment?" %}</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {% trans "You will be redirected to the payment page to complete the transaction." %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="button" class="btn btn-warning" id="confirmRetry">
+                    {% trans "Yes, Retry Payment" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal instances
+        const paymentDetailModal = new bootstrap.Modal(document.getElementById('paymentDetailModal'));
+        const cancelPaymentModal = new bootstrap.Modal(document.getElementById('cancelPaymentModal'));
+        const retryPaymentModal = new bootstrap.Modal(document.getElementById('retryPaymentModal'));
+        
+        let currentPaymentId = null;
+        
+        // View Payment Details
+        document.querySelectorAll('.view-payment').forEach(button => {
+            button.addEventListener('click', function() {
+                currentPaymentId = this.getAttribute('data-payment-id');
+                loadPaymentDetails(currentPaymentId);
+            });
+        });
+        
+        // Cancel Payment
+        document.querySelectorAll('.cancel-payment').forEach(button => {
+            button.addEventListener('click', function() {
+                currentPaymentId = this.getAttribute('data-payment-id');
+                cancelPaymentModal.show();
+            });
+        });
+        
+        // Retry Payment
+        document.querySelectorAll('.retry-payment').forEach(button => {
+            button.addEventListener('click', function() {
+                currentPaymentId = this.getAttribute('data-payment-id');
+                retryPaymentModal.show();
+            });
+        });
+        
+        // Refund Payment
+        document.querySelectorAll('.refund-payment').forEach(button => {
+            button.addEventListener('click', function() {
+                const paymentId = this.getAttribute('data-payment-id');
+                window.location.href = `{% url 'refund_request' %}?payment_id=${paymentId}`;
+            });
+        });
+        
+        // Confirm Cancel
+        document.getElementById('confirmCancel').addEventListener('click', function() {
+            if (currentPaymentId) {
+                cancelPayment(currentPaymentId);
+            }
+        });
+        
+        // Confirm Retry
+        document.getElementById('confirmRetry').addEventListener('click', function() {
+            if (currentPaymentId) {
+                retryPayment(currentPaymentId);
+            }
+        });
+        
+        // Print Receipt
+        document.getElementById('printPayment').addEventListener('click', function() {
+            window.print();
+        });
+        
+        // Load payment details via AJAX
+        function loadPaymentDetails(paymentId) {
+            const contentDiv = document.getElementById('paymentDetailContent');
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{% trans "Loading..." %}</span>
+                    </div>
+                    <p class="mt-3">{% trans "Loading payment details..." %}</p>
+                </div>
+            `;
+            
+            paymentDetailModal.show();
+            
+            fetch(`/api/payment/${paymentId}/details/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        contentDiv.innerHTML = formatPaymentDetails(data.payment);
+                    } else {
+                        contentDiv.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ${data.error}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    contentDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {% trans "Error loading payment details. Please try again." %}
+                        </div>
+                    `;
+                });
+        }
+        
+        function formatPaymentDetails(payment) {
+            return `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">{% trans "Payment Information" %}</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>{% trans "Payment ID" %}:</th>
+                                <td>${payment.payment_id}</td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Date & Time" %}:</th>
+                                <td>${payment.created_at}</td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Type" %}:</th>
+                                <td>${payment.payment_type}</td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Status" %}:</th>
+                                <td><span class="badge bg-${getStatusColor(payment.status)}">${payment.status_display}</span></td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Method" %}:</th>
+                                <td>${payment.payment_method_display}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">{% trans "Amount Details" %}</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>{% trans "Amount" %}:</th>
+                                <td>${payment.amount} SAR</td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "VAT (15%)" %}:</th>
+                                <td>${payment.vat_amount} SAR</td>
+                            </tr>
+                            <tr>
+                                <th>{% trans "Total" %}:</th>
+                                <td><strong>${payment.total_amount} SAR</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                ${payment.description ? `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6 class="text-muted">{% trans "Description" %}</h6>
+                        <p>${payment.description}</p>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${payment.reference_number ? `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6 class="text-muted">{% trans "Reference" %}</h6>
+                        <p><code>${payment.reference_number}</code></p>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${payment.metadata ? `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6 class="text-muted">{% trans "Additional Information" %}</h6>
+                        <pre class="bg-light p-3 rounded">${JSON.stringify(payment.metadata, null, 2)}</pre>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        function getStatusColor(status) {
+            switch(status) {
+                case 'success': return 'success';
+                case 'pending': return 'warning';
+                case 'failed': return 'danger';
+                case 'cancelled': return 'secondary';
+                case 'refunded': return 'info';
+                default: return 'light';
+            }
+        }
+        
+        function cancelPayment(paymentId) {
+            fetch(`/api/payment/${paymentId}/cancel/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                cancelPaymentModal.hide();
+                if (data.success) {
+                    showToast('{% trans "Payment cancelled successfully" %}', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.error || '{% trans "Error cancelling payment" %}', 'danger');
+                }
+            })
+            .catch(error => {
+                cancelPaymentModal.hide();
+                showToast('{% trans "Error cancelling payment" %}', 'danger');
+            });
+        }
+        
+        function retryPayment(paymentId) {
+            retryPaymentModal.hide();
+            window.location.href = `{% url 'payment' %}?payment_id=${paymentId}`;
+        }
+        
+        // Export functions
+        window.exportToCSV = function() {
+            showToast('{% trans "Exporting to CSV..." %}', 'info');
+            // In production, implement actual CSV export
+            setTimeout(() => {
+                showToast('{% trans "CSV export started" %}', 'success');
+            }, 1000);
+        };
+        
+        window.exportToPDF = function() {
+            showToast('{% trans "Generating PDF..." %}', 'info');
+            // In production, implement actual PDF export
+            setTimeout(() => {
+                showToast('{% trans "PDF generated successfully" %}', 'success');
+            }, 1500);
+        };
+        
+        window.exportToExcel = function() {
+            showToast('{% trans "Exporting to Excel..." %}', 'info');
+            // In production, implement actual Excel export
+            setTimeout(() => {
+                showToast('{% trans "Excel export started" %}', 'success');
+            }, 1000);
+        };
+        
+        // Initialize charts
+        initializeCharts();
+        
+        function initializeCharts() {
+            // Payment Methods Chart
+            const methodsCtx = document.getElementById('paymentMethodsChart').getContext('2d');
+            const methodsChart = new Chart(methodsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        '{% trans "Bank Transfer" %}',
+                        '{% trans "Credit Card" %}',
+                        '{% trans "Mada" %}',
+                        '{% trans "Wallet" %}',
+                        '{% trans "Other" %}'
+                    ],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: [
+                            '#4e73df',
+                            '#1cc88a',
+                            '#36b9cc',
+                            '#f6c23e',
+                            '#858796'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // Monthly Trend Chart
+            const trendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+            const trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: [
+                        '{% trans "Jan" %}', '{% trans "Feb" %}', '{% trans "Mar" %}', 
+                        '{% trans "Apr" %}', '{% trans "May" %}', '{% trans "Jun" %}'
+                    ],
+                    datasets: [{
+                        label: '{% trans "Amount (SAR)" %}',
+                        data: [12000, 19000, 15000, 25000, 22000, 30000],
+                        borderColor: '#4e73df',
+                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' SAR';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                document.body.removeChild(toast);
+            });
+        }
+        
+        // Auto-refresh every 60 seconds for pending payments
+        if (document.querySelector('.badge.bg-warning')) {
+            setInterval(() => {
+                fetch(window.location.href, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Update pending payment counts
+                    const pendingCount = doc.querySelector('.card.border-left-warning .h5');
+                    if (pendingCount) {
+                        document.querySelector('.card.border-left-warning .h5').textContent = pendingCount.textContent;
+                    }
+                });
+            }, 60000);
+        }
+    });
+</script>
+
+<style>
+    .card {
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+        border-top: none;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+    
+    .payment-row:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .btn-group .btn {
+        border-radius: 4px;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .page-link {
+        border-radius: 4px;
+        margin: 0 3px;
+    }
+    
+    .dropdown-menu {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .dropdown-item {
+        border-radius: 4px;
+        margin: 2px 5px;
+        width: calc(100% - 10px);
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .toast {
+        z-index: 1060;
+    }
+    
+    @media (max-width: 768px) {
+        .h3, .h5, .h6 {
+            font-size: 1rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 3px 6px;
+        }
+    }
+    
+    @media print {
+        .btn, .dropdown, .modal {
+            display: none !important;
+        }
+        
+        .card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+        }
+        
+        .card-header {
+            background-color: #f8f9fa !important;
+            color: #000 !important;
+        }
+    }
+</style>
+{% endblock %}

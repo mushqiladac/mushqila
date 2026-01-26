@@ -1,0 +1,86 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row min-vh-100 align-items-center justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="text-center p-5">
+                <!-- Error Icon -->
+                <div class="mb-4">
+                    {% if error_code == '400' %}
+                    <div class="display-1 text-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    {% elif error_code == '403' %}
+                    <div class="display-1 text-danger">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    {% elif error_code == '404' %}
+                    <div class="display-1 text-primary">
+                        <i class="fas fa-map-signs"></i>
+                    </div>
+                    {% elif error_code == '500' %}
+                    <div class="display-1 text-danger">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    {% else %}
+                    <div class="display-1 text-secondary">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Error Code -->
+                <h1 class="display-4 fw-bold text-gradient mb-3">
+                    {{ error_code }}
+                </h1>
+
+                <!-- Error Message -->
+                <h2 class="h3 mb-4">{{ error_message }}</h2>
+
+                <!-- Error Description -->
+                <p class="lead text-muted mb-5">
+                    {{ error_description }}
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="javascript:history.back()" class="btn btn-primary btn-lg px-4 py-3">
+                        <i class="fas fa-arrow-left me-2"></i> Go Back
+                    </a>
+                    <a href="{% url 'accounts:home' %}" class="btn btn-outline-primary btn-lg px-4 py-3">
+                        <i class="fas fa-home me-2"></i> Home Page
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary btn-lg px-4 py-3">
+                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                    </a>
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-secondary btn-lg px-4 py-3">
+                        <i class="fas fa-sign-in-alt me-2"></i> Login
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Support Contact -->
+                <div class="mt-5 pt-4 border-top">
+                    <p class="text-muted mb-3">
+                        If the problem persists, please contact our support team.
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-4">
+                        <a href="mailto:support@mushqila.com" class="text-decoration-none text-primary">
+                            <i class="fas fa-envelope me-2"></i> support@mushqila.com
+                        </a>
+                        <a href="tel:+8801234567890" class="text-decoration-none text-primary">
+                            <i class="fas fa-phone me-2"></i> +880 1234 567890
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

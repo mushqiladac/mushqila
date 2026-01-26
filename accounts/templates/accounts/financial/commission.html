@@ -1,0 +1,1140 @@
+{% extends 'accounts/base.html' %}
+{% load i18n %}
+{% load humanize %}
+
+{% block title %}{% trans "Commissions" %} | Mushqila Platform{% endblock %}
+
+{% block page_title %}{% trans "Commissions" %}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="ms-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard_redirect' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'accounts:wallet' %}">{% trans "Wallet" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Commissions" %}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h1 class="h3 mb-1">{% trans "Commission Dashboard" %}</h1>
+                    <p class="text-muted mb-0">
+                        {% trans "Track your earnings from bookings and referrals" %}
+                    </p>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <div class="btn-group">
+                        {% if user.user_type == 'admin' or user.user_type == 'super_agent' %}
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#commissionSettingsModal">
+                            <i class="fas fa-cog me-2"></i>{% trans "Settings" %}
+                        </button>
+                        {% endif %}
+                        <button type="button" class="btn btn-outline-primary" id="exportCommissions">
+                            <i class="fas fa-download me-2"></i>{% trans "Export" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commission Summary Cards -->
+    <div class="row mb-4">
+        <!-- Total Commission -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% trans "Total Commission" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_commission|floatformat:2|intcomma }} {% trans "SAR" %}
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-coins me-1"></i>
+                                    {% trans "All Time" %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hand-holding-usd fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Commission -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                {% trans "Pending Commission" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ pending_commission|floatformat:2|intcomma }} {% trans "SAR" %}
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {% trans "Awaiting Payment" %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paid Commission -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                {% trans "Paid Commission" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ paid_commission|floatformat:2|intcomma }} {% trans "SAR" %}
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    {% trans "Received" %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commission Rate -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                {% trans "Commission Rate" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ commission_rate|floatformat:2 }}%
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge bg-info">
+                                    <i class="fas fa-percentage me-1"></i>
+                                    {% trans "Your Rate" %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter me-2"></i>{% trans "Filter Commissions" %}
+            </h6>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                <i class="fas fa-sliders-h"></i>
+            </button>
+        </div>
+        <div class="collapse show" id="filterCollapse">
+            <div class="card-body">
+                <form method="GET" id="filterForm">
+                    <div class="row g-3">
+                        <!-- Status -->
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">{% trans "Status" %}</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">{% trans "All Status" %}</option>
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="col-md-4">
+                            <label for="date_from" class="form-label">{% trans "From Date" %}</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" 
+                                   value="{{ request.GET.date_from }}">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="date_to" class="form-label">{% trans "To Date" %}</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" 
+                                   value="{{ request.GET.date_to }}">
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <button type="reset" class="btn btn-outline-secondary" id="resetFilters">
+                                    <i class="fas fa-redo me-2"></i>{% trans "Reset Filters" %}
+                                </button>
+                                <div>
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-filter me-2"></i>{% trans "Apply Filters" %}
+                                    </button>
+                                    <a href="{% url 'accounts:commission' %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-list me-2"></i>{% trans "View All" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commissions Table -->
+    <div class="card shadow">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-coins me-2"></i>{% trans "Commission History" %}
+                <span class="badge bg-primary ms-2">{{ commissions.paginator.count }}</span>
+            </h6>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-sort me-2"></i>{% trans "Sort By" %}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="?sort=date_desc">{% trans "Newest First" %}</a></li>
+                    <li><a class="dropdown-item" href="?sort=date_asc">{% trans "Oldest First" %}</a></li>
+                    <li><a class="dropdown-item" href="?sort=amount_desc">{% trans "Amount (High to Low)" %}</a></li>
+                    <li><a class="dropdown-item" href="?sort=amount_asc">{% trans "Amount (Low to High)" %}</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if commissions %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="commissionsTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>{% trans "Date" %}</th>
+                            <th>{% trans "Commission ID" %}</th>
+                            <th>{% trans "Booking" %}</th>
+                            <th>{% trans "Agent" %}</th>
+                            <th>{% trans "Amount (SAR)" %}</th>
+                            <th>{% trans "Rate" %}</th>
+                            <th>{% trans "Status" %}</th>
+                            <th>{% trans "Payment Date" %}</th>
+                            <th>{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for commission in commissions %}
+                        <tr class="commission-row" data-id="{{ commission.id }}">
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold">{{ commission.created_at|date:"d M Y" }}</span>
+                                    <small class="text-muted">{{ commission.created_at|time:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <code class="text-primary">{{ commission.commission_id|default:commission.id|truncatechars:10 }}</code>
+                            </td>
+                            <td>
+                                {% if commission.booking %}
+                                <div class="d-flex align-items-center">
+                                    {% if commission.booking.booking_type == 'flight' %}
+                                    <i class="fas fa-plane text-primary me-2"></i>
+                                    {% elif commission.booking.booking_type == 'hotel' %}
+                                    <i class="fas fa-hotel text-success me-2"></i>
+                                    {% elif commission.booking.booking_type == 'hajj' %}
+                                    <i class="fas fa-kaaba text-warning me-2"></i>
+                                    {% elif commission.booking.booking_type == 'umrah' %}
+                                    <i class="fas fa-mosque text-info me-2"></i>
+                                    {% else %}
+                                    <i class="fas fa-ticket-alt text-secondary me-2"></i>
+                                    {% endif %}
+                                    <div>
+                                        <div class="small">{{ commission.booking.get_booking_type_display|default:"Booking" }}</div>
+                                        {% if commission.booking.booking_id %}
+                                        <small class="text-muted">{{ commission.booking.booking_id|truncatechars:12 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if commission.agent %}
+                                <div class="d-flex align-items-center">
+                                    <div class="agent-avatar me-2">
+                                        <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                             style="width: 32px; height: 32px; border-radius: 50%; font-size: 0.8rem;">
+                                            {{ commission.agent.first_name|first|upper }}{{ commission.agent.last_name|first|upper }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="small">{{ commission.agent.get_full_name|default:commission.agent.email }}</div>
+                                        <small class="text-muted">{{ commission.agent.get_user_type_display }}</small>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-coins text-warning me-2"></i>
+                                    <span class="fw-bold text-warning">
+                                        {{ commission.amount|floatformat:2|intcomma }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ commission.commission_rate|floatformat:2 }}%
+                                </span>
+                            </td>
+                            <td>
+                                {% if commission.status == 'paid' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>{% trans "Paid" %}
+                                </span>
+                                {% elif commission.status == 'pending' %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-clock me-1"></i>{% trans "Pending" %}
+                                </span>
+                                {% elif commission.status == 'cancelled' %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times-circle me-1"></i>{% trans "Cancelled" %}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ commission.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if commission.payment_date %}
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold">{{ commission.payment_date|date:"d M Y" }}</span>
+                                    <small class="text-muted">{{ commission.payment_date|time:"H:i" }}</small>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-primary view-commission" 
+                                            data-id="{{ commission.id }}" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#commissionModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% if user.user_type == 'admin' and commission.status == 'pending' %}
+                                    <button type="button" class="btn btn-outline-success mark-paid" 
+                                            data-id="{{ commission.id }}">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if commissions.has_other_pages %}
+            <nav aria-label="Commission pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if commissions.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ commissions.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                    </li>
+                    {% endif %}
+
+                    {% for i in commissions.paginator.page_range %}
+                        {% if commissions.number == i %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ i }}</span>
+                        </li>
+                        {% elif i > commissions.number|add:'-3' and i < commissions.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if commissions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ commissions.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <!-- No Commissions Found -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-coins fa-4x text-muted"></i>
+                </div>
+                <h5 class="text-muted mb-3">{% trans "No commissions found" %}</h5>
+                <p class="text-muted mb-4">
+                    {% trans "You haven't earned any commissions yet. Start by making bookings or referring new agents." %}
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'accounts:flight_bookings' %}" class="btn btn-primary">
+                        <i class="fas fa-plane me-2"></i>{% trans "Book Flights" %}
+                    </a>
+                    <a href="{% url 'accounts:referral' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus me-2"></i>{% trans "Refer Agents" %}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Commission Statistics -->
+    {% if commissions %}
+    <div class="row mt-4">
+        <div class="col-md-6 mb-4">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-chart-pie me-2"></i>{% trans "Commission Summary" %}
+                    </h6>
+                    <div class="commission-summary">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">{% trans "Total Commissions:" %}</span>
+                            <span class="fw-bold">{{ commissions.paginator.count }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">{% trans "Total Amount:" %}</span>
+                            <span class="fw-bold text-warning">
+                                {{ total_commission|floatformat:2|intcomma }} SAR
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">{% trans "Pending:" %}</span>
+                            <span class="fw-bold text-warning">
+                                {{ pending_commission|floatformat:2|intcomma }} SAR
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">{% trans "Paid:" %}</span>
+                            <span class="fw-bold text-success">
+                                {{ paid_commission|floatformat:2|intcomma }} SAR
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h6 class="text-success mb-3">
+                        <i class="fas fa-calendar-alt me-2"></i>{% trans "Recent Activity" %}
+                    </h6>
+                    <div class="recent-activity" style="max-height: 200px; overflow-y: auto;">
+                        {% for commission in commissions|slice:":5" %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="fas fa-coins text-warning"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="small">
+                                    {{ commission.get_status_display }} commission
+                                    {% if commission.booking %}
+                                    from {{ commission.booking.get_booking_type_display }}
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted smaller">{{ commission.created_at|timesince }} {% trans "ago" %}</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="small fw-bold text-warning">
+                                    {{ commission.amount|floatformat:2 }} SAR
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- How Commissions Work -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h6 class="text-primary mb-3">
+                <i class="fas fa-info-circle me-2"></i>{% trans "How Commissions Work" %}
+            </h6>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="text-center p-3 border rounded">
+                        <i class="fas fa-plane-departure fa-2x text-primary mb-3"></i>
+                        <h6 class="mb-2">{% trans "Booking Commissions" %}</h6>
+                        <p class="text-muted small mb-0">
+                            {% trans "Earn commission on every booking you make through Mushqila platform." %}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="text-center p-3 border rounded">
+                        <i class="fas fa-user-plus fa-2x text-success mb-3"></i>
+                        <h6 class="mb-2">{% trans "Referral Commissions" %}</h6>
+                        <p class="text-muted small mb-0">
+                            {% trans "Earn commission when agents you refer make bookings on the platform." %}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="text-center p-3 border rounded">
+                        <i class="fas fa-calendar-check fa-2x text-warning mb-3"></i>
+                        <h6 class="mb-2">{% trans "Payment Schedule" %}</h6>
+                        <p class="text-muted small mb-0">
+                            {% trans "Commissions are paid monthly on the 5th of each month for completed bookings." %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Commission Detail Modal -->
+<div class="modal fade" id="commissionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Commission Details" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="commissionDetails">
+                <!-- Content will be loaded via AJAX -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{% trans "Loading..." %}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                <button type="button" class="btn btn-primary" id="printCommission">
+                    <i class="fas fa-print me-2"></i>{% trans "Print" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Commission Settings Modal (Admin/Super Agent Only) -->
+{% if user.user_type == 'admin' or user.user_type == 'super_agent' %}
+<div class="modal fade" id="commissionSettingsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Commission Settings" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="commissionSettingsForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="commission_rate" class="form-label">{% trans "Default Commission Rate (%)" %}</label>
+                        <input type="number" class="form-control" id="commission_rate" 
+                               name="commission_rate" min="0" max="100" step="0.1"
+                               value="{{ user.commission_rate|default:'5.0' }}">
+                        <div class="form-text">
+                            {% trans "Default commission rate for new agents" %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="payment_schedule" class="form-label">{% trans "Payment Schedule" %}</label>
+                        <select class="form-select" id="payment_schedule" name="payment_schedule">
+                            <option value="monthly">{% trans "Monthly (5th of each month)" %}</option>
+                            <option value="biweekly">{% trans "Bi-Weekly" %}</option>
+                            <option value="weekly">{% trans "Weekly" %}</option>
+                            <option value="instant">{% trans "Instant" %}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="auto_approve" name="auto_approve">
+                        <label class="form-check-label" for="auto_approve">
+                            {% trans "Auto-approve commission payments" %}
+                        </label>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% trans "Changes to commission settings will affect future bookings only." %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>{% trans "Save Settings" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    /* Commission Cards */
+    .border-left-primary {
+        border-left: 4px solid #4e73df !important;
+    }
+    
+    .border-left-warning {
+        border-left: 4px solid #f6c23e !important;
+    }
+    
+    .border-left-success {
+        border-left: 4px solid #1cc88a !important;
+    }
+    
+    .border-left-info {
+        border-left: 4px solid #36b9cc !important;
+    }
+    
+    /* Table Styles */
+    .commission-row:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+    
+    /* Badges */
+    .badge {
+        font-weight: 500;
+        padding: 0.4em 0.8em;
+    }
+    
+    /* Pagination */
+    .page-link {
+        border-radius: 5px;
+        margin: 0 3px;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    /* How it works cards */
+    .border {
+        border: 1px solid #e9ecef !important;
+        transition: all 0.3s ease;
+    }
+    
+    .border:hover {
+        border-color: #0d6efd !important;
+        transform: translateY(-2px);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .h3 {
+            font-size: 1.5rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .btn-group-sm .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .d-flex.flex-wrap {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .d-flex.flex-wrap > * {
+            margin-bottom: 10px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .col-12 {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        
+        .table th, .table td {
+            padding: 0.5rem;
+        }
+        
+        .modal-dialog {
+            margin: 10px;
+        }
+        
+        .recent-activity {
+            max-height: 150px;
+        }
+    }
+    
+    /* Print Styles */
+    @media print {
+        .navbar, .sidebar, .breadcrumb, .card-header, .btn, .modal-footer {
+            display: none !important;
+        }
+        
+        .container-fluid {
+            padding: 0 !important;
+        }
+        
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+        .card-body {
+            padding: 0 !important;
+        }
+        
+        .table {
+            font-size: 12px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const filterForm = document.getElementById('filterForm');
+        const resetButton = document.getElementById('resetFilters');
+        const exportButton = document.getElementById('exportCommissions');
+        const viewButtons = document.querySelectorAll('.view-commission');
+        const markPaidButtons = document.querySelectorAll('.mark-paid');
+        const commissionModal = new bootstrap.Modal(document.getElementById('commissionModal'));
+        const printButton = document.getElementById('printCommission');
+        
+        {% if user.user_type == 'admin' or user.user_type == 'super_agent' %}
+        const settingsForm = document.getElementById('commissionSettingsForm');
+        {% endif %}
+        
+        // Reset filters
+        resetButton.addEventListener('click', function() {
+            filterForm.reset();
+            filterForm.submit();
+        });
+        
+        // Export commissions
+        exportButton.addEventListener('click', function() {
+            exportToCSV();
+        });
+        
+        // View commission details
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const commissionId = this.getAttribute('data-id');
+                loadCommissionDetails(commissionId);
+            });
+        });
+        
+        // Mark commission as paid (admin only)
+        markPaidButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const commissionId = this.getAttribute('data-id');
+                markAsPaid(commissionId);
+            });
+        });
+        
+        // Print commission
+        printButton.addEventListener('click', function() {
+            window.print();
+        });
+        
+        // Auto-submit date filters when dates are selected
+        document.getElementById('date_from').addEventListener('change', function() {
+            if (this.value && document.getElementById('date_to').value) {
+                filterForm.submit();
+            }
+        });
+        
+        document.getElementById('date_to').addEventListener('change', function() {
+            if (this.value && document.getElementById('date_from').value) {
+                filterForm.submit();
+            }
+        });
+        
+        // Save commission settings (admin only)
+        {% if user.user_type == 'admin' or user.user_type == 'super_agent' %}
+        settingsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveCommissionSettings();
+        });
+        {% endif %}
+        
+        // Helper Functions
+        function loadCommissionDetails(commissionId) {
+            fetch(`/accounts/api/commissions/${commissionId}/`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const detailsDiv = document.getElementById('commissionDetails');
+                detailsDiv.innerHTML = `
+                    <div class="commission-detail">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">{% trans "Commission Information" %}</h6>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th>{% trans "Commission ID:" %}</th>
+                                        <td><code>${data.commission_id || data.id}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <th>{% trans "Status:" %}</th>
+                                        <td>${getStatusBadge(data.status, data.status_display)}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>{% trans "Created Date:" %}</th>
+                                        <td>${data.created_at_formatted}</td>
+                                    </tr>
+                                    ${data.payment_date ? `
+                                    <tr>
+                                        <th>{% trans "Payment Date:" %}</th>
+                                        <td>${data.payment_date_formatted}</td>
+                                    </tr>` : ''}
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">{% trans "Amount Details" %}</h6>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th>{% trans "Amount:" %}</th>
+                                        <td class="text-warning fw-bold">
+                                            ${data.amount} SAR
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>{% trans "Commission Rate:" %}</th>
+                                        <td><span class="badge bg-info">${data.commission_rate}%</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th>{% trans "Booking Amount:" %}</th>
+                                        <td>${data.booking_amount || '-'} SAR</td>
+                                    </tr>
+                                    <tr>
+                                        <th>{% trans "Currency:" %}</th>
+                                        <td>${data.currency || 'SAR'}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        ${data.booking ? `
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted">{% trans "Booking Information" %}</h6>
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p class="mb-1"><strong>{% trans "Booking Type:" %}</strong> ${data.booking.booking_type_display}</p>
+                                                <p class="mb-1"><strong>{% trans "Booking ID:" %}</strong> ${data.booking.booking_id}</p>
+                                                <p class="mb-0"><strong>{% trans "Booking Date:" %}</strong> ${data.booking.created_at_formatted}</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p class="mb-1"><strong>{% trans "Customer:" %}</strong> ${data.booking.customer_name || '-'}</p>
+                                                <p class="mb-1"><strong>{% trans "Total Amount:" %}</strong> ${data.booking.total_amount} SAR</p>
+                                                <p class="mb-0"><strong>{% trans "Status:" %}</strong> ${data.booking.status_display}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>` : ''}
+                        
+                        ${data.agent ? `
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="text-muted">{% trans "Agent Information" %}</h6>
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle bg-primary text-white me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                                                ${data.agent.first_name ? data.agent.first_name[0].toUpperCase() : ''}${data.agent.last_name ? data.agent.last_name[0].toUpperCase() : ''}
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">${data.agent.full_name || data.agent.email}</h6>
+                                                <p class="mb-1 text-muted">${data.agent.user_type_display}</p>
+                                                <p class="mb-0 small text-muted">${data.agent.email}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>` : ''}
+                        
+                        ${data.description ? `
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="text-muted">{% trans "Description" %}</h6>
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <p class="mb-0">${data.description}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>` : ''}
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading commission details:', error);
+                document.getElementById('commissionDetails').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        {% trans "Error loading commission details. Please try again." %}
+                    </div>
+                `;
+            });
+        }
+        
+        function getStatusBadge(status, text) {
+            const badges = {
+                'paid': 'bg-success',
+                'pending': 'bg-warning',
+                'cancelled': 'bg-danger'
+            };
+            
+            const icons = {
+                'paid': 'fa-check-circle',
+                'pending': 'fa-clock',
+                'cancelled': 'fa-times-circle'
+            };
+            
+            const badgeClass = badges[status] || 'bg-secondary';
+            const iconClass = icons[status] || 'fa-info-circle';
+            
+            return `<span class="badge ${badgeClass}"><i class="fas ${iconClass} me-1"></i>${text}</span>`;
+        }
+        
+        function exportToCSV() {
+            // Get current filter parameters
+            const params = new URLSearchParams(window.location.search);
+            
+            // Show loading
+            exportButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Exporting..." %}';
+            exportButton.disabled = true;
+            
+            // Create export URL
+            let exportUrl = '{% url "accounts:commission" %}?export=csv';
+            params.forEach((value, key) => {
+                if (key !== 'export' && key !== 'page') {
+                    exportUrl += `&${key}=${encodeURIComponent(value)}`;
+                }
+            });
+            
+            // Trigger download
+            const link = document.createElement('a');
+            link.href = exportUrl;
+            link.download = `commissions_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Reset button
+            setTimeout(() => {
+                exportButton.innerHTML = '<i class="fas fa-download me-2"></i>{% trans "Export" %}';
+                exportButton.disabled = false;
+            }, 1000);
+        }
+        
+        function markAsPaid(commissionId) {
+            if (!confirm('{% trans "Are you sure you want to mark this commission as paid?" %}')) {
+                return;
+            }
+            
+            const button = document.querySelector(`.mark-paid[data-id="${commissionId}"]`);
+            button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            button.disabled = true;
+            
+            fetch(`/accounts/api/commissions/${commissionId}/mark-paid/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('{% trans "Commission marked as paid successfully" %}', 'success');
+                    // Reload page after 1 second
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(data.message || '{% trans "Error updating commission status" %}', 'danger');
+                    button.innerHTML = '<i class="fas fa-check"></i>';
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error marking commission as paid:', error);
+                showToast('{% trans "Error updating commission status. Please try again." %}', 'danger');
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                button.disabled = false;
+            });
+        }
+        
+        {% if user.user_type == 'admin' or user.user_type == 'super_agent' %}
+        function saveCommissionSettings() {
+            const formData = new FormData(settingsForm);
+            const submitBtn = settingsForm.querySelector('button[type="submit"]');
+            
+            // Show loading
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Saving..." %}';
+            submitBtn.disabled = true;
+            
+            fetch('{% url "accounts:commission_settings" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('{% trans "Commission settings saved successfully" %}', 'success');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('commissionSettingsModal'));
+                    modal.hide();
+                } else {
+                    showToast(data.message || '{% trans "Error saving settings" %}', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving commission settings:', error);
+                showToast('{% trans "Error saving settings. Please try again." %}', 'danger');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>{% trans "Save Settings" %}';
+                submitBtn.disabled = false;
+            });
+        }
+        {% endif %}
+        
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                document.body.removeChild(toast);
+            });
+        }
+        
+        // Initialize date pickers with today's date as max
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date_to').max = today;
+        
+        // Auto-fill date from if date to is selected
+        document.getElementById('date_to').addEventListener('change', function() {
+            const dateFrom = document.getElementById('date_from');
+            if (!dateFrom.value && this.value) {
+                // Set date from to 30 days before date to
+                const date = new Date(this.value);
+                date.setDate(date.getDate() - 30);
+                dateFrom.value = date.toISOString().split('T')[0];
+            }
+        });
+        
+        // Table row click event
+        document.querySelectorAll('.commission-row').forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Don't trigger if clicking on buttons
+                if (!e.target.closest('button')) {
+                    const commissionId = this.getAttribute('data-id');
+                    loadCommissionDetails(commissionId);
+                    commissionModal.show();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

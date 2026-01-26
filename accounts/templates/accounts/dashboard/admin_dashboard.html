@@ -1,0 +1,835 @@
+<!-- accounts/templates/accounts/dashboard/admin_dashboard.html -->
+
+{% extends 'accounts/base.html' %}
+{% load humanize %}
+
+{% block title %}Admin Dashboard - Mushqila B2B{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center py-3 mb-4 border-bottom">
+        <div>
+            <h1 class="h2 mb-0"><i class="fas fa-user-shield me-2 text-primary"></i>Admin Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back, {{ user.get_full_name|default:user.email }}</p>
+        </div>
+        <div class="btn-toolbar">
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i> Refresh
+                </button>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#adminActionsModal">
+                    <i class="fas fa-cog me-1"></i> Quick Actions
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+        <!-- Total Users -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-primary bg-opacity-10 text-primary me-3">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Users</h6>
+                            <h3 class="mb-0">{{ stats.total_users|intcomma }}</h3>
+                            <small class="text-muted">
+                                <span class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>{{ stats.active_users_percentage }}% Active
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="#" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-list me-1"></i> View All
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Approvals -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-warning bg-opacity-10 text-warning me-3">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Pending Approvals</h6>
+                            <h3 class="mb-0">{{ stats.pending_approvals|intcomma }}</h3>
+                            <small class="text-muted">
+                                <span class="text-danger">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ stats.pending_kyc }} KYC
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="#" class="btn btn-outline-warning btn-sm w-100">
+                            <i class="fas fa-eye me-1"></i> Review
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-success bg-opacity-10 text-success me-3">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Revenue</h6>
+                            <h3 class="mb-0">{{ stats.total_revenue|floatformat:0|intcomma }} <small class="fs-6">SAR</small></h3>
+                            <small class="text-muted">
+                                <span class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>{{ stats.revenue_growth }}% Growth
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-success btn-sm w-100" data-bs-toggle="modal" data-bs-target="#reportsModal">
+                            <i class="fas fa-chart-line me-1"></i> Reports
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Bookings -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-info bg-opacity-10 text-info me-3">
+                            <i class="fas fa-plane"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Active Bookings</h6>
+                            <h3 class="mb-0">{{ stats.total_bookings|intcomma }}</h3>
+                            <small class="text-muted">
+                                <span class="text-info">
+                                    <i class="fas fa-chart-bar me-1"></i>{{ stats.bookings_growth }}% Growth
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="#" class="btn btn-outline-info btn-sm w-100">
+                            <i class="fas fa-search me-1"></i> View Bookings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Approvals Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-user-clock me-2 text-warning"></i>Pending Approvals</h5>
+                        <a href="#" class="btn btn-sm btn-outline-warning">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if pending_users %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Type</th>
+                                    <th>Registered</th>
+                                    <th>Documents</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in pending_users %}
+                                <tr id="user-row-{{ user.id }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-3">
+                                                <div class="avatar-title bg-light rounded-circle text-primary">
+                                                    {{ user.email|first|upper }}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ user.get_full_name|default:user.email }}</h6>
+                                                <small class="text-muted">{{ user.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if user.user_type == 'agent' %}primary{% elif user.user_type == 'super_agent' %}success{% elif user.user_type == 'supplier' %}info{% else %}secondary{% endif %}">
+                                            {{ user.get_user_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{ user.created_at|date:"M d, Y" }}<br>
+                                        <small class="text-muted">{{ user.created_at|timesince }} ago</small>
+                                    </td>
+                                    <td>
+                                        {% if user.documents.count %}
+                                        <span class="badge bg-success">{{ user.documents.count }} Uploaded</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">No Documents</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending Review</span>
+                                        {% elif user.status == 'under_review' %}
+                                        <span class="badge bg-info">Under Review</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ user.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-success" onclick="approveUser('{{ user.id }}')">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="reviewUser('{{ user.id }}')">
+                                                <i class="fas fa-eye"></i> Review
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="rejectUser('{{ user.id }}')">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="icon-lg rounded-circle bg-light text-muted mb-3 mx-auto">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h5 class="text-muted">No Pending Approvals</h5>
+                        <p class="text-muted">All users have been reviewed</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management & Recent Activities -->
+    <div class="row">
+        <!-- User Management -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-user-cog me-2 text-primary"></i>User Management</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-filter me-1"></i> Filter
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="filterUsers('all')">All Users</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterUsers('active')">Active Only</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterUsers('pending')">Pending</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="filterUsers('blocked')">Blocked</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm" id="userManagementTable">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in recent_users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-xs me-2">
+                                                <div class="avatar-title bg-light rounded-circle text-primary">
+                                                    {{ user.email|first|upper }}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ user.get_full_name|default:user.email|truncatechars:15 }}</div>
+                                                <small class="text-muted">{{ user.user_type|title }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if user.user_type == 'agent' %}primary{% elif user.user_type == 'super_agent' %}success{% elif user.user_type == 'supplier' %}info{% else %}secondary{% endif %}">
+                                            {{ user.get_user_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if user.status == 'active' %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% elif user.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% elif user.status == 'blocked' %}
+                                        <span class="badge bg-danger">Blocked</span>
+                                        {% elif user.status == 'suspended' %}
+                                        <span class="badge bg-dark">Suspended</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ user.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'accounts:user_detail' user.id %}" class="btn btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-success" onclick="changeUserStatus('{{ user.id }}', 'active')">
+                                                <i class="fas fa-check-circle"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-warning" onclick="changeUserStatus('{{ user.id }}', 'suspended')">
+                                                <i class="fas fa-pause-circle"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" onclick="changeUserStatus('{{ user.id }}', 'blocked')">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="#" class="btn btn-outline-primary btn-sm">
+                            Manage All Users <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-history me-2 text-info"></i>Recent Admin Activities</h5>
+                        <a href="#" class="btn btn-sm btn-outline-info">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="activity-timeline">
+                        {% for activity in recent_activities %}
+                        <div class="activity-item">
+                            <div class="activity-icon bg-{% if activity.activity_type == 'approve' %}success{% elif activity.activity_type == 'reject' %}danger{% elif activity.activity_type == 'block' %}dark{% else %}info{% endif %}">
+                                <i class="fas fa-{% if activity.activity_type == 'approve' %}check{% elif activity.activity_type == 'reject' %}times{% elif activity.activity_type == 'block' %}ban{% else %}info-circle{% endif %}"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1">{{ activity.title }}</h6>
+                                    <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                                </div>
+                                <p class="mb-1 text-muted small">{{ activity.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>
+                                        {% if activity.target_user %}
+                                        {{ activity.target_user.email }}
+                                        {% else %}
+                                        System
+                                        {% endif %}
+                                    </small>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="fas fa-user-shield me-1"></i>{{ activity.admin.email }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <div class="icon-lg rounded-circle bg-light text-muted mb-3 mx-auto">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h5 class="text-muted">No Recent Activities</h5>
+                            <p class="text-muted">Activities will appear here</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Charts -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2 text-primary"></i>User Registration Trends</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="registrationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2 text-success"></i>User Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Actions Modal -->
+<div class="modal fade" id="adminActionsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-cogs me-2"></i>Admin Quick Actions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <a href="#" class="card admin-action-card text-decoration-none text-center">
+                            <div class="card-body py-4">
+                                <div class="admin-action-icon bg-warning bg-opacity-10 text-warning mx-auto mb-3">
+                                    <i class="fas fa-user-clock"></i>
+                                </div>
+                                <h6 class="mb-2">Review Pending</h6>
+                                <p class="text-muted small mb-0">Approve/Reject users</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="#" class="card admin-action-card text-decoration-none text-center">
+                            <div class="card-body py-4">
+                                <div class="admin-action-icon bg-primary bg-opacity-10 text-primary mx-auto mb-3">
+                                    <i class="fas fa-users-cog"></i>
+                                </div>
+                                <h6 class="mb-2">Manage Users</h6>
+                                <p class="text-muted small mb-0">View all users</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="#" class="card admin-action-card text-decoration-none text-center">
+                            <div class="card-body py-4">
+                                <div class="admin-action-icon bg-success bg-opacity-10 text-success mx-auto mb-3">
+                                    <i class="fas fa-file-signature"></i>
+                                </div>
+                                <h6 class="mb-2">KYC Review</h6>
+                                <p class="text-muted small mb-0">Verify documents</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="#" class="card admin-action-card text-decoration-none text-center">
+                            <div class="card-body py-4">
+                                <div class="admin-action-icon bg-info bg-opacity-10 text-info mx-auto mb-3">
+                                    <i class="fas fa-sliders-h"></i>
+                                </div>
+                                <h6 class="mb-2">Settings</h6>
+                                <p class="text-muted small mb-0">System configuration</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reports Modal -->
+<div class="modal fade" id="reportsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-chart-bar me-2"></i>System Reports</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Report Type</th>
+                                <th>Period</th>
+                                <th>Count</th>
+                                <th>Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>User Registrations</td>
+                                <td>Last 30 Days</td>
+                                <td>{{ stats.new_users_30_days }}</td>
+                                <td>-</td>
+                                <td><button class="btn btn-sm btn-outline-primary">Export</button></td>
+                            </tr>
+                            <tr>
+                                <td>Revenue</td>
+                                <td>Current Month</td>
+                                <td>{{ stats.monthly_transactions }}</td>
+                                <td>{{ stats.monthly_revenue|floatformat:0 }} SAR</td>
+                                <td><button class="btn btn-sm btn-outline-success">Export</button></td>
+                            </tr>
+                            <tr>
+                                <td>Bookings</td>
+                                <td>Current Month</td>
+                                <td>{{ stats.monthly_bookings }}</td>
+                                <td>{{ stats.monthly_booking_value|floatformat:0 }} SAR</td>
+                                <td><button class="btn btn-sm btn-outline-info">Export</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmationMessage"></p>
+                <div class="mb-3" id="reasonInput" style="display: none;">
+                    <label class="form-label">Reason (Optional)</label>
+                    <textarea class="form-control" id="reasonText" rows="3" placeholder="Enter reason for this action..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn" id="confirmButton">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart Data
+    const registrationData = {
+        labels: {{ registration_labels|safe }},
+        datasets: [{
+            label: 'New Registrations',
+            data: {{ registration_data|safe }},
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+        }]
+    };
+    
+    const statusData = {
+        labels: ['Active', 'Pending', 'Blocked', 'Suspended'],
+        datasets: [{
+            data: {{ status_distribution|safe }},
+            backgroundColor: ['#2ecc71', '#f39c12', '#e74c3c', '#34495e'],
+            borderWidth: 1
+        }]
+    };
+    
+    // Initialize Charts
+    const regCtx = document.getElementById('registrationChart').getContext('2d');
+    const registrationChart = new Chart(regCtx, {
+        type: 'line',
+        data: registrationData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+    
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: statusData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+    
+    // User Management Functions
+    let currentUserId = null;
+    let currentAction = null;
+    
+    function approveUser(userId) {
+        currentUserId = userId;
+        currentAction = 'approve';
+        $('#confirmationTitle').html('<i class="fas fa-check-circle text-success me-2"></i>Approve User');
+        $('#confirmationMessage').text('Are you sure you want to approve this user? They will gain access to the system.');
+        $('#reasonInput').hide();
+        $('#confirmButton').removeClass().addClass('btn btn-success').html('<i class="fas fa-check me-1"></i> Approve');
+        $('#confirmationModal').modal('show');
+    }
+    
+    function reviewUser(userId) {
+        window.location.href = `/admin/users/${userId}/review/`;
+    }
+    
+    function rejectUser(userId) {
+        currentUserId = userId;
+        currentAction = 'reject';
+        $('#confirmationTitle').html('<i class="fas fa-times-circle text-danger me-2"></i>Reject User');
+        $('#confirmationMessage').text('Are you sure you want to reject this user? They will not be able to access the system.');
+        $('#reasonInput').show();
+        $('#confirmButton').removeClass().addClass('btn btn-danger').html('<i class="fas fa-times me-1"></i> Reject');
+        $('#confirmationModal').modal('show');
+    }
+    
+    function changeUserStatus(userId, status) {
+        currentUserId = userId;
+        currentAction = status;
+        
+        const actions = {
+            'active': { title: 'Activate User', message: 'Activate this user?', btnClass: 'success', btnText: 'Activate' },
+            'suspended': { title: 'Suspend User', message: 'Suspend this user?', btnClass: 'warning', btnText: 'Suspend' },
+            'blocked': { title: 'Block User', message: 'Block this user?', btnClass: 'danger', btnText: 'Block' }
+        };
+        
+        const action = actions[status];
+        $('#confirmationTitle').html(`<i class="fas fa-${status === 'active' ? 'check' : status === 'suspended' ? 'pause' : 'ban'}-circle text-${action.btnClass} me-2"></i>${action.title}`);
+        $('#confirmationMessage').text(action.message);
+        $('#reasonInput').show();
+        $('#confirmButton').removeClass().addClass(`btn btn-${action.btnClass}`).html(`<i class="fas fa-${status === 'active' ? 'check' : status === 'suspended' ? 'pause' : 'ban'} me-1"></i> ${action.btnText}`);
+        $('#confirmationModal').modal('show');
+    }
+    
+    // Confirm Action
+    $('#confirmButton').click(function() {
+        const reason = $('#reasonText').val();
+        
+        $.ajax({
+            url: '/api/admin/users/' + currentUserId + '/status/',
+            method: 'POST',
+            data: {
+                action: currentAction,
+                reason: reason,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    
+                    // Update UI
+                    if (currentAction === 'approve' || currentAction === 'reject') {
+                        $(`#user-row-${currentUserId}`).fadeOut();
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    toastr.error(response.message);
+                }
+                $('#confirmationModal').modal('hide');
+            },
+            error: function() {
+                toastr.error('An error occurred. Please try again.');
+                $('#confirmationModal').modal('hide');
+            }
+        });
+    });
+    
+    // Filter users
+    function filterUsers(filter) {
+        $('table tr').show();
+        if (filter !== 'all') {
+            $('table tr:not(:has(td span.badge.bg-' + 
+                (filter === 'active' ? 'success' : 
+                 filter === 'pending' ? 'warning' : 
+                 filter === 'blocked' ? 'danger' : 'secondary') + '))').hide();
+            $('table tr:first').show();
+        }
+    }
+    
+    // Auto-refresh every 5 minutes
+    setTimeout(() => {
+        location.reload();
+    }, 300000);
+    
+    // Initialize Toastr
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "5000"
+    };
+</script>
+
+<style>
+    .stat-card {
+        border-radius: 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    .stat-card-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+    
+    .admin-action-card {
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border: 1px solid #e0e0e0;
+        height: 100%;
+    }
+    
+    .admin-action-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    
+    .admin-action-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+    
+    .activity-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .activity-timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+    
+    .activity-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .activity-icon {
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 14px;
+    }
+    
+    .activity-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 250px;
+        width: 100%;
+    }
+    
+    .avatar-xs {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .avatar-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        width: 100%;
+        height: 100%;
+    }
+    
+    @media (max-width: 768px) {
+        .stat-card-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+        
+        .chart-container {
+            height: 200px;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,1060 @@
+<!-------------- accounts/templates/accounts/business/ip_whitelist.html  ------->
+{% extends 'accounts/base.html' %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{% trans "IP Whitelist" %} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">{% trans "IP Whitelist Management" %}</h1>
+                    <p class="text-muted mb-0">
+                        {% trans "Manage IP addresses allowed to access your account" %}
+                    </p>
+                </div>
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i>{% trans "Add IP Address" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Status Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% trans "Whitelisted IPs" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ whitelisted_ips.count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-lock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                {% trans "Active IPs" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ active_ips }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                {% trans "Current IP" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if current_ip %}
+                                    <span class="text-truncate">{{ current_ip }}</span>
+                                {% else %}
+                                    {% trans "Unknown" %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-desktop fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                {% trans "Last Login" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if last_login %}
+                                    {{ last_login|date:"d M" }}
+                                {% else %}
+                                    {% trans "N/A" %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-history fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current IP Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-network-wired me-2"></i>{% trans "Current Connection Status" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-globe fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">
+                                        {% if current_ip %}
+                                            {{ current_ip }}
+                                        {% else %}
+                                            {% trans "IP Address not detected" %}
+                                        {% endif %}
+                                    </h5>
+                                    <p class="text-muted mb-2">
+                                        {% if is_current_ip_whitelisted %}
+                                            <span class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                {% trans "This IP is whitelisted" %}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-warning">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                {% trans "This IP is not whitelisted" %}
+                                            </span>
+                                        {% endif %}
+                                    </p>
+                                    <div class="d-flex">
+                                        <div class="me-4">
+                                            <small class="text-muted">{% trans "Location" %}:</small>
+                                            <div>{{ current_location|default:"Unknown" }}</div>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">{% trans "ISP" %}:</small>
+                                            <div>{{ current_isp|default:"Unknown" }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            {% if current_ip and not is_current_ip_whitelisted %}
+                            <button type="button" class="btn btn-primary" id="addCurrentIP">
+                                <i class="fas fa-plus me-2"></i>{% trans "Add Current IP" %}
+                            </button>
+                            {% endif %}
+                            <button type="button" class="btn btn-outline-secondary mt-2" id="refreshIP">
+                                <i class="fas fa-redo me-2"></i>{% trans "Refresh" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IP Whitelist Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-list me-2"></i>{% trans "Whitelisted IP Addresses" %}
+                    </h6>
+                    <span class="badge bg-primary">{{ whitelisted_ips.count }}</span>
+                </div>
+                <div class="card-body">
+                    {% if whitelisted_ips %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="ipWhitelistTable">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "IP Address" %}</th>
+                                    <th>{% trans "Description" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Added On" %}</th>
+                                    <th>{% trans "Last Used" %}</th>
+                                    <th>{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ip in whitelisted_ips %}
+                                <tr data-ip-id="{{ ip.id }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fas fa-network-wired text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ ip.ip_address }}</div>
+                                                <small class="text-muted">
+                                                    {% if ip.ip_address == current_ip %}
+                                                    <span class="badge bg-info">{% trans "Current" %}</span>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if ip.description %}
+                                            {{ ip.description }}
+                                        {% else %}
+                                            <span class="text-muted">{% trans "No description" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if ip.is_active %}bg-success
+                                            {% else %}bg-secondary{% endif %}">
+                                            {% if ip.is_active %}
+                                            <i class="fas fa-check-circle me-1"></i>{% trans "Active" %}
+                                            {% else %}
+                                            <i class="fas fa-ban me-1"></i>{% trans "Inactive" %}
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{ ip.created_at|date:"d M Y" }}
+                                        <br>
+                                        <small class="text-muted">{{ ip.created_at|timesince }} {% trans "ago" %}</small>
+                                    </td>
+                                    <td>
+                                        {% if ip.last_used %}
+                                            {{ ip.last_used|date:"d M Y" }}
+                                            <br>
+                                            <small class="text-muted">{{ ip.last_used|timesince }} {% trans "ago" %}</small>
+                                        {% else %}
+                                            <span class="text-muted">{% trans "Never used" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" 
+                                                    class="btn btn-outline-primary edit-ip" 
+                                                    data-ip-id="{{ ip.id }}"
+                                                    data-ip="{{ ip.ip_address }}"
+                                                    data-description="{{ ip.description|default:'' }}"
+                                                    title="{% trans 'Edit IP' %}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            {% if ip.is_active %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-warning disable-ip" 
+                                                    data-ip-id="{{ ip.id }}"
+                                                    title="{% trans 'Disable IP' %}">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                            {% else %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-success enable-ip" 
+                                                    data-ip-id="{{ ip.id }}"
+                                                    title="{% trans 'Enable IP' %}">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            {% endif %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-danger delete-ip" 
+                                                    data-ip-id="{{ ip.id }}"
+                                                    title="{% trans 'Delete IP' %}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-lock-open fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted mb-3">{% trans "No Whitelisted IPs Found" %}</h5>
+                        <p class="text-muted mb-4">
+                            {% trans "You haven't whitelisted any IP addresses yet. Start by adding your current IP or office network IP." %}
+                        </p>
+                        <a href="#" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>{% trans "Add Your First IP" %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Recommendations -->
+    <div class="row mt-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-shield-alt me-2"></i>{% trans "Security Recommendations" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-check text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-1">{% trans "Use Static IP Addresses" %}</h6>
+                                <small class="text-muted">{% trans "Configure static IPs for office networks" %}</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-check text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-1">{% trans "Limit IP Count" %}</h6>
+                                <small class="text-muted">{% trans "Only whitelist essential IP addresses" %}</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-check text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-1">{% trans "Regular Review" %}</h6>
+                                <small class="text-muted">{% trans "Review and remove unused IPs monthly" %}</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-check text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-1">{% trans "VPN IPs" %}</h6>
+                                <small class="text-muted">{% trans "Whitelist VPN exit points for remote access" %}</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-check text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-1">{% trans "Monitor Logs" %}</h6>
+                                <small class="text-muted">{% trans "Regularly check login history for unauthorized access" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history me-2"></i>{% trans "Recent Login Activity" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "IP Address" %}</th>
+                                    <th>{% trans "Date" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentLogins">
+                                <!-- Filled by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end mt-3">
+                        <a href="#" class="btn btn-sm btn-outline-primary">
+                            {% trans "View All Activity" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IP Ranges Guide -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle me-2"></i>{% trans "IP Address Formats" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-home me-2"></i>{% trans "Single IP" %}
+                                    </h6>
+                                    <p class="card-text">
+                                        <code>192.168.1.100</code>
+                                    </p>
+                                    <small class="text-muted">
+                                        {% trans "Allow access from specific device" %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-info">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">
+                                        <i class="fas fa-building me-2"></i>{% trans "IP Range" %}
+                                    </h6>
+                                    <p class="card-text">
+                                        <code>192.168.1.1 - 192.168.1.50</code>
+                                    </p>
+                                    <small class="text-muted">
+                                        {% trans "Allow access from office network range" %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h6 class="card-title text-success">
+                                        <i class="fas fa-wifi me-2"></i>{% trans "Subnet" %}
+                                    </h6>
+                                    <p class="card-text">
+                                        <code>192.168.1.0/24</code>
+                                    </p>
+                                    <small class="text-muted">
+                                        {% trans "Allow access from entire subnet" %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Current IP Modal -->
+<div class="modal fade" id="addCurrentIPModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary">
+                    <i class="fas fa-plus-circle me-2"></i>{% trans "Add Current IP to Whitelist" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCurrentIPForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="currentIP" name="ip_address" value="{{ current_ip|default:'' }}">
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "IP Address" %}</label>
+                        <input type="text" 
+                               class="form-control" 
+                               value="{{ current_ip|default:'' }}" 
+                               readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Description" %} *</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="currentIPDescription" 
+                               name="description"
+                               required
+                               placeholder="{% trans 'e.g., Office Network, Home Office, etc.' %}">
+                        <small class="form-text text-muted">
+                            {% trans "Add a description to identify this IP address" %}
+                        </small>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% trans "By adding this IP, you allow access to your account from this location. Make sure this is a secure network." %}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="confirmAddCurrentIP">
+                    {% trans "Add to Whitelist" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit IP Modal -->
+<div class="modal fade" id="editIPModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary">
+                    <i class="fas fa-edit me-2"></i>{% trans "Edit IP Address" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editIPForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="editIPId" name="ip_id">
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "IP Address" %}</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="editIPAddress" 
+                               name="ip_address"
+                               readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Description" %} *</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="editDescription" 
+                               name="description"
+                               required
+                               placeholder="{% trans 'Enter description for this IP address' %}">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editIsActive" name="is_active" checked>
+                            <label class="form-check-label" for="editIsActive">
+                                {% trans "Active (Allow access from this IP)" %}
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="confirmEditIP">
+                    {% trans "Save Changes" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{% trans "Remove IP Address" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>{% trans "Are you sure you want to remove this IP address from the whitelist?" %}</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {% trans "This IP address will no longer be able to access your account. Make sure you have alternative access methods." %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteIP">
+                    {% trans "Yes, Remove IP" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal instances
+        const addCurrentIPModal = new bootstrap.Modal(document.getElementById('addCurrentIPModal'));
+        const editIPModal = new bootstrap.Modal(document.getElementById('editIPModal'));
+        const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        
+        let currentIPId = null;
+        
+        // Add Current IP
+        document.getElementById('addCurrentIP').addEventListener('click', function() {
+            addCurrentIPModal.show();
+        });
+        
+        // Confirm Add Current IP
+        document.getElementById('confirmAddCurrentIP').addEventListener('click', function() {
+            addCurrentIP();
+        });
+        
+        // Edit IP
+        document.querySelectorAll('.edit-ip').forEach(button => {
+            button.addEventListener('click', function() {
+                currentIPId = this.getAttribute('data-ip-id');
+                const ipAddress = this.getAttribute('data-ip');
+                const description = this.getAttribute('data-description');
+                
+                document.getElementById('editIPId').value = currentIPId;
+                document.getElementById('editIPAddress').value = ipAddress;
+                document.getElementById('editDescription').value = description;
+                
+                editIPModal.show();
+            });
+        });
+        
+        // Disable IP
+        document.querySelectorAll('.disable-ip').forEach(button => {
+            button.addEventListener('click', function() {
+                currentIPId = this.getAttribute('data-ip-id');
+                toggleIPStatus(currentIPId, false);
+            });
+        });
+        
+        // Enable IP
+        document.querySelectorAll('.enable-ip').forEach(button => {
+            button.addEventListener('click', function() {
+                currentIPId = this.getAttribute('data-ip-id');
+                toggleIPStatus(currentIPId, true);
+            });
+        });
+        
+        // Delete IP
+        document.querySelectorAll('.delete-ip').forEach(button => {
+            button.addEventListener('click', function() {
+                currentIPId = this.getAttribute('data-ip-id');
+                confirmDeleteModal.show();
+            });
+        });
+        
+        // Confirm Edit IP
+        document.getElementById('confirmEditIP').addEventListener('click', function() {
+            editIP();
+        });
+        
+        // Confirm Delete IP
+        document.getElementById('confirmDeleteIP').addEventListener('click', function() {
+            deleteIP();
+        });
+        
+        // Refresh IP
+        document.getElementById('refreshIP').addEventListener('click', function() {
+            refreshIPInfo();
+        });
+        
+        // Load recent logins
+        loadRecentLogins();
+        
+        // Helper Functions
+        function addCurrentIP() {
+            const form = document.getElementById('addCurrentIPForm');
+            const formData = new FormData(form);
+            
+            fetch('/api/ip-whitelist/add-current/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                addCurrentIPModal.hide();
+                if (data.success) {
+                    showToast('{% trans "IP address added to whitelist" %}', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.error || '{% trans "Error adding IP address" %}', 'danger');
+                }
+            })
+            .catch(error => {
+                addCurrentIPModal.hide();
+                showToast('{% trans "Error adding IP address" %}', 'danger');
+            });
+        }
+        
+        function editIP() {
+            const form = document.getElementById('editIPForm');
+            const formData = new FormData(form);
+            
+            fetch('/api/ip-whitelist/edit/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                editIPModal.hide();
+                if (data.success) {
+                    showToast('{% trans "IP address updated successfully" %}', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.error || '{% trans "Error updating IP address" %}', 'danger');
+                }
+            })
+            .catch(error => {
+                editIPModal.hide();
+                showToast('{% trans "Error updating IP address" %}', 'danger');
+            });
+        }
+        
+        function toggleIPStatus(ipId, isActive) {
+            const action = isActive ? 'enable' : 'disable';
+            
+            fetch(`/api/ip-whitelist/${ipId}/${action}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(
+                        isActive ? '{% trans "IP address enabled" %}' : '{% trans "IP address disabled" %}', 
+                        'success'
+                    );
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.error || '{% trans "Error updating IP status" %}', 'danger');
+                }
+            })
+            .catch(error => {
+                showToast('{% trans "Error updating IP status" %}', 'danger');
+            });
+        }
+        
+        function deleteIP() {
+            fetch(`/api/ip-whitelist/${currentIPId}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                confirmDeleteModal.hide();
+                if (data.success) {
+                    showToast('{% trans "IP address removed from whitelist" %}', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.error || '{% trans "Error removing IP address" %}', 'danger');
+                }
+            })
+            .catch(error => {
+                confirmDeleteModal.hide();
+                showToast('{% trans "Error removing IP address" %}', 'danger');
+            });
+        }
+        
+        function refreshIPInfo() {
+            const refreshBtn = document.getElementById('refreshIP');
+            const originalHTML = refreshBtn.innerHTML;
+            
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "Refreshing..." %}';
+            refreshBtn.disabled = true;
+            
+            fetch('/api/current-ip/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update current IP display
+                        const ipDisplay = document.querySelector('.card.border-left-warning .h5 span');
+                        if (ipDisplay) {
+                            ipDisplay.textContent = data.ip;
+                        }
+                        
+                        // Update current IP status
+                        const statusElement = document.querySelector('.card-body .text-muted.mb-2 span');
+                        if (statusElement) {
+                            if (data.is_whitelisted) {
+                                statusElement.innerHTML = '<i class="fas fa-check-circle me-1"></i>{% trans "This IP is whitelisted" %}';
+                                statusElement.className = 'text-success';
+                            } else {
+                                statusElement.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>{% trans "This IP is not whitelisted" %}';
+                                statusElement.className = 'text-warning';
+                            }
+                        }
+                        
+                        showToast('{% trans "IP information refreshed" %}', 'success');
+                    }
+                })
+                .catch(error => {
+                    showToast('{% trans "Error refreshing IP information" %}', 'danger');
+                })
+                .finally(() => {
+                    refreshBtn.innerHTML = originalHTML;
+                    refreshBtn.disabled = false;
+                });
+        }
+        
+        function loadRecentLogins() {
+            fetch('/api/recent-logins/')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('recentLogins');
+                    if (data.length > 0) {
+                        tbody.innerHTML = data.map(login => `
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-network-wired text-muted me-2"></i>
+                                        <span class="text-truncate" style="max-width: 120px;">${login.ip_address}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <small>${login.date}</small>
+                                </td>
+                                <td>
+                                    <span class="badge ${login.success ? 'bg-success' : 'bg-danger'}">
+                                        ${login.success ? '{% trans "Success" %}' : '{% trans "Failed" %}'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">
+                                    {% trans "No recent login activity found" %}
+                                </td>
+                            </tr>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading recent logins:', error);
+                });
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                document.body.removeChild(toast);
+            });
+        }
+        
+        // Auto-refresh IP status every 5 minutes
+        setInterval(() => {
+            if (document.getElementById('refreshIP')) {
+                refreshIPInfo();
+            }
+        }, 300000);
+    });
+</script>
+
+<style>
+    .card {
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+        border-top: none;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+    
+    .list-group-item {
+        border: none;
+        padding: 1rem 0;
+    }
+    
+    .list-group-item:first-child {
+        padding-top: 0;
+    }
+    
+    .list-group-item:last-child {
+        padding-bottom: 0;
+    }
+    
+    .btn-group .btn {
+        border-radius: 4px;
+    }
+    
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+        border: none;
+    }
+    
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .toast {
+        z-index: 1060;
+    }
+    
+    .alert {
+        border-radius: 8px;
+        border: none;
+    }
+    
+    .modal-content {
+        border-radius: 10px;
+    }
+    
+    .modal-header {
+        border-radius: 10px 10px 0 0;
+    }
+    
+    @media (max-width: 768px) {
+        .h3, .h5, .h6 {
+            font-size: 1rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 3px 6px;
+        }
+        
+        .list-group-item {
+            padding: 0.75rem 0;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .d-flex.justify-content-between.align-items-center {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .d-flex.justify-content-between.align-items-center .btn {
+            margin-top: 1rem;
+            width: 100%;
+        }
+        
+        .text-truncate {
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .btn-group {
+            flex-wrap: wrap;
+        }
+        
+        .btn-group .btn {
+            margin-bottom: 2px;
+        }
+    }
+    
+    @media (max-width: 400px) {
+        .card-title {
+            font-size: 0.9rem;
+        }
+        
+        code {
+            font-size: 0.8rem;
+            word-break: break-all;
+        }
+        
+        .btn {
+            padding: 0.375rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    }
+</style>
+{% endblock %}

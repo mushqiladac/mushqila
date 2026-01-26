@@ -1,0 +1,9 @@
+<!-- Create accounts/static/accounts/images/world-map.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+    <path fill="#283593" d="M400,200a200,200 0 1,0 400,0a200,200 0 1,0 -400,0"/>
+    <circle cx="200" cy="100" r="5" fill="#fff"/>
+    <circle cx="300" cy="150" r="5" fill="#fff"/>
+    <circle cx="500" cy="120" r="5" fill="#fff"/>
+    <circle cx="600" cy="250" r="5" fill="#fff"/>
+    <circle cx="700" cy="180" r="5" fill="#fff"/>
+</svg>

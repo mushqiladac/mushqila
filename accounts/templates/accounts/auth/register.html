@@ -1,0 +1,1511 @@
+{# accounts/templates/accounts/auth/register.html #}
+{% extends 'accounts/base_auth.html' %}
+{% load static %}
+
+{% block title %}Register - Mushqila B2B Travel{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <!-- Registration Progress -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-center flex-grow-1 position-relative">
+                            <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" 
+                                 style="width: 40px; height: 40px;">
+                                <strong>1</strong>
+                            </div>
+                            <div class="step-label small">Personal Info</div>
+                        </div>
+                        <div class="progress flex-grow-1 mx-3" style="height: 4px;">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="text-center flex-grow-1 position-relative">
+                            <div class="step-number bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" 
+                                 style="width: 40px; height: 40px;">
+                                <strong>2</strong>
+                            </div>
+                            <div class="step-label small">Company Info</div>
+                        </div>
+                        <div class="progress flex-grow-1 mx-3" style="height: 4px;">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="text-center flex-grow-1 position-relative">
+                            <div class="step-number bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" 
+                                 style="width: 40px; height: 40px;">
+                                <strong>3</strong>
+                            </div>
+                            <div class="step-label small">Security</div>
+                        </div>
+                        <div class="progress flex-grow-1 mx-3" style="height: 4px;">
+                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="text-center flex-grow-1">
+                            <div class="step-number bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" 
+                                 style="width: 40px; height: 40px;">
+                                <strong>4</strong>
+                            </div>
+                            <div class="step-label small">Complete</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Registration Card -->
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-3">
+                    <div class="text-center">
+                        <h1 class="h2 font-weight-bold text-primary mb-2">
+                            <i class="fas fa-user-tie me-2"></i>B2B Travel Agent Registration
+                        </h1>
+                        <p class="text-muted mb-0">Join Saudi Arabia's premier B2B travel platform for travel agents</p>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Please fix the following errors:</strong>
+                        <ul class="mb-0 mt-2">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" novalidate id="registrationForm" class="needs-validation" autocomplete="off">
+                        {% csrf_token %}
+                        
+                        <!-- Section 1: Personal Information -->
+                        <div class="registration-section" id="section1">
+                            <div class="section-header mb-4">
+                                <h4 class="mb-3 text-primary">
+                                    <i class="fas fa-user-circle me-2"></i>Personal Information
+                                </h4>
+                                <p class="text-muted small">Enter your personal details</p>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.first_name }}
+                                        <label for="{{ form.first_name.id_for_label }}">
+                                            <i class="fas fa-user me-1"></i>First Name *
+                                        </label>
+                                        {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.first_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.last_name }}
+                                        <label for="{{ form.last_name.id_for_label }}">
+                                            <i class="fas fa-user me-1"></i>Last Name *
+                                        </label>
+                                        {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.last_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.email }}
+                                        <label for="{{ form.email.id_for_label }}">
+                                            <i class="fas fa-envelope me-1"></i>Email Address *
+                                        </label>
+                                        <div class="form-text">Use your business email address</div>
+                                        {% if form.email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.email.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.phone }}
+                                        <label for="{{ form.phone.id_for_label }}">
+                                            <i class="fas fa-phone me-1"></i>Saudi Phone *
+                                        </label>
+                                        <div class="form-text">Format: +9665XXXXXXXX</div>
+                                        {% if form.phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.phone.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-end mt-4">
+                                <button type="button" class="btn btn-primary next-section" data-next="section2">
+                                    Continue <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 2: Company Information -->
+                        <div class="registration-section d-none" id="section2">
+                            <div class="section-header mb-4">
+                                <h4 class="mb-3 text-primary">
+                                    <i class="fas fa-building me-2"></i>Company Information
+                                </h4>
+                                <p class="text-muted small">Tell us about your travel agency</p>
+                            </div>
+                            
+                            <!-- User Type -->
+                            <div class="mb-4">
+                                <label for="id_user_type" class="form-label fw-bold mb-3">
+                                    <i class="fas fa-user-tag me-1"></i>Select Your Role *
+                                </label>
+                                <div class="row g-3">
+                                    {% for choice in form.user_type.field.choices %}
+                                    {% if choice.0 != '' %}
+                                    <div class="col-md-4">
+                                        <div class="card role-card h-100 border {% if form.user_type.value == choice.0 %}border-primary{% else %}border-light{% endif %}">
+                                            <div class="card-body text-center">
+                                                <div class="mb-3">
+                                                    {% if choice.0 == 'agent' %}
+                                                    <i class="fas fa-user-tie fa-3x text-primary"></i>
+                                                    {% elif choice.0 == 'supplier' %}
+                                                    <i class="fas fa-hotel fa-3x text-success"></i>
+                                                    {% elif choice.0 == 'corporate' %}
+                                                    <i class="fas fa-building fa-3x text-info"></i>
+                                                    {% else %}
+                                                    <i class="fas fa-briefcase fa-3x text-secondary"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <h6 class="card-title">{{ choice.1 }}</h6>
+                                                <div class="form-check d-flex justify-content-center">
+                                                    <input class="form-check-input" 
+                                                           type="radio" 
+                                                           name="{{ form.user_type.name }}" 
+                                                           id="user_type_{{ choice.0 }}" 
+                                                           value="{{ choice.0 }}"
+                                                           {% if form.user_type.value == choice.0 %}checked{% endif %}
+                                                           required>
+                                                    <label class="form-check-label ms-2" for="user_type_{{ choice.0 }}">
+                                                        Select
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% if form.user_type.errors %}
+                                <div class="invalid-feedback d-block mt-2">
+                                    {% for error in form.user_type.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Company Name (English & Arabic) -->
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.company_name_en }}
+                                        <label for="{{ form.company_name_en.id_for_label }}">
+                                            <i class="fas fa-briefcase me-1"></i>Company Name (English)
+                                        </label>
+                                        {% if form.company_name_en.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.company_name_en.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.company_name_ar }}
+                                        <label for="{{ form.company_name_ar.id_for_label }}">
+                                            <i class="fas fa-briefcase me-1"></i>اسم الشركة (عربي)
+                                        </label>
+                                        {% if form.company_name_ar.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.company_name_ar.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Commercial Registration & VAT -->
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.company_registration }}
+                                        <label for="{{ form.company_registration.id_for_label }}">
+                                            <i class="fas fa-file-contract me-1"></i>CR Number
+                                        </label>
+                                        <div class="form-text">10-digit Commercial Registration</div>
+                                        {% if form.company_registration.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.company_registration.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.vat_number }}
+                                        <label for="{{ form.vat_number.id_for_label }}">
+                                            <i class="fas fa-receipt me-1"></i>VAT Number
+                                        </label>
+                                        <div class="form-text">15-digit VAT starting with 3</div>
+                                        {% if form.vat_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.vat_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Saudi Address -->
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.address_en }}
+                                        <label for="{{ form.address_en.id_for_label }}">
+                                            <i class="fas fa-map-marker-alt me-1"></i>Address (English)
+                                        </label>
+                                        {% if form.address_en.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.address_en.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.address_ar }}
+                                        <label for="{{ form.address_ar.id_for_label }}">
+                                            <i class="fas fa-map-marker-alt me-1"></i>العنوان (عربي)
+                                        </label>
+                                        {% if form.address_ar.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.address_ar.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card bg-light border-0 mt-4">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-info-circle text-primary me-2"></i>Why we need this?
+                                    </h6>
+                                    <ul class="list-unstyled small mb-0">
+                                        <li><i class="fas fa-check text-success me-2"></i> For B2B verification and KYC</li>
+                                        <li><i class="fas fa-check text-success me-2"></i> To generate proper invoices</li>
+                                        <li><i class="fas fa-check text-success me-2"></i> For commission and tax reporting</li>
+                                        <li><i class="fas fa-check text-success me-2"></i> Saudi regulatory compliance</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary prev-section" data-prev="section1">
+                                    <i class="fas fa-arrow-left me-2"></i> Back
+                                </button>
+                                <button type="button" class="btn btn-primary next-section" data-next="section3">
+                                    Continue <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 3: Security & Referral -->
+                        <div class="registration-section d-none" id="section3">
+                            <div class="section-header mb-4">
+                                <h4 class="mb-3 text-primary">
+                                    <i class="fas fa-shield-alt me-2"></i>Account Security
+                                </h4>
+                                <p class="text-muted small">Create a strong password for your account</p>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating position-relative">
+                                        {{ form.password1 }}
+                                        <label for="{{ form.password1.id_for_label }}">
+                                            <i class="fas fa-key me-1"></i>Password *
+                                        </label>
+                                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-3" 
+                                                onclick="togglePassword('{{ form.password1.id_for_label }}')" tabindex="-1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if form.password1.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.password1.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <!-- Password Strength Indicator -->
+                                    <div id="passwordStrengthIndicator" class="mt-2"></div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating position-relative">
+                                        {{ form.password2 }}
+                                        <label for="{{ form.password2.id_for_label }}">
+                                            <i class="fas fa-key me-1"></i>Confirm Password *
+                                        </label>
+                                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y me-3" 
+                                                onclick="togglePassword('{{ form.password2.id_for_label }}')" tabindex="-1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if form.password2.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.password2.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div id="passwordMatchIndicator" class="mt-2"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-light border mt-4">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-lightbulb text-warning me-2"></i>Password Requirements:
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="mb-0 small">
+                                            <li id="reqLength"><i class="fas fa-circle me-2 text-danger"></i> Minimum 8 characters</li>
+                                            <li id="reqUpper"><i class="fas fa-circle me-2 text-danger"></i> One uppercase letter</li>
+                                            <li id="reqLower"><i class="fas fa-circle me-2 text-danger"></i> One lowercase letter</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="mb-0 small">
+                                            <li id="reqNumber"><i class="fas fa-circle me-2 text-danger"></i> One number (0-9)</li>
+                                            <li id="reqSpecial"><i class="fas fa-circle me-2 text-danger"></i> One special character</li>
+                                            <li id="reqMatch"><i class="fas fa-circle me-2 text-danger"></i> Passwords must match</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Referral Code (Optional) -->
+                            <div class="card border-0 bg-light mt-4">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-handshake text-success me-2"></i>Referral Program
+                                    </h6>
+                                    <div class="form-floating">
+                                        {{ form.referral_code }}
+                                        <label for="{{ form.referral_code.id_for_label }}">
+                                            Referral Code (Optional)
+                                        </label>
+                                        <div class="form-text">Enter if you were referred by another agent. Format: SAXXXXXXXX</div>
+                                        {% if form.referral_code.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.referral_code.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary prev-section" data-prev="section2">
+                                    <i class="fas fa-arrow-left me-2"></i> Back
+                                </button>
+                                <button type="button" class="btn btn-primary next-section" data-next="section4">
+                                    Continue <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Section 4: Terms & Agreement -->
+                        <div class="registration-section d-none" id="section4">
+                            <div class="section-header mb-4">
+                                <h4 class="mb-3 text-primary">
+                                    <i class="fas fa-file-signature me-2"></i>Terms & Agreement
+                                </h4>
+                                <p class="text-muted small">Review and accept terms to complete registration</p>
+                            </div>
+                            
+                            <!-- Terms & Conditions -->
+                            <div class="card border-0 bg-light mb-4">
+                                <div class="card-body">
+                                    <div class="terms-content border p-3 mb-3 bg-white" style="max-height: 200px; overflow-y: auto;">
+                                        <h6 class="text-primary">B2B Travel Argentina Platform Agreement</h6>
+                                        <p class="small">
+                                            <strong>1. Acceptance of Terms</strong><br>
+                                            By registering as a travel agent on our platform, you agree to comply with all terms and conditions.
+                                            
+                                            <br><br><strong>2. Agent Responsibilities</strong><br>
+                                            You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.
+                                            
+                                            <br><br><strong>3. Commission & Payments</strong><br>
+                                            Commissions will be paid according to our published commission structure. All payments are in Saudi Riyal (SAR).
+                                            
+                                            <br><br><strong>4. Saudi Regulations</strong><br>
+                                            You agree to comply with all Saudi Arabian laws and regulations including SCTA, VAT, and commercial registration requirements.
+                                            
+                                            <br><br><strong>5. Data Privacy</strong><br>
+                                            We collect and process your data in accordance with Saudi data protection laws and our privacy policy.
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        {{ form.terms_agreed }}
+                                        <label class="form-check-label" for="{{ form.terms_agreed.id_for_label }}">
+                                            I have read and agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" class="text-decoration-none">Terms & Conditions</a> *
+                                        </label>
+                                        {% if form.terms_agreed.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.terms_agreed.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        {{ form.marketing_consent }}
+                                        <label class="form-check-label" for="{{ form.marketing_consent.id_for_label }}">
+                                            I agree to receive marketing communications and updates about new features
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Final Review Alert -->
+                            <div class="alert alert-info">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle fa-2x"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="alert-heading">Important Information</h6>
+                                        <ul class="mb-0 small">
+                                            <li>Your account will be reviewed by our team within 24-48 hours</li>
+                                            <li>You'll receive a verification email to activate your account</li>
+                                            <li>Complete KYC verification to access full platform features</li>
+                                            <li>For urgent inquiries, contact: support@mushqila.com</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Summary Card -->
+                            <div class="card border-primary border-2 mb-4">
+                                <div class="card-header bg-primary bg-opacity-10 border-primary">
+                                    <h6 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Registration Summary</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Name:</strong> <span id="summaryName">-</span></p>
+                                            <p class="mb-1"><strong>Email:</strong> <span id="summaryEmail">-</span></p>
+                                            <p class="mb-1"><strong>Phone:</strong> <span id="summaryPhone">-</span></p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-1"><strong>Company:</strong> <span id="summaryCompany">-</span></p>
+                                            <p class="mb-1"><strong>User Type:</strong> <span id="summaryUserType">-</span></p>
+                                            <p class="mb-1"><strong>CR Number:</strong> <span id="summaryCR">-</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary prev-section" data-prev="section3">
+                                    <i class="fas fa-arrow-left me-2"></i> Back
+                                </button>
+                                <button type="submit" class="btn btn-success btn-lg px-5" id="submitBtn">
+                                    <i class="fas fa-user-check me-2"></i> Complete Registration
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Benefits Section -->
+                <div class="card-footer bg-white border-top-0 pt-4 pb-4">
+                    <h5 class="text-center mb-4">
+                        <i class="fas fa-award text-primary me-2"></i>Benefits of Joining Mushqila B2B
+                    </h5>
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 h-100">
+                                <div class="icon-wrapper bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 70px; height: 70px;">
+                                    <i class="fas fa-plane-departure fs-4"></i>
+                                </div>
+                                <h6 class="font-weight-bold mb-2">Best Flight Deals</h6>
+                                <p class="small text-muted mb-0">Access exclusive B2B rates on domestic & international flights</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 h-100">
+                                <div class="icon-wrapper bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 70px; height: 70px;">
+                                    <i class="fas fa-hotel fs-4"></i>
+                                </div>
+                                <h6 class="font-weight-bold mb-2">Hotel Partnerships</h6>
+                                <p class="small text-muted mb-0">Special rates with 5,000+ hotels worldwide</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 h-100">
+                                <div class="icon-wrapper bg-info bg-opacity-10 text-info rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 70px; height: 70px;">
+                                    <i class="fas fa-kaaba fs-4"></i>
+                                </div>
+                                <h6 class="font-weight-bold mb-2">Hajj & Umrah</h6>
+                                <p class="small text-muted mb-0">Specialized packages for religious tourism</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 h-100">
+                                <div class="icon-wrapper bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 70px; height: 70px;">
+                                    <i class="fas fa-chart-line fs-4"></i>
+                                </div>
+                                <h6 class="font-weight-bold mb-2">Real-time Dashboard</h6>
+                                <p class="small text-muted mb-0">Track bookings, commissions, and performance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Login Link -->
+            <div class="text-center mt-4">
+                <p class="mb-0">
+                    Already have an account? 
+                    <a href="{% url 'accounts:login' %}" class="fw-bold text-decoration-none text-primary">
+                        <i class="fas fa-sign-in-alt me-1"></i>Sign In Here
+                    </a>
+                </p>
+                <p class="text-muted small mt-2">
+                    <i class="fas fa-lock me-1"></i>
+                    Your information is secured with 256-bit SSL encryption
+                </p>
+                <p class="text-muted small">
+                    <i class="fas fa-phone me-1"></i>
+                    Need help? Call +966 50 099 3174
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="termsModalLabel">
+                    <i class="fas fa-file-contract me-2"></i>Terms & Conditions
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>B2B Travel Argentina Platform Agreement</h6>
+                <p>Welcome to Mushqila B2B Travel Argentina Platform. This agreement governs your use of our B2B travel platform.</p>
+                
+                <h6 class="mt-4">1. Platform Usage</h6>
+                <p>This platform is exclusively for registered travel agents and agencies. Personal use is not permitted.</p>
+                
+                <h6 class="mt-4">2. Agent Responsibilities</h6>
+                <p>As a registered agent, you agree to:
+                    <ul>
+                        <li>Maintain accurate company information</li>
+                        <li>Comply with Saudi travel regulations</li>
+                        <li>Process bookings in good faith</li>
+                        <li>Maintain client confidentiality</li>
+                    </ul>
+                </p>
+                
+                <h6 class="mt-4">3. Commission Structure</h6>
+                <p>Commissions are paid monthly based on completed bookings. Detailed commission rates are available in your dashboard.</p>
+                
+                <h6 class="mt-4">4. Data Protection</h6>
+                <p>We comply with Saudi Data Protection Law. Your information is secured and used only for platform operations.</p>
+                
+                <h6 class="mt-4">5. Termination</h6>
+                <p>We reserve the right to suspend accounts violating our terms or Saudi regulations.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    // Password toggle function
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const button = field.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    
+    // Update registration summary
+    function updateSummary() {
+        // Personal Info
+        const firstName = document.getElementById('{{ form.first_name.id_for_label }}')?.value || '-';
+        const lastName = document.getElementById('{{ form.last_name.id_for_label }}')?.value || '-';
+        document.getElementById('summaryName').textContent = `${firstName} ${lastName}`;
+        
+        document.getElementById('summaryEmail').textContent = document.getElementById('{{ form.email.id_for_label }}')?.value || '-';
+        document.getElementById('summaryPhone').textContent = document.getElementById('{{ form.phone.id_for_label }}')?.value || '-';
+        
+        // Company Info
+        const companyEn = document.getElementById('{{ form.company_name_en.id_for_label }}')?.value;
+        const companyAr = document.getElementById('{{ form.company_name_ar.id_for_label }}')?.value;
+        document.getElementById('summaryCompany').textContent = companyEn || companyAr || '-';
+        
+        // User Type
+        const userType = document.querySelector('input[name="{{ form.user_type.name }}"]:checked');
+        document.getElementById('summaryUserType').textContent = userType ? userType.parentElement.parentElement.querySelector('.card-title').textContent : '-';
+        
+        // CR Number
+        document.getElementById('summaryCR').textContent = document.getElementById('{{ form.company_registration.id_for_label }}')?.value || '-';
+    }
+    
+    // ✅ FIXED: updateRequirementIndicator - Added null checks
+    function updateRequirementIndicator(elementId, isValid) {
+        const element = document.getElementById(elementId);
+        if (!element) {
+            console.log(`Element with id "${elementId}" not found`);
+            return;
+        }
+        
+        const icon = element.querySelector('i');
+        if (icon) {
+            if (isValid) {
+                icon.classList.remove('text-danger');
+                icon.classList.add('text-success');
+            } else {
+                icon.classList.remove('text-success');
+                icon.classList.add('text-danger');
+            }
+        }
+    }
+    
+    // ✅ FIXED: validatePassword - Safe element checking
+    function validatePassword(password) {
+        const validations = {
+            length: password.length >= 8,
+            upper: /[A-Z]/.test(password),
+            lower: /[a-z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+        
+        // Update requirement indicators safely
+        if (document.getElementById('reqLength')) updateRequirementIndicator('reqLength', validations.length);
+        if (document.getElementById('reqUpper')) updateRequirementIndicator('reqUpper', validations.upper);
+        if (document.getElementById('reqLower')) updateRequirementIndicator('reqLower', validations.lower);
+        if (document.getElementById('reqNumber')) updateRequirementIndicator('reqNumber', validations.number);
+        if (document.getElementById('reqSpecial')) updateRequirementIndicator('reqSpecial', validations.special);
+        
+        // Calculate strength score
+        const strength = Object.values(validations).filter(v => v).length;
+        updatePasswordStrength(strength);
+        
+        return validations;
+    }
+    
+    function updatePasswordStrength(strength) {
+        const indicator = document.getElementById('passwordStrengthIndicator');
+        if (!indicator) return;
+        
+        const strengths = [
+            { text: 'Very Weak', class: 'danger', width: 20 },
+            { text: 'Weak', class: 'warning', width: 40 },
+            { text: 'Fair', class: 'info', width: 60 },
+            { text: 'Good', class: 'primary', width: 80 },
+            { text: 'Strong', class: 'success', width: 100 }
+        ];
+        
+        const strengthInfo = strengths[strength] || strengths[0];
+        
+        indicator.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <small class="text-muted">Password Strength</small>
+                <small class="fw-bold text-${strengthInfo.class}">${strengthInfo.text}</small>
+            </div>
+            <div class="progress" style="height: 5px;">
+                <div class="progress-bar bg-${strengthInfo.class}" 
+                     role="progressbar" 
+                     style="width: ${strengthInfo.width}%"
+                     aria-valuenow="${strengthInfo.width}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                </div>
+            </div>
+        `;
+    }
+    
+    function checkPasswordMatch() {
+        const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+        const password2 = document.getElementById('{{ form.password2.id_for_label }}');
+        const indicator = document.getElementById('passwordMatchIndicator');
+        const matchElement = document.getElementById('reqMatch');
+        
+        if (!password1 || !password2) return;
+        
+        const match = password1.value && password2.value && password1.value === password2.value;
+        
+        // Update match indicator
+        if (indicator) {
+            if (password2.value) {
+                if (match) {
+                    indicator.innerHTML = '<small class="text-success"><i class="fas fa-check-circle me-1"></i>Passwords match</small>';
+                    password2.classList.remove('is-invalid');
+                    password2.classList.add('is-valid');
+                } else {
+                    indicator.innerHTML = '<small class="text-danger"><i class="fas fa-times-circle me-1"></i>Passwords do not match</small>';
+                    password2.classList.remove('is-valid');
+                    password2.classList.add('is-invalid');
+                }
+            } else {
+                indicator.innerHTML = '';
+            }
+        }
+        
+        // Update requirement indicator
+        if (matchElement) {
+            const icon = matchElement.querySelector('i');
+            if (icon) {
+                if (match && password2.value) {
+                    icon.classList.remove('text-danger');
+                    icon.classList.add('text-success');
+                } else {
+                    icon.classList.remove('text-success');
+                    icon.classList.add('text-danger');
+                }
+            }
+        }
+    }
+    
+    // Form validation and section navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        const sections = document.querySelectorAll('.registration-section');
+        const progressBars = document.querySelectorAll('.progress-bar');
+        const stepNumbers = document.querySelectorAll('.step-number');
+        
+        // Initialize first section
+        showSection('section1');
+        updateProgress(1);
+        
+        // Next section button - SIMPLIFIED VALIDATION
+        document.querySelectorAll('.next-section').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const currentSection = this.closest('.registration-section');
+                const nextSectionId = this.dataset.next;
+                
+                // Use basic validation only for continue button
+                if (basicValidateSection(currentSection.id)) {
+                    hideAllSections();
+                    showSection(nextSectionId);
+                    updateProgress(getSectionNumber(nextSectionId));
+                    updateSummary();
+                    
+                    // Auto-scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    // Show error message
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'alert alert-warning alert-dismissible fade show mt-3';
+                    errorMsg.innerHTML = `
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Please fill in all required fields marked with *
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    currentSection.querySelector('.section-header')?.after(errorMsg);
+                    
+                    // Remove after 3 seconds
+                    setTimeout(() => {
+                        errorMsg.remove();
+                    }, 3000);
+                }
+            });
+        });
+        
+        // Previous section button
+        document.querySelectorAll('.prev-section').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const prevSectionId = this.dataset.prev;
+                hideAllSections();
+                showSection(prevSectionId);
+                updateProgress(getSectionNumber(prevSectionId));
+                
+                // Auto-scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+        
+        // Form submission
+        const form = document.getElementById('registrationForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    submitBtn.disabled = true;
+                }
+                
+                // Final validation before submit
+                if (!finalValidation()) {
+                    e.preventDefault();
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="fas fa-user-check me-2"></i> Complete Registration';
+                        submitBtn.disabled = false;
+                    }
+                }
+            });
+        }
+        
+        // Real-time password validation
+        const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+        const password2 = document.getElementById('{{ form.password2.id_for_label }}');
+        
+        if (password1) {
+            password1.addEventListener('input', function() {
+                validatePassword(this.value);
+                checkPasswordMatch();
+            });
+        }
+        
+        if (password2) {
+            password2.addEventListener('input', checkPasswordMatch);
+        }
+        
+        // Auto-format Saudi phone number
+        const phoneInput = document.getElementById('{{ form.phone.id_for_label }}');
+        if (phoneInput) {
+            phoneInput.addEventListener('blur', function() {
+                let phone = this.value.trim().replace(/\s+/g, '');
+                
+                // Format to Saudi standard
+                if (phone && !phone.startsWith('+966')) {
+                    if (phone.startsWith('966')) {
+                        phone = '+' + phone;
+                    } else if (phone.startsWith('05')) {
+                        phone = '+966' + phone.substring(1);
+                    } else if (phone.startsWith('5') && phone.length === 9) {
+                        phone = '+966' + phone;
+                    } else if (phone.length === 9 && /^5/.test(phone)) {
+                        phone = '+966' + phone;
+                    }
+                    
+                    // Ensure it matches the pattern
+                    if (!/^\+9665\d{8}$/.test(phone)) {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    }
+                    
+                    this.value = phone;
+                }
+            });
+            
+            phoneInput.addEventListener('input', function() {
+                this.classList.remove('is-invalid', 'is-valid');
+            });
+        }
+        
+        // User type card selection
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (!e.target.matches('input[type="radio"]')) {
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) {
+                        radio.checked = true;
+                        document.querySelectorAll('.role-card').forEach(c => {
+                            c.classList.remove('border-primary');
+                            c.classList.add('border-light');
+                        });
+                        this.classList.remove('border-light');
+                        this.classList.add('border-primary');
+                    }
+                }
+            });
+        });
+        
+        // Initialize role cards
+        document.querySelectorAll('input[name="{{ form.user_type.name }}"]').forEach(radio => {
+            if (radio.checked) {
+                const card = radio.closest('.role-card');
+                if (card) {
+                    card.classList.remove('border-light');
+                    card.classList.add('border-primary');
+                }
+            }
+        });
+        
+        // Helper functions
+        function hideAllSections() {
+            sections.forEach(section => {
+                section.classList.add('d-none');
+            });
+        }
+        
+        function showSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.remove('d-none');
+            }
+        }
+        
+        // BASIC VALIDATION - Only checks if required fields are filled
+        function basicValidateSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const requiredInputs = section.querySelectorAll('input[required], select[required], textarea[required]');
+            let isValid = true;
+            
+            requiredInputs.forEach(input => {
+                // Remove previous validation classes
+                input.classList.remove('is-invalid', 'is-valid');
+                
+                // Special handling for radio buttons
+                if (input.type === 'radio') {
+                    const radioGroup = section.querySelectorAll(`input[name="${input.name}"]`);
+                    const anyChecked = Array.from(radioGroup).some(radio => radio.checked);
+                    if (!anyChecked) {
+                        isValid = false;
+                        // Highlight all radios in group
+                        radioGroup.forEach(radio => {
+                            radio.closest('.role-card')?.classList.add('border-danger');
+                        });
+                    } else {
+                        radioGroup.forEach(radio => {
+                            radio.closest('.role-card')?.classList.remove('border-danger');
+                        });
+                    }
+                }
+                // Check only if field is filled
+                else if (!input.value.trim()) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                    
+                    // Scroll to first error
+                    if (isValid === false) {
+                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        input.focus();
+                    }
+                } else {
+                    input.classList.add('is-valid');
+                }
+            });
+            
+            return isValid;
+        }
+        
+        // FINAL VALIDATION - Strict validation only on form submit
+        function finalValidation() {
+            let isValid = true;
+            let firstErrorSection = null;
+            
+            sections.forEach(section => {
+                if (!strictValidateSection(section.id)) {
+                    isValid = false;
+                    if (!firstErrorSection) {
+                        firstErrorSection = section.id;
+                    }
+                }
+            });
+            
+            // Show first section with error
+            if (!isValid && firstErrorSection) {
+                hideAllSections();
+                showSection(firstErrorSection);
+                updateProgress(getSectionNumber(firstErrorSection));
+                
+                // Scroll to top of form
+                document.getElementById('registrationForm').scrollIntoView({ behavior: 'smooth' });
+                
+                // Show error message
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                errorMsg.innerHTML = `
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Please fix all errors before submitting the form
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('#registrationForm .card-body').prepend(errorMsg);
+            }
+            
+            return isValid;
+        }
+        
+        // STRICT VALIDATION - Full validation with all rules
+        function strictValidateSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const inputs = section.querySelectorAll('input, select, textarea');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                // Remove previous validation classes
+                input.classList.remove('is-invalid', 'is-valid');
+                
+                let fieldValid = true;
+                
+                // Check required fields
+                if (input.hasAttribute('required') && !input.value.trim()) {
+                    fieldValid = false;
+                } 
+                // Validate email
+                else if (input.type === 'email' && input.value && !isValidEmail(input.value)) {
+                    fieldValid = false;
+                }
+                // Validate Saudi phone
+                else if (input.name === 'phone' && input.value && !isValidSaudiPhone(input.value)) {
+                    fieldValid = false;
+                }
+                // Validate password
+                else if (input.name === 'password1' && input.value) {
+                    const validations = validatePassword(input.value);
+                    fieldValid = Object.values(validations).every(v => v);
+                }
+                // Validate password match
+                else if (input.name === 'password2' && input.value) {
+                    const password1 = document.getElementById('{{ form.password1.id_for_label }}')?.value;
+                    fieldValid = password1 && input.value && password1 === input.value;
+                }
+                
+                if (!fieldValid) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                } else if (input.value.trim()) {
+                    input.classList.add('is-valid');
+                }
+            });
+            
+            // Special validation for section 4 (terms)
+            if (sectionId === 'section4') {
+                const termsCheckbox = document.getElementById('{{ form.terms_agreed.id_for_label }}');
+                if (termsCheckbox && !termsCheckbox.checked) {
+                    termsCheckbox.classList.add('is-invalid');
+                    isValid = false;
+                }
+            }
+            
+            return isValid;
+        }
+        
+        function getSectionNumber(sectionId) {
+            switch(sectionId) {
+                case 'section1': return 1;
+                case 'section2': return 2;
+                case 'section3': return 3;
+                case 'section4': return 4;
+                default: return 1;
+            }
+        }
+        
+        function updateProgress(currentStep) {
+            // Update progress bars
+            const progressPercentage = ((currentStep - 1) / 3) * 100;
+            progressBars.forEach(bar => {
+                bar.style.width = `${progressPercentage}%`;
+            });
+            
+            // Update step numbers
+            stepNumbers.forEach((step, index) => {
+                if (index < currentStep) {
+                    step.classList.remove('bg-secondary');
+                    step.classList.add('bg-primary');
+                } else {
+                    step.classList.remove('bg-primary');
+                    step.classList.add('bg-secondary');
+                }
+            });
+        }
+        
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function isValidSaudiPhone(phone) {
+            const re = /^\+9665\d{8}$/;
+            return re.test(phone);
+        }
+        
+        // Initialize password requirements
+        if (password1) {
+            validatePassword('');
+            checkPasswordMatch();
+        }
+        
+        // Initialize summary
+        updateSummary();
+    });
+</script>
+
+<style>
+    /* Custom styles for registration form */
+    .form-floating > .form-control,
+    .form-floating > .form-select,
+    .form-floating > .form-control-plaintext {
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+        padding: 1rem 0.75rem;
+        border-radius: 0.5rem;
+    }
+    
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+        color: #6c757d;
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .is-valid {
+        border-color: #198754 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .is-invalid {
+        border-color: #dc3545 !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .registration-section {
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .section-header {
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 1rem;
+    }
+    
+    .step-number {
+        transition: all 0.3s ease;
+        z-index: 2;
+        position: relative;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .step-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .progress {
+        background-color: #e9ecef;
+        margin-top: 20px;
+        border-radius: 2px;
+    }
+    
+    .progress-bar {
+        background-color: #0d6efd;
+        transition: width 0.5s ease;
+        border-radius: 2px;
+    }
+    
+    .role-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .role-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .role-card.border-primary {
+        box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+    }
+    
+    .role-card.border-danger {
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+    }
+    
+    .icon-wrapper {
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .icon-wrapper:hover {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(25, 135, 84, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+        background: linear-gradient(135deg, #157347 0%, #146c43 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(25, 135, 84, 0.3);
+    }
+    
+    .btn-success:disabled {
+        background: #6c757d;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+        border: none;
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+    }
+    
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Terms content scrollbar */
+    .terms-content::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .terms-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .terms-content::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+    
+    .terms-content::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .progress {
+            display: none !important;
+        }
+        
+        .step-number {
+            width: 30px !important;
+            height: 30px !important;
+            font-size: 0.9rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1rem !important;
+            font-size: 1rem;
+        }
+        
+        .col-md-3, .col-md-4, .col-md-6 {
+            margin-bottom: 1rem;
+        }
+        
+        .h2 {
+            font-size: 1.5rem !important;
+        }
+        
+        .role-card {
+            margin-bottom: 1rem;
+        }
+        
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .d-flex.justify-content-between button {
+            width: 100%;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .container {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        
+        .card {
+            border-radius: 0;
+            margin: 0 -10px;
+        }
+        
+        .row.g-3 {
+            margin-left: -5px;
+            margin-right: -5px;
+        }
+        
+        .col-md-6, .col-md-4 {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+        
+        .card-body.p-4.p-md-5 {
+            padding: 1rem !important;
+        }
+        
+        .card-footer .row.g-4 {
+            margin-left: -5px;
+            margin-right: -5px;
+        }
+        
+        .card-footer .col-md-3 {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .card {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        
+        .card-header.bg-white {
+            background-color: #4a5568 !important;
+            color: #e2e8f0;
+        }
+        
+        .text-muted {
+            color: #a0aec0 !important;
+        }
+        
+        .bg-light {
+            background-color: #4a5568 !important;
+            color: #e2e8f0;
+        }
+        
+        .alert-light {
+            background-color: #4a5568;
+            border-color: #718096;
+            color: #e2e8f0;
+        }
+        
+        .form-control, .form-select {
+            background-color: #4a5568;
+            border-color: #718096;
+            color: #e2e8f0;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+        
+        .form-floating > label {
+            color: #a0aec0;
+        }
+        
+        .border-light {
+            border-color: #718096 !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,924 @@
+{% extends 'accounts/base.html' %}
+{% load humanize %}
+
+{% block title %}Agent Dashboard - Mushqila B2B{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center py-3 mb-4 border-bottom">
+        <div>
+            <h1 class="h2 mb-0"><i class="fas fa-user-tie me-2 text-primary"></i>Agent Dashboard</h1>
+            <p class="text-muted mb-0">
+                Welcome back, {{ user.get_full_name|default:user.email }}
+                {% if user.company_name_en or user.company_name_ar %}
+                <span class="badge bg-primary ms-2">{{ user.company_name_en|default:user.company_name_ar }}</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="btn-toolbar">
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i> Refresh
+                </button>
+                <a href="{% url 'accounts:flight_booking_create' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus-circle me-1"></i> New Booking
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+        <!-- Total Bookings -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-primary bg-opacity-10 text-primary me-3">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Bookings</h6>
+                            <h3 class="mb-0">{{ total_bookings|intcomma }}</h3>
+                            <small class="text-muted">
+                                <span class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>{{ monthly_growth }}% This Month
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'accounts:flight_bookings' %}" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-eye me-1"></i> View All
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Sales -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-success bg-opacity-10 text-success me-3">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Sales</h6>
+                            <h3 class="mb-0">{{ total_sales|floatformat:0|intcomma }} <small class="fs-6">SAR</small></h3>
+                            <small class="text-muted">
+                                <span class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>{{ sales_growth }}% Growth
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-success btn-sm w-100" data-bs-toggle="modal" data-bs-target="#salesReportModal">
+                            <i class="fas fa-chart-line me-1"></i> Reports
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Commission -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-warning bg-opacity-10 text-warning me-3">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Commission</h6>
+                            <h3 class="mb-0">{{ total_commission|floatformat:0|intcomma }} <small class="fs-6">SAR</small></h3>
+                            <small class="text-muted">
+                                Rate: {{ user.commission_rate|default:5 }}%
+                                <i class="fas fa-percentage ms-1"></i>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-warning btn-sm w-100" data-bs-toggle="modal" data-bs-target="#commissionModal">
+                            <i class="fas fa-calculator me-1"></i> Calculator
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Balance -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-info bg-opacity-10 text-info me-3">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Wallet Balance</h6>
+                            <h3 class="mb-0">{{ wallet_balance|floatformat:0|intcomma }} <small class="fs-6">SAR</small></h3>
+                            <small class="text-muted">
+                                <i class="fas fa-history me-1"></i>
+                                Available Credit: {{ available_credit|floatformat:0|intcomma }} SAR
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'accounts:deposit' %}" class="btn btn-outline-info btn-sm w-100">
+                            <i class="fas fa-plus-circle me-1"></i> Add Funds
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:flight_booking_create' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-primary bg-opacity-10 text-primary mx-auto">
+                                        <i class="fas fa-plane"></i>
+                                    </div>
+                                    <h6 class="mb-2">Book Flight</h6>
+                                    <p class="text-muted small mb-0">Domestic & International</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:hotel_booking_create' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-success bg-opacity-10 text-success mx-auto">
+                                        <i class="fas fa-hotel"></i>
+                                    </div>
+                                    <h6 class="mb-2">Book Hotel</h6>
+                                    <p class="text-muted small mb-0">Hotels Worldwide</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:deposit' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-info bg-opacity-10 text-info mx-auto">
+                                        <i class="fas fa-plus"></i>
+                                    </div>
+                                    <h6 class="mb-2">Deposit Funds</h6>
+                                    <p class="text-muted small mb-0">Add money to wallet</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:kyc' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-warning bg-opacity-10 text-warning mx-auto">
+                                        <i class="fas fa-id-card"></i>
+                                    </div>
+                                    <h6 class="mb-2">KYC Status</h6>
+                                    <p class="text-muted small mb-0">
+                                        {% if user.kyc_verified %}
+                                        <span class="text-success">✓ Verified</span>
+                                        {% elif user.kyc_submitted %}
+                                        <span class="text-warning">⏳ Pending</span>
+                                        {% else %}
+                                        <span class="text-danger">✗ Required</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:credit_request' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-secondary bg-opacity-10 text-secondary mx-auto">
+                                        <i class="fas fa-hand-holding-usd"></i>
+                                    </div>
+                                    <h6 class="mb-2">Credit Limit</h6>
+                                    <p class="text-muted small mb-0">Increase your limit</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:profile' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-dark bg-opacity-10 text-dark mx-auto">
+                                        <i class="fas fa-user-cog"></i>
+                                    </div>
+                                    <h6 class="mb-2">Profile Settings</h6>
+                                    <p class="text-muted small mb-0">Manage account</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Analytics -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2 text-primary"></i>Sales Overview</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-calendar me-1"></i> Last 7 Days
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="changeChartPeriod('7')">Last 7 Days</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="changeChartPeriod('30')">Last 30 Days</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="changeChartPeriod('90')">Last 90 Days</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2 text-info"></i>Booking Types</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="bookingTypeChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <span class="d-block">
+                                    <i class="fas fa-circle text-primary me-1"></i> Flights
+                                </span>
+                                <span class="fw-bold">{{ service_stats.flights }}%</span>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <span class="d-block">
+                                    <i class="fas fa-circle text-success me-1"></i> Hotels
+                                </span>
+                                <span class="fw-bold">{{ service_stats.hotels }}%</span>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <span class="d-block">
+                                    <i class="fas fa-circle text-warning me-1"></i> Hajj
+                                </span>
+                                <span class="fw-bold">{{ service_stats.hajj }}%</span>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <span class="d-block">
+                                    <i class="fas fa-circle text-info me-1"></i> Umrah
+                                </span>
+                                <span class="fw-bold">{{ service_stats.umrah }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-history me-2 text-primary"></i>Recent Bookings</h5>
+                        <div class="btn-group">
+                            <a href="{% url 'accounts:flight_bookings' %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-list me-1"></i> All Bookings
+                            </a>
+                            <a href="{% url 'accounts:flight_booking_create' %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus me-1"></i> New Booking
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Passenger</th>
+                                    <th>Service</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Commission</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in recent_bookings %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-light text-dark fw-bold">{{ booking.booking_id }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-xs me-2">
+                                                <div class="avatar-title bg-light rounded-circle text-primary">
+                                                    {{ booking.passenger_name|first|upper }}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ booking.passenger_name|truncatechars:20 }}</div>
+                                                <small class="text-muted">{{ booking.passenger_phone|default:"No phone" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if booking.service_type == 'flight' %}
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-plane me-1"></i> Flight
+                                        </span>
+                                        {% elif booking.service_type == 'hotel' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-hotel me-1"></i> Hotel
+                                        </span>
+                                        {% elif booking.service_type == 'hajj' %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-kaaba me-1"></i> Hajj
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-mosque me-1"></i> Umrah
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div>{{ booking.created_at|date:"M d, Y" }}</div>
+                                        <small class="text-muted">{{ booking.created_at|time }}</small>
+                                    </td>
+                                    <td class="fw-bold">{{ booking.total_amount|floatformat:0|intcomma }} SAR</td>
+                                    <td>
+                                        {% if booking.status == 'confirmed' %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                        {% elif booking.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% elif booking.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ booking.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">
+                                            {{ booking.commission_amount|default:0|floatformat:0|intcomma }} SAR
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            {% if booking.service_type == 'flight' %}
+                                            <a href="{% url 'accounts:flight_booking_detail' booking.id %}" class="btn btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% elif booking.service_type == 'hotel' %}
+                                            <a href="{% url 'accounts:hotel_booking_detail' booking.id %}" class="btn btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% endif %}
+                                            {% if booking.status == 'pending' %}
+                                            <button class="btn btn-outline-success" onclick="confirmBooking('{{ booking.id }}', '{{ booking.service_type }}')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="cancelBooking('{{ booking.id }}', '{{ booking.service_type }}')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="icon-lg rounded-circle bg-light text-muted mb-3 mx-auto">
+                            <i class="fas fa-calendar-times"></i>
+                        </div>
+                        <h5 class="text-muted">No Bookings Yet</h5>
+                        <p class="text-muted mb-4">Start by creating your first booking</p>
+                        <a href="{% url 'accounts:flight_booking_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-1"></i> Create First Booking
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications & Account Status -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-bell me-2 text-warning"></i>Recent Notifications</h5>
+                        {% if unread_notifications_count %}
+                        <span class="badge bg-danger">{{ unread_notifications_count }} Unread</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if notifications %}
+                    <div class="notification-list">
+                        {% for notification in notifications %}
+                        <a href="{% if notification.action_url %}{{ notification.action_url }}{% else %}#{% endif %}" 
+                           class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                            <div class="d-flex">
+                                <div class="notification-icon bg-{{ notification.notification_type }} me-3">
+                                    <i class="fas fa-{% if notification.notification_type == 'success' %}check-circle{% elif notification.notification_type == 'warning' %}exclamation-circle{% elif notification.notification_type == 'error' %}times-circle{% else %}info-circle{% endif %}"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 {% if not notification.is_read %}fw-bold{% endif %}">
+                                        {{ notification.title }}
+                                    </h6>
+                                    <p class="mb-1 text-muted small">{{ notification.message|truncatechars:80 }}</p>
+                                    <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                                </div>
+                                {% if not notification.is_read %}
+                                <div class="ms-2">
+                                    <span class="badge-dot bg-danger"></span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <div class="icon-lg rounded-circle bg-light text-muted mb-3 mx-auto">
+                            <i class="fas fa-bell-slash"></i>
+                        </div>
+                        <h5 class="text-muted">No Notifications</h5>
+                        <p class="text-muted">You're all caught up!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-user-check me-2 text-success"></i>Account Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <div class="position-relative d-inline-block">
+                                {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="Profile" 
+                                     class="rounded-circle border border-3 border-primary shadow" 
+                                     width="100" height="100">
+                                {% else %}
+                                <div class="rounded-circle bg-primary bg-opacity-10 border border-3 border-primary shadow d-flex align-items-center justify-content-center" 
+                                     style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user fa-2x text-primary"></i>
+                                </div>
+                                {% endif %}
+                                {% if user.kyc_verified %}
+                                <span class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-3 border-white" 
+                                      style="width: 25px; height: 25px;">
+                                    <i class="fas fa-check text-white"></i>
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <div class="status-item">
+                                        <div class="status-icon bg-primary">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">Email</small>
+                                            <div class="fw-medium">
+                                                {% if user.email_verified %}
+                                                <span class="text-success">✓ Verified</span>
+                                                {% else %}
+                                                <span class="text-danger">✗ Not Verified</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-6 mb-3">
+                                    <div class="status-item">
+                                        <div class="status-icon bg-warning">
+                                            <i class="fas fa-phone"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">Phone</small>
+                                            <div class="fw-medium">
+                                                {% if user.phone_verified %}
+                                                <span class="text-success">✓ Verified</span>
+                                                {% else %}
+                                                <span class="text-danger">✗ Not Verified</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-6 mb-3">
+                                    <div class="status-item">
+                                        <div class="status-icon bg-success">
+                                            <i class="fas fa-id-card"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">KYC</small>
+                                            <div class="fw-medium">
+                                                {% if user.kyc_verified %}
+                                                <span class="text-success">✓ Verified</span>
+                                                {% elif user.kyc_submitted %}
+                                                <span class="text-warning">⏳ Under Review</span>
+                                                {% else %}
+                                                <span class="text-danger">✗ Required</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-6 mb-3">
+                                    <div class="status-item">
+                                        <div class="status-icon bg-info">
+                                            <i class="fas fa-user-tag"></i>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">Account Type</small>
+                                            <div class="fw-medium">{{ user.get_user_type_display }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="fw-medium">Account Completion</span>
+                                    <span class="fw-bold">
+                                        {% if user.email_verified and user.kyc_verified and user.phone_verified %}
+                                        100%
+                                        {% elif user.email_verified and user.kyc_submitted and user.phone_verified %}
+                                        85%
+                                        {% elif user.email_verified and user.phone_verified %}
+                                        70%
+                                        {% elif user.email_verified %}
+                                        35%
+                                        {% else %}
+                                        0%
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="progress progress-thin">
+                                    {% if user.email_verified %}
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 35%"></div>
+                                    {% endif %}
+                                    {% if user.phone_verified %}
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: 35%"></div>
+                                    {% endif %}
+                                    {% if user.kyc_verified %}
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 30%"></div>
+                                    {% elif user.kyc_submitted %}
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 15%"></div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Commission Calculator Modal -->
+<div class="modal fade" id="commissionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-calculator me-2"></i>Commission Calculator</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Booking Amount (SAR)</label>
+                    <input type="number" class="form-control" id="bookingAmount" placeholder="Enter amount" min="0" step="0.01">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Service Type</label>
+                    <select class="form-select" id="serviceType">
+                        <option value="1.0">Flight (Domestic)</option>
+                        <option value="1.1">Flight (International)</option>
+                        <option value="1.2">Hajj Package</option>
+                        <option value="1.15">Umrah Package</option>
+                        <option value="0.9">Hotel</option>
+                        <option value="1.0">Other</option>
+                    </select>
+                </div>
+                <div class="alert alert-info">
+                    <div class="d-flex justify-content-between">
+                        <span>Your Commission Rate:</span>
+                        <strong>{{ user.commission_rate|default:5 }}%</strong>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary" onclick="calculateCommission()">
+                        <i class="fas fa-calculator me-2"></i>Calculate Commission
+                    </button>
+                </div>
+                <div id="commissionResult" class="mt-4 text-center d-none">
+                    <h3 class="text-success" id="resultAmount">0.00 SAR</h3>
+                    <p class="text-muted">Commission you will earn</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sales Report Modal -->
+<div class="modal fade" id="salesReportModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-file-invoice me-2"></i>Sales Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Flights</th>
+                                <th>Hotels</th>
+                                <th>Packages</th>
+                                <th>Total Sales</th>
+                                <th>Commission</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Current Month</td>
+                                <td>{{ monthly_stats.flights|default:"0" }}</td>
+                                <td>{{ monthly_stats.hotels|default:"0" }}</td>
+                                <td>{{ monthly_stats.packages|default:"0" }}</td>
+                                <td>{{ monthly_stats.sales|floatformat:0|default:"0" }} SAR</td>
+                                <td>{{ monthly_stats.commission|floatformat:0|default:"0" }} SAR</td>
+                            </tr>
+                            <tr>
+                                <td>Last Month</td>
+                                <td>{{ last_month_stats.flights|default:"0" }}</td>
+                                <td>{{ last_month_stats.hotels|default:"0" }}</td>
+                                <td>{{ last_month_stats.packages|default:"0" }}</td>
+                                <td>{{ last_month_stats.sales|floatformat:0|default:"0" }} SAR</td>
+                                <td>{{ last_month_stats.commission|floatformat:0|default:"0" }} SAR</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Actions Modal -->
+<div class="modal fade" id="bookingActionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bookingActionTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="bookingActionMessage"></p>
+                <div class="mb-3">
+                    <label class="form-label">Reason (Optional)</label>
+                    <textarea class="form-control" id="bookingReason" rows="3" placeholder="Enter reason..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn" id="bookingActionButton">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart Data
+    const salesChartData = {
+        labels: {{ sales_labels|safe }},
+        datasets: [{
+            label: 'Sales (SAR)',
+            data: {{ sales_data|safe }},
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+        }]
+    };
+    
+    const bookingTypeData = {
+        labels: ['Flights', 'Hotels', 'Hajj', 'Umrah', 'Other'],
+        datasets: [{
+            data: {{ service_distribution|safe }},
+            backgroundColor: [
+                '#3498db',
+                '#2ecc71',
+                '#e74c3c',
+                '#f39c12',
+                '#95a5a6'
+            ],
+            borderWidth: 1
+        }]
+    };
+    
+    // Initialize Charts
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(salesCtx, {
+        type: 'line',
+        data: salesChartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + ' SAR';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    const bookingCtx = document.getElementById('bookingTypeChart').getContext('2d');
+    const bookingChart = new Chart(bookingCtx, {
+        type: 'doughnut',
+        data: bookingTypeData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Commission Calculator
+    function calculateCommission() {
+        const amount = parseFloat(document.getElementById('bookingAmount').value);
+        const rateMultiplier = parseFloat(document.getElementById('serviceType').value);
+        const baseRate = {{ user.commission_rate|default:5 }};
+        
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid booking amount');
+            return;
+        }
+        
+        const commissionRate = baseRate * rateMultiplier;
+        const commission = (amount * commissionRate) / 100;
+        
+        // Display result
+        const resultElement = document.getElementById('resultAmount');
+        resultElement.textContent = commission.toFixed(2) + ' SAR';
+        document.getElementById('commissionResult').classList.remove('d-none');
+    }
+    
+    // Booking Actions
+    let currentBookingId = null;
+    let currentServiceType = null;
+    let currentAction = null;
+    
+    function confirmBooking(bookingId, serviceType) {
+        currentBookingId = bookingId;
+        currentServiceType = serviceType;
+        currentAction = 'confirm';
+        
+        document.getElementById('bookingActionTitle').textContent = 'Confirm Booking';
+        document.getElementById('bookingActionMessage').textContent = 'Are you sure you want to confirm this booking?';
+        document.getElementById('bookingActionButton').className = 'btn btn-success';
+        document.getElementById('bookingActionButton').textContent = 'Confirm Booking';
+        
+        const modal = new bootstrap.Modal(document.getElementById('bookingActionModal'));
+        modal.show();
+    }
+    
+    function cancelBooking(bookingId, serviceType) {
+        currentBookingId = bookingId;
+        currentServiceType = serviceType;
+        currentAction = 'cancel';
+        
+        document.getElementById('bookingActionTitle').textContent = 'Cancel Booking';
+        document.getElementById('bookingActionMessage').textContent = 'Are you sure you want to cancel this booking? This action cannot be undone.';
+        document.getElementById('bookingActionButton').className = 'btn btn-danger';
+        document.getElementById('bookingActionButton').textContent = 'Cancel Booking';
+        
+        const modal = new bootstrap.Modal(document.getElementById('bookingActionModal'));
+        modal.show();
+    }
+    
+    // Handle booking action confirmation
+    document.getElementById('bookingActionButton').addEventListener('click', function() {
+        if (!currentBookingId || !currentAction) return;
+        
+        const reason = document.getElementById('bookingReason').value;
+        
+        // Send AJAX request
+        fetch('/api/bookings/' + currentBookingId + '/' + currentAction + '/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                reason: reason,
+                service_type: currentServiceType
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal and reload page
+                bootstrap.Modal.getInstance(document.getElementById('bookingActionModal')).hide();
+                location.reload();
+            } else {
+                alert(data.message || 'An error occurred');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    });
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Auto-refresh dashboard every 5 minutes
+    setTimeout(function() {
+        if (document.visibilityState === 'visible') {
+            location.reload();
+        }
+    }, 300000); // 5 minutes
+</script>
+{% endblock %}

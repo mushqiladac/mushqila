@@ -1,0 +1,599 @@
+<!-- accounts/templates/accounts/dashboard/supplier_dashboard.html -->
+
+{% extends 'accounts/base.html' %}
+{% load humanize %}
+
+{% block title %}Supplier Dashboard - Mushqila{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Supplier Header -->
+    <div class="d-flex justify-content-between align-items-center py-3 mb-4 border-bottom">
+        <div>
+            <h1 class="h2 mb-0"><i class="fas fa-truck me-2 text-success"></i>Supplier Dashboard</h1>
+            <p class="text-muted mb-0">
+                Welcome back, {{ user.get_full_name|default:user.email }}
+                {% if user.company_name_en or user.company_name_ar %}
+                <span class="badge bg-success ms-2">{{ user.company_name_en|default:user.company_name_ar }}</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="btn-toolbar">
+            <div class="btn-group me-2">
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i> Refresh
+                </button>
+                <a href="{% url 'accounts:supplier_services' %}" class="btn btn-sm btn-success">
+                    <i class="fas fa-plus-circle me-1"></i> Add Service
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-4 mb-4">
+        <!-- Active Services -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-success bg-opacity-10 text-success me-3">
+                            <i class="fas fa-concierge-bell"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Active Services</h6>
+                            <h3 class="mb-0">{{ active_services|intcomma }}</h3>
+                            <small class="text-muted">
+                                <span class="text-success">
+                                    <i class="fas fa-check-circle me-1"></i>{{ services_available }} Available
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'accounts:supplier_services' %}" class="btn btn-outline-success btn-sm w-100">
+                            <i class="fas fa-eye me-1"></i> Manage
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Bookings -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-primary bg-opacity-10 text-primary me-3">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Bookings</h6>
+                            <h3 class="mb-0">{{ total_bookings|intcomma }}</h3>
+                            <small class="text-muted">
+                                <span class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>{{ booking_growth }}% This Month
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'accounts:supplier_orders' %}" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-list me-1"></i> View All
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-warning bg-opacity-10 text-warning me-3">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Total Revenue</h6>
+                            <h3 class="mb-0">{{ total_revenue|floatformat:0|intcomma }} <small class="fs-6">SAR</small></h3>
+                            <small class="text-muted">
+                                <span class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i>{{ revenue_growth }}% Growth
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'accounts:supplier_payments' %}" class="btn btn-outline-warning btn-sm w-100">
+                            <i class="fas fa-chart-line me-1"></i> Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Payments -->
+        <div class="col-xl-3 col-lg-6">
+            <div class="card stat-card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-card-icon bg-danger bg-opacity-10 text-danger me-3">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-1">Pending Payments</h6>
+                            <h3 class="mb-0">{{ pending_payments|floatformat:0|intcomma }} <small class="fs-6">SAR</small></h3>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                Awaiting clearance
+                            </small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'accounts:supplier_payments' %}" class="btn btn-outline-danger btn-sm w-100">
+                            <i class="fas fa-file-invoice me-1"></i> View Invoices
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Analytics -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2 text-success"></i>Monthly Revenue</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-calendar me-1"></i> Last 6 Months
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="changeRevenuePeriod('3')">Last 3 Months</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="changeRevenuePeriod('6')">Last 6 Months</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="changeRevenuePeriod('12')">Last 12 Months</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-trophy me-2 text-warning"></i>Top Performing Services</h5>
+                </div>
+                <div class="card-body">
+                    {% if top_services %}
+                    <div class="service-rankings">
+                        {% for service in top_services %}
+                        <div class="service-item mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="d-flex align-items-center">
+                                    <div class="service-rank me-2">
+                                        <span class="badge bg-{{ forloop.counter|add:'-1'|divisibleby:'2'|yesno:'warning,success' }}">
+                                            #{{ forloop.counter }}
+                                        </span>
+                                    </div>
+                                    <div class="service-name">
+                                        <h6 class="mb-0">{{ service.name|truncatechars:25 }}</h6>
+                                        <small class="text-muted">{{ service.service_type|title }}</small>
+                                    </div>
+                                </div>
+                                <div class="service-stats text-end">
+                                    <div class="fw-bold">{{ service.revenue|floatformat:0|intcomma }} SAR</div>
+                                    <small class="text-muted">{{ service.booking_count }} bookings</small>
+                                </div>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-{{ forloop.counter|add:'-1'|divisibleby:'2'|yesno:'warning,success' }}" 
+                                     role="progressbar" 
+                                     style="width: {{ service.booking_count|add:10 }}%">
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="icon-lg rounded-circle bg-light text-muted mb-3 mx-auto">
+                            <i class="fas fa-box-open"></i>
+                        </div>
+                        <h5 class="text-muted">No Services Yet</h5>
+                        <p class="text-muted">Add your first service to get started</p>
+                        <a href="{% url 'accounts:supplier_services' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus-circle me-1"></i> Add Service
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-history me-2 text-primary"></i>Recent Orders</h5>
+                        <div class="btn-group">
+                            <a href="{% url 'accounts:supplier_orders' %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-list me-1"></i> All Orders
+                            </a>
+                            <a href="{% url 'accounts:supplier_services' %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus me-1"></i> New Service
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Agent</th>
+                                    <th>Service</th>
+                                    <th>Date</th>
+                                    <th>Quantity</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-light text-dark fw-bold">{{ order.order_id|default:"ORD" }}{{ order.id }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-xs me-2">
+                                                <div class="avatar-title bg-light rounded-circle text-primary">
+                                                    {{ order.agent.email|first|upper }}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ order.agent.company_name_en|default:order.agent.email|truncatechars:20 }}</div>
+                                                <small class="text-muted">{{ order.agent.phone|default:"No phone" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-medium">{{ order.service.name|default:"N/A"|truncatechars:25 }}</div>
+                                        <small class="text-muted">{{ order.service.service_type|default:"General"|title }}</small>
+                                    </td>
+                                    <td>
+                                        <div>{{ order.created_at|date:"M d, Y" }}</div>
+                                        <small class="text-muted">{{ order.created_at|time }}</small>
+                                    </td>
+                                    <td class="fw-bold">{{ order.quantity|default:1 }}</td>
+                                    <td class="fw-bold">{{ order.total_amount|default:0|floatformat:0|intcomma }} SAR</td>
+                                    <td>
+                                        {% if order.status == 'confirmed' %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                        {% elif order.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% elif order.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        {% elif order.status == 'delivered' %}
+                                        <span class="badge bg-info">Delivered</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ order.status|title }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'accounts:supplier_order_detail' order.id %}" class="btn btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if order.status == 'pending' %}
+                                            <button class="btn btn-outline-success" onclick="confirmOrder('{{ order.id }}')">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="cancelOrder('{{ order.id }}')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="icon-lg rounded-circle bg-light text-muted mb-3 mx-auto">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <h5 class="text-muted">No Orders Yet</h5>
+                        <p class="text-muted mb-4">Your orders will appear here</p>
+                        <a href="{% url 'accounts:supplier_services' %}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-1"></i> Promote Services
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:supplier_services' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-success bg-opacity-10 text-success mx-auto">
+                                        <i class="fas fa-list-alt"></i>
+                                    </div>
+                                    <h6 class="mb-2">Manage Services</h6>
+                                    <p class="text-muted small mb-0">Add/Edit services</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:supplier_orders' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-primary bg-opacity-10 text-primary mx-auto">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <h6 class="mb-2">View Orders</h6>
+                                    <p class="text-muted small mb-0">Manage orders</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:supplier_payments' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-warning bg-opacity-10 text-warning mx-auto">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </div>
+                                    <h6 class="mb-2">Payments</h6>
+                                    <p class="text-muted small mb-0">View payment history</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:supplier_analytics' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-info bg-opacity-10 text-info mx-auto">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </div>
+                                    <h6 class="mb-2">Analytics</h6>
+                                    <p class="text-muted small mb-0">Business insights</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:profile' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-secondary bg-opacity-10 text-secondary mx-auto">
+                                        <i class="fas fa-user-cog"></i>
+                                    </div>
+                                    <h6 class="mb-2">Profile</h6>
+                                    <p class="text-muted small mb-0">Account settings</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6">
+                            <a href="{% url 'accounts:kyc' %}" class="card quick-action-card text-decoration-none">
+                                <div class="card-body text-center py-4">
+                                    <div class="quick-action-icon bg-danger bg-opacity-10 text-danger mx-auto">
+                                        <i class="fas fa-id-card"></i>
+                                    </div>
+                                    <h6 class="mb-2">KYC Status</h6>
+                                    <p class="text-muted small mb-0">
+                                        {% if user.kyc_verified %}
+                                        <span class="text-success">✓ Verified</span>
+                                        {% elif user.kyc_submitted %}
+                                        <span class="text-warning">⏳ Pending</span>
+                                        {% else %}
+                                        <span class="text-danger">✗ Required</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Actions Modal -->
+<div class="modal fade" id="orderActionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderActionTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="orderActionMessage"></p>
+                <div class="mb-3">
+                    <label class="form-label">Notes (Optional)</label>
+                    <textarea class="form-control" id="orderNotes" rows="3" placeholder="Add any notes..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn" id="orderActionButton">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Revenue Chart Data
+    const revenueChartData = {
+        labels: {{ revenue_labels|safe }},
+        datasets: [{
+            label: 'Revenue (SAR)',
+            data: {{ revenue_data|safe }},
+            borderColor: '#2ecc71',
+            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4
+        }]
+    };
+    
+    // Initialize Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: revenueChartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + ' SAR';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Order Actions
+    let currentOrderId = null;
+    let currentAction = null;
+    
+    function confirmOrder(orderId) {
+        currentOrderId = orderId;
+        currentAction = 'confirm';
+        
+        document.getElementById('orderActionTitle').textContent = 'Confirm Order';
+        document.getElementById('orderActionMessage').textContent = 'Are you sure you want to confirm this order?';
+        document.getElementById('orderActionButton').className = 'btn btn-success';
+        document.getElementById('orderActionButton').textContent = 'Confirm Order';
+        
+        const modal = new bootstrap.Modal(document.getElementById('orderActionModal'));
+        modal.show();
+    }
+    
+    function cancelOrder(orderId) {
+        currentOrderId = orderId;
+        currentAction = 'cancel';
+        
+        document.getElementById('orderActionTitle').textContent = 'Cancel Order';
+        document.getElementById('orderActionMessage').textContent = 'Are you sure you want to cancel this order? This action cannot be undone.';
+        document.getElementById('orderActionButton').className = 'btn btn-danger';
+        document.getElementById('orderActionButton').textContent = 'Cancel Order';
+        
+        const modal = new bootstrap.Modal(document.getElementById('orderActionModal'));
+        modal.show();
+    }
+    
+    // Handle order action confirmation
+    document.getElementById('orderActionButton').addEventListener('click', function() {
+        if (!currentOrderId || !currentAction) return;
+        
+        const notes = document.getElementById('orderNotes').value;
+        
+        // Send AJAX request
+        fetch('/api/supplier/orders/' + currentOrderId + '/' + currentAction + '/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                notes: notes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal and reload page
+                bootstrap.Modal.getInstance(document.getElementById('orderActionModal')).hide();
+                location.reload();
+            } else {
+                alert(data.message || 'An error occurred');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    });
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Change revenue period
+    function changeRevenuePeriod(months) {
+        // This would typically make an AJAX call to get new data
+        alert('Changing to last ' + months + ' months...');
+        // For now, just reload with parameter
+        window.location.href = window.location.pathname + '?period=' + months;
+    }
+    
+    // Auto-refresh dashboard every 5 minutes
+    setTimeout(function() {
+        if (document.visibilityState === 'visible') {
+            location.reload();
+        }
+    }, 300000); // 5 minutes
+    
+    // Dashboard notifications
+    function checkForNewOrders() {
+        // Simulate checking for new orders
+        console.log('Checking for new orders...');
+    }
+    
+    // Check every 30 seconds
+    setInterval(checkForNewOrders, 30000);
+</script>
+{% endblock %}

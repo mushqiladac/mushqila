@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="{{ request.LANGUAGE_CODE|default:'en' }}" dir="{% if request.LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Mushqila B2B Travel Platform - Saudi Arabia's premier travel agent platform. Empowering agents with cutting-edge technology, competitive rates, and seamless booking experience.">
+    <meta name="keywords" content="B2B Travel, Travel Agent, Flight Booking, Hotel Reservations, Hajj Packages, Umrah Packages, Saudi Arabia Travel">
+    <meta name="author" content="Mushqila B2B">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Mushqila B2B Travel Platform - Saudi Arabia">
+    <meta property="og:description" content="Empowering Saudi travel agents with cutting-edge technology and competitive rates.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    
+    <!-- Favicon -->
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'accounts/images/mn.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'accounts/images/mn.png' %}">
+    
+    <title>{% block title %}Mushqila Platform{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #0dcaf0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 70px;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 1030;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .sidebar-collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-brand img {
+            height: 40px;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-menu .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1.5rem;
+            margin: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu .nav-link:hover,
+        .sidebar-menu .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+        }
+        
+        .sidebar-menu .nav-link i {
+            font-size: 1.25rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .sidebar-menu .nav-title {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 1.5rem 1.5rem 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s;
+        }
+        
+        .main-content-expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+        
+        /* Top Navbar */
+        .top-navbar {
+            background: #fff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 0.75rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .navbar-search {
+            max-width: 400px;
+        }
+        
+        .user-dropdown .dropdown-toggle {
+            color: #495057;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-dropdown .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        /* Home Layout */
+        .home-layout {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .home-layout main {
+            flex: 1;
+        }
+        
+        /* Home Navbar -->
+        .home-navbar {
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+        }
+        
+        .home-navbar.scrolled {
+            padding: 0.5rem 0;
+            background-color: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand-home {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: var(--primary-color) !important;
+            text-decoration: none;
+        }
+        
+        .navbar-brand-home i {
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+        
+        .home-navbar .nav-link {
+            color: #495057 !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.375rem;
+            transition: all 0.3s;
+        }
+        
+        .home-navbar .nav-link:hover {
+            color: var(--primary-color) !important;
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+        
+        /* Toast Messages -->
+        .toast-container {
+            z-index: 1090;
+        }
+        
+        .toast {
+            border-radius: 0.5rem;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #ffffff;
+            margin-top: auto;
+        }
+        
+        .footer a {
+            color: #ffffff;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .footer a:hover {
+            opacity: 1;
+            color: #ffffff;
+            text-decoration: underline;
+        }
+        
+        .footer h5 {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .footer h5::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 40px;
+            height: 3px;
+            background: var(--primary-color);
+        }
+        
+        .footer-social a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+        
+        .footer-social a:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        /* Utility Classes -->
+        .btn {
+            border-radius: 0.5rem;
+            font-weight: 500;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+        }
+        
+        .btn-outline-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.1);
+        }
+        
+        /* Cards -->
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            background: #fff;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        /* Dashboard Cards -->
+        .stat-card {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .stat-card.success {
+            border-left-color: var(--success-color);
+        }
+        
+        .stat-card.warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .stat-card.info {
+            border-left-color: var(--info-color);
+        }
+        
+        /* Responsive Design -->
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .navbar-brand-home {
+                font-size: 1.5rem;
+            }
+            
+            .home-navbar .nav-link {
+                padding: 0.75rem 1rem !important;
+                margin: 0.25rem 0;
+            }
+            
+            .footer .row > div {
+                margin-bottom: 2rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            
+            .home-navbar {
+                padding: 0.75rem 0;
+            }
+            
+            .home-navbar.scrolled {
+                padding: 0.5rem 0;
+            }
+            
+            .navbar-toggler {
+                padding: 0.25rem 0.5rem;
+            }
+            
+            .top-navbar {
+                padding: 0.5rem 1rem;
+            }
+        }
+        
+        /* Arabic Support -->
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .rtl .sidebar {
+            left: auto;
+            right: 0;
+        }
+        
+        .rtl .main-content {
+            margin-left: 0;
+            margin-right: var(--sidebar-width);
+        }
+        
+        .rtl .main-content-expanded {
+            margin-left: 0;
+            margin-right: var(--sidebar-collapsed-width);
+        }
+        
+        /* Loading Spinner -->
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        /* Custom Scrollbar -->
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        /* Page Content -->
+        .page-header {
+            padding: 1.5rem 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .page-content {
+            padding: 2rem 0;
+        }
+        
+        /* Breadcrumb -->
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 0;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* Badges -->
+        .badge {
+            padding: 0.35em 0.65em;
+            font-weight: 500;
+            border-radius: 0.375rem;
+        }
+        
+        /* Alerts -->
+        .alert {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Forms -->
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            border: 1px solid #ced4da;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        /* Tables -->
+        .table {
+            background: #fff;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table th {
+            border-top: none;
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            padding: 1rem;
+        }
+        
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+        
+        /* Pagination -->
+        .pagination {
+            gap: 0.5rem;
+        }
+        
+        .page-link {
+            border-radius: 0.375rem;
+            border: 1px solid #dee2e6;
+            color: #495057;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .page-link:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #fff;
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        /* Modal -->
+        .modal-content {
+            border-radius: 1rem;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid #e9ecef;
+            padding: 1.5rem;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 1rem 1.5rem;
+        }
+        
+        /* Animation Classes -->
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if request.LANGUAGE_CODE == 'ar' %}rtl{% endif %} {% if user.is_authenticated %}dashboard-layout{% else %}home-layout{% endif %}"
+      {% if user.is_authenticated %}data-sidebar-collapsed="false"{% endif %}>
+    
+    {% if user.is_authenticated %}
+    <!-- ==================== DASHBOARD LAYOUT ==================== -->
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'accounts:dashboard_redirect' %}" class="sidebar-brand">
+                <i class="fas fa-plane-departure"></i>
+                <span class="brand-text">Mushqila</span>
+            </a>
+            <button class="btn btn-link text-white d-none d-lg-block" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-menu">
+            <!-- Dashboard -->
+            <div class="nav-title">MAIN</div>
+            <a href="{% url 'accounts:dashboard_redirect' %}" class="nav-link {% if 'dashboard' in request.path %}active{% endif %}">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <!-- User Type Specific Dashboard Links -->
+            {% if user.user_type == 'admin' or user.is_staff %}
+            <a href="{% url 'accounts:admin_dashboard' %}" class="nav-link {% if 'admin' in request.path %}active{% endif %}">
+                <i class="fas fa-user-shield"></i>
+                <span>Admin Panel</span>
+            </a>
+            <a href="{% url 'accounts:admin_user_list' %}" class="nav-link {% if 'admin/users' in request.path %}active{% endif %}">
+                <i class="fas fa-users-cog"></i>
+                <span>User Management</span>
+            </a>
+            {% endif %}
+            
+            <!-- Bookings -->
+            <div class="nav-title">BOOKINGS</div>
+            <a href="{% url 'accounts:flight_bookings' %}" class="nav-link {% if 'flight' in request.path %}active{% endif %}">
+                <i class="fas fa-plane"></i>
+                <span>Flights</span>
+            </a>
+            <a href="{% url 'accounts:hotel_bookings' %}" class="nav-link {% if 'hotel' in request.path %}active{% endif %}">
+                <i class="fas fa-hotel"></i>
+                <span>Hotels</span>
+            </a>
+            <a href="{% url 'accounts:hajj_booking' %}" class="nav-link {% if 'hajj' in request.path %}active{% endif %}">
+                <i class="fas fa-kaaba"></i>
+                <span>Hajj</span>
+            </a>
+            <a href="{% url 'accounts:umrah_booking' %}" class="nav-link {% if 'umrah' in request.path %}active{% endif %}">
+                <i class="fas fa-mosque"></i>
+                <span>Umrah</span>
+            </a>
+            
+            <!-- Business -->
+            <div class="nav-title">BUSINESS</div>
+            <a href="{% url 'accounts:agent_hierarchy' %}" class="nav-link {% if 'agent_hierarchy' in request.path %}active{% endif %}">
+                <i class="fas fa-sitemap"></i>
+                <span>Agent Hierarchy</span>
+            </a>
+            <a href="{% url 'accounts:credit_request' %}" class="nav-link {% if 'credit' in request.path %}active{% endif %}">
+                <i class="fas fa-credit-card"></i>
+                <span>Credit Limit</span>
+                {% if user.credit_limit %}
+                <span class="badge bg-info ms-auto">{{ user.credit_limit|floatformat:0 }} SAR</span>
+                {% endif %}
+            </a>
+            <a href="{% url 'accounts:ip_whitelist' %}" class="nav-link {% if 'ip-whitelist' in request.path %}active{% endif %}">
+                <i class="fas fa-network-wired"></i>
+                <span>IP Whitelist</span>
+            </a>
+            <a href="{% url 'accounts:invoices' %}" class="nav-link {% if 'invoices' in request.path %}active{% endif %}">
+                <i class="fas fa-file-invoice"></i>
+                <span>Invoices</span>
+            </a>
+            
+            <!-- Financial -->
+            <div class="nav-title">FINANCIAL</div>
+            <a href="{% url 'accounts:wallet' %}" class="nav-link {% if 'wallet' in request.path %}active{% endif %}">
+                <i class="fas fa-wallet"></i>
+                <span>Wallet</span>
+                {% if user.wallet_balance %}
+                <span class="badge bg-success ms-auto">{{ user.wallet_balance|floatformat:0 }} SAR</span>
+                {% endif %}
+            </a>
+            <a href="{% url 'accounts:transactions' %}" class="nav-link {% if 'transactions' in request.path %}active{% endif %}">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </a>
+            <a href="{% url 'accounts:commission' %}" class="nav-link {% if 'commission' in request.path %}active{% endif %}">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>Commission</span>
+            </a>
+            <a href="{% url 'accounts:deposit' %}" class="nav-link {% if 'deposit' in request.path %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i>
+                <span>Deposit</span>
+            </a>
+            <a href="{% url 'accounts:withdraw' %}" class="nav-link {% if 'withdraw' in request.path %}active{% endif %}">
+                <i class="fas fa-minus-circle"></i>
+                <span>Withdraw</span>
+            </a>
+            
+            <!-- Account -->
+            <div class="nav-title">ACCOUNT</div>
+            <a href="{% url 'accounts:profile' %}" class="nav-link {% if 'profile' in request.path %}active{% endif %}">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="{% url 'accounts:kyc' %}" class="nav-link {% if 'kyc' in request.path %}active{% endif %}">
+                <i class="fas fa-id-card"></i>
+                <span>KYC Verification</span>
+                {% if user.kyc_verified %}
+                <span class="badge bg-success ms-auto"><i class="fas fa-check"></i></span>
+                {% elif user.kyc_submitted %}
+                <span class="badge bg-warning ms-auto"><i class="fas fa-clock"></i></span>
+                {% else %}
+                <span class="badge bg-danger ms-auto"><i class="fas fa-times"></i></span>
+                {% endif %}
+            </a>
+            <a href="{% url 'accounts:notifications' %}" class="nav-link {% if 'notifications' in request.path %}active{% endif %}">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+                {% if request.user.notifications.unread.count %}
+                <span class="badge bg-danger ms-auto">{{ request.user.notifications.unread.count }}</span>
+                {% endif %}
+            </a>
+            <a href="{% url 'accounts:security' %}" class="nav-link {% if 'security' in request.path %}active{% endif %}">
+                <i class="fas fa-shield-alt"></i>
+                <span>Security</span>
+            </a>
+            <a href="{% url 'accounts:activity_log' %}" class="nav-link {% if 'activity' in request.path %}active{% endif %}">
+                <i class="fas fa-history"></i>
+                <span>Activity Log</span>
+            </a>
+            
+            <!-- Support -->
+            <div class="nav-title">SUPPORT</div>
+            <a href="#" class="nav-link">
+                <i class="fas fa-headset"></i>
+                <span>Support</span>
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fas fa-envelope"></i>
+                <span>Contact Us</span>
+            </a>
+            
+            <!-- Logout -->
+            <div class="mt-4 pt-3 border-top border-secondary">
+                <a href="{% url 'accounts:logout' %}" class="nav-link text-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Navbar -->
+        <nav class="top-navbar">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center justify-content-between">
+                    <!-- Mobile Toggle -->
+                    <button class="btn btn-outline-secondary d-lg-none" id="mobileSidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <!-- Page Title -->
+                    <div class="d-flex align-items-center">
+                        <h4 class="mb-0 me-3">{% block page_title %}{% endblock %}</h4>
+                        {% block breadcrumb %}{% endblock %}
+                    </div>
+                    
+                    <!-- User Menu -->
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Quick Actions -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-plus"></i> Quick Actions
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'accounts:flight_booking_create' %}">
+                                    <i class="fas fa-plane me-2"></i> New Flight Booking
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:hotel_booking_create' %}">
+                                    <i class="fas fa-hotel me-2"></i> New Hotel Booking
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:deposit' %}">
+                                    <i class="fas fa-wallet me-2"></i> Deposit Funds
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:invoices' %}">
+                                    <i class="fas fa-file-invoice me-2"></i> Create Invoice
+                                </a></li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Notifications -->
+                        <div class="dropdown">
+                            <a href="#" class="btn btn-link text-dark" data-bs-toggle="dropdown">
+                                <i class="fas fa-bell"></i>
+                                {% if user.notifications.unread.count %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ user.notifications.unread.count }}
+                                    <span class="visually-hidden">unread notifications</span>
+                                </span>
+                                {% endif %}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 300px;">
+                                <h6 class="dropdown-header">Notifications</h6>
+                                {% if user.notifications.all|slice:":5" %}
+                                    {% for notification in user.notifications.all|slice:":5" %}
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="{{ notification.action_url|default:'#' }}">
+                                        <div class="me-3">
+                                            {% if notification.notification_type == 'success' %}
+                                            <i class="fas fa-check-circle text-success"></i>
+                                            {% elif notification.notification_type == 'error' %}
+                                            <i class="fas fa-exclamation-circle text-danger"></i>
+                                            {% elif notification.notification_type == 'warning' %}
+                                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                                            {% else %}
+                                            <i class="fas fa-info-circle text-info"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="small">{{ notification.title }}</div>
+                                            <div class="text-muted small">{{ notification.created_at|timesince }} ago</div>
+                                        </div>
+                                        {% if not notification.is_read %}
+                                        <span class="badge-dot bg-danger"></span>
+                                        {% endif %}
+                                    </a>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="dropdown-item text-center py-3 text-muted">
+                                        No notifications
+                                    </div>
+                                {% endif %}
+                                <div class="dropdown-divider"></div>
+                                <a href="{% url 'accounts:notifications' %}" class="dropdown-item text-center">
+                                    View All Notifications
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- User Dropdown -->
+                        <div class="dropdown user-dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
+                                {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="avatar">
+                                {% else %}
+                                <div class="avatar bg-primary text-white d-flex align-items-center justify-content-center rounded-circle" style="width: 40px; height: 40px;">
+                                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                                </div>
+                                {% endif %}
+                                <span class="d-none d-md-inline ms-2">{{ user.get_full_name|default:user.email }}</span>
+                                <i class="fas fa-chevron-down ms-1"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li class="dropdown-header">
+                                    <h6 class="mb-0">{{ user.get_full_name|default:user.email }}</h6>
+                                    <small class="text-muted">{{ user.get_user_type_display }}</small>
+                                </li>
+                                <li><div class="dropdown-divider"></div></li>
+                                <li><a href="{% url 'accounts:profile' %}" class="dropdown-item">
+                                    <i class="fas fa-user me-2"></i> Profile
+                                </a></li>
+                                <li><a href="{% url 'accounts:profile_edit' %}" class="dropdown-item">
+                                    <i class="fas fa-edit me-2"></i> Edit Profile
+                                </a></li>
+                                <li><a href="{% url 'accounts:security' %}" class="dropdown-item">
+                                    <i class="fas fa-shield-alt me-2"></i> Security
+                                </a></li>
+                                <li><div class="dropdown-divider"></div></li>
+                                <li><a href="{% url 'accounts:logout' %}" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Page Content -->
+        <div class="container-fluid page-content fade-in">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- ==================== HOME LAYOUT ==================== -->
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg home-navbar" id="homeNavbar">
+        <div class="container">
+            <a class="navbar-brand-home" href="{% url 'accounts:home' %}">
+                <i class="fas fa-plane-departure"></i> Mushqila
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:home' %}#services">
+                            <i class="fas fa-concierge-bell me-1"></i> Services
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:home' %}#about">
+                            <i class="fas fa-info-circle me-1"></i> About Us
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:home' %}#contact">
+                            <i class="fas fa-phone me-1"></i> Contact
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:home' %}#faq">
+                            <i class="fas fa-question-circle me-1"></i> FAQ
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i> Agent Login
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i> Become an Agent
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main style="margin-top: 76px;">
+        {% block landing_content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <div class="mb-4">
+                        <a href="{% url 'accounts:home' %}" class="navbar-brand-home mb-3 d-inline-block">
+                            <i class="fas fa-plane-departure"></i> Mushqila
+                        </a>
+                        <p class="opacity-75 mb-4">
+                            Saudi Arabia's premier B2B travel platform. Empowering travel agents with cutting-edge technology, competitive rates, and unparalleled support for Hajj, Umrah, and all travel services.
+                        </p>
+                    </div>
+                    <div class="footer-social">
+                        <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'accounts:login' %}"><i class="fas fa-chevron-right me-2"></i> Agent Login</a></li>
+                        <li class="mb-2"><a href="{% url 'accounts:register' %}"><i class="fas fa-chevron-right me-2"></i> Register</a></li>
+                        <li class="mb-2"><a href="{% url 'accounts:home' %}#about"><i class="fas fa-chevron-right me-2"></i> About Us</a></li>
+                        <li class="mb-2"><a href="{% url 'accounts:home' %}#faq"><i class="fas fa-chevron-right me-2"></i> FAQ</a></li>
+                        <li><a href="{% url 'accounts:home' %}#contact"><i class="fas fa-chevron-right me-2"></i> Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-4 mb-4 mb-md-0">
+                    <h5>Our Services</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'accounts:home' %}#services"><i class="fas fa-chevron-right me-2"></i> Flight Booking</a></li>
+                        <li class="mb-2"><a href="{% url 'accounts:home' %}#services"><i class="fas fa-chevron-right me-2"></i> Hotel Reservations</a></li>
+                        <li class="mb-2"><a href="{% url 'accounts:home' %}#services"><i class="fas fa-chevron-right me-2"></i> Hajj Packages</a></li>
+                        <li class="mb-2"><a href="{% url 'accounts:home' %}#services"><i class="fas fa-chevron-right me-2"></i> Umrah Packages</a></li>
+                        <li><a href="{% url 'accounts:home' %}#services"><i class="fas fa-chevron-right me-2"></i> Visa Processing</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-4">
+                    <h5>Contact Info</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3 d-flex align-items-start">
+                            <i class="fas fa-map-marker-alt mt-1 me-3"></i>
+                            <div>
+                                <strong>Headquarters:</strong>
+                                <div class="opacity-75 small">Prince Bandar Ibn Abdulaziz Street, Ar Rawdha, Riyadh, Saudi Arabia</div>
+                            </div>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <i class="fas fa-phone me-3"></i>
+                            <div>
+                                <strong>Phone:</strong>
+                                <div class="opacity-75">+966 50 099 3174</div>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <i class="fas fa-envelope me-3"></i>
+                            <div>
+                                <strong>Email:</strong>
+                                <div class="opacity-75">support@mushqila.com</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="opacity-25 my-5">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <p class="mb-0 opacity-75">
+                        &copy; <span id="currentYear"></span> Mushqila Travel Platform. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="{% url 'accounts:home' %}#privacy" class="text-white opacity-75 me-3">Privacy Policy</a>
+                    <a href="{% url 'accounts:home' %}#terms" class="text-white opacity-75 me-3">Terms of Service</a>
+                    <a href="{% url 'accounts:home' %}#cookies" class="text-white opacity-75">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+    
+    <!-- Toast Messages -->
+    {% if messages %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090">
+        {% for message in messages %}
+        <div class="toast show align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center">
+                    {% if message.tags == 'success' %}
+                    <i class="fas fa-check-circle text-success me-3 fs-4"></i>
+                    {% elif message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle text-danger me-3 fs-4"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle text-warning me-3 fs-4"></i>
+                    {% else %}
+                    <i class="fas fa-info-circle text-info me-3 fs-4"></i>
+                    {% endif %}
+                    <div>
+                        <strong class="me-auto">
+                            {% if message.tags == 'success' %}Success
+                            {% elif message.tags == 'error' %}Error
+                            {% elif message.tags == 'warning' %}Warning
+                            {% else %}Information
+                            {% endif %}
+                        </strong>
+                        <div>{{ message }}</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Current year for footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const isCollapsed = sidebar.classList.toggle('sidebar-collapsed');
+            
+            if (isCollapsed) {
+                mainContent.classList.add('main-content-expanded');
+                localStorage.setItem('sidebarCollapsed', 'true');
+            } else {
+                mainContent.classList.remove('main-content-expanded');
+                localStorage.setItem('sidebarCollapsed', 'false');
+            }
+        }
+        
+        // Mobile sidebar toggle
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+        
+        // Initialize sidebar state
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+            
+            if (sidebar && mainContent) {
+                // Load saved state
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    sidebar.classList.add('sidebar-collapsed');
+                    mainContent.classList.add('main-content-expanded');
+                }
+                
+                // Attach events
+                if (sidebarToggle) {
+                    sidebarToggle.addEventListener('click', toggleSidebar);
+                }
+                
+                if (mobileSidebarToggle) {
+                    mobileSidebarToggle.addEventListener('click', toggleMobileSidebar);
+                }
+            }
+            
+            // Navbar scroll effect
+            const homeNavbar = document.getElementById('homeNavbar');
+            if (homeNavbar) {
+                window.addEventListener('scroll', function() {
+                    if (window.scrollY > 50) {
+                        homeNavbar.classList.add('scrolled');
+                    } else {
+                        homeNavbar.classList.remove('scrolled');
+                    }
+                });
+            }
+        });
+        
+        // Initialize tooltips
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+        
+        // Initialize popovers
+        $(function () {
+            $('[data-bs-toggle="popover"]').popover();
+        });
+        
+        // Auto-hide messages after 5 seconds
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('.toast').toast('hide');
+            }, 5000);
+            
+            // Smooth scrolling for anchor links
+            $('a[href^="#"]').on('click', function(e) {
+                if (this.hash !== '' && this.pathname === window.location.pathname) {
+                    e.preventDefault();
+                    const hash = this.hash;
+                    
+                    $('html, body').animate({
+                        scrollTop: $(hash).offset().top - 80
+                    }, 800, function() {
+                        window.location.hash = hash;
+                    });
+                }
+            });
+            
+            // Add active class to current page in navigation
+            const currentUrl = window.location.pathname;
+            $('.nav-link').each(function() {
+                const linkUrl = $(this).attr('href');
+                if (linkUrl && currentUrl.startsWith(linkUrl.replace(/\/$/, ''))) {
+                    $(this).addClass('active');
+                }
+            });
+        });
+        
+        // Form validation helper
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+            return form.checkValidity();
+        }
+        
+        // Loading state for buttons
+        function setLoading(button, isLoading) {
+            if (isLoading) {
+                button.disabled = true;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...';
+                button.setAttribute('data-original-text', originalText);
+            } else {
+                button.disabled = false;
+                const originalText = button.getAttribute('data-original-text');
+                if (originalText) {
+                    button.innerHTML = originalText;
+                }
+            }
+        }
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-SA', {
+                style: 'currency',
+                currency: 'SAR',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+        
+        // Format date
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+        
+        // Format date time
+        function formatDateTime(date) {
+            return new Date(date).toLocaleString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Confirm action
+        function confirmAction(message, callback) {
+            if (confirm(message)) {
+                callback();
+            }
+        }
+        
+        // Show alert
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            const pageContent = document.querySelector('.page-content');
+            if (pageContent) {
+                pageContent.prepend(alertDiv);
+            }
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

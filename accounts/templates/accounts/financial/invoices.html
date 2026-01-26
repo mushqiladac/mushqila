@@ -1,0 +1,1299 @@
+<!-------------- accounts/templates/accounts/financial/invoices.html  ------->
+{% extends 'accounts/base.html' %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{% trans "Invoices" %} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">{% trans "Invoices" %}</h1>
+                    <p class="text-muted mb-0">
+                        {% trans "View and manage all your invoices" %}
+                    </p>
+                </div>
+                {% if user.user_type in 'admin super_agent' %}
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i>{% trans "Create Invoice" %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% trans "Total Invoices" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ stats.total_invoices }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-invoice-dollar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                {% trans "Paid Amount" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ stats.total_paid|floatformat:2|intcomma }} SAR
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                {% trans "Outstanding" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ stats.total_outstanding|floatformat:2|intcomma }} SAR
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                {% trans "Overdue" %}
+                            </div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                        {{ stats.overdue_count }}
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-danger" role="progressbar" 
+                                             style="width: {{ stats.overdue_percentage }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-filter me-2"></i>{% trans "Filter Invoices" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="GET" id="filterForm">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Status" %}</label>
+                                <select name="status" class="form-select">
+                                    <option value="">{% trans "All Status" %}</option>
+                                    {% for status in status_choices %}
+                                    <option value="{{ status.0 }}" {% if request.GET.status == status.0 %}selected{% endif %}>
+                                        {{ status.1 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "From Date" %}</label>
+                                <input type="date" 
+                                       name="date_from" 
+                                       class="form-control" 
+                                       value="{{ request.GET.date_from }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "To Date" %}</label>
+                                <input type="date" 
+                                       name="date_to" 
+                                       class="form-control" 
+                                       value="{{ request.GET.date_to }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Customer" %}</label>
+                                <select name="customer" class="form-select">
+                                    <option value="">{% trans "All Customers" %}</option>
+                                    {% for customer in customers %}
+                                    <option value="{{ customer.id }}" {% if request.GET.customer|add:"0" == customer.id %}selected{% endif %}>
+                                        {{ customer.get_full_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Search" %}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" 
+                                           name="search" 
+                                           class="form-control" 
+                                           placeholder="{% trans 'Search by invoice number, customer, description...' %}"
+                                           value="{{ request.GET.search }}">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Min Amount (SAR)" %}</label>
+                                <input type="number" 
+                                       name="min_amount" 
+                                       class="form-control" 
+                                       step="0.01"
+                                       min="0"
+                                       value="{{ request.GET.min_amount }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Max Amount (SAR)" %}</label>
+                                <input type="number" 
+                                       name="max_amount" 
+                                       class="form-control" 
+                                       step="0.01"
+                                       min="0"
+                                       value="{{ request.GET.max_amount }}">
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter me-2"></i>{% trans "Apply Filters" %}
+                                    </button>
+                                    <a href="#" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-2"></i>{% trans "Clear Filters" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-invoice me-2"></i>{% trans "Invoice List" %}
+                    </h6>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-download me-2"></i>{% trans "Export" %}
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="exportToCSV()">
+                                <i class="fas fa-file-csv me-2"></i>{% trans "CSV" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportToPDF()">
+                                <i class="fas fa-file-pdf me-2"></i>{% trans "PDF" %}
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel me-2"></i>{% trans "Excel" %}
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if invoices %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="invoicesTable">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Invoice #" %}</th>
+                                    <th>{% trans "Customer" %}</th>
+                                    <th>{% trans "Issue Date" %}</th>
+                                    <th>{% trans "Due Date" %}</th>
+                                    <th>{% trans "Amount" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Type" %}</th>
+                                    <th>{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for invoice in invoices %}
+                                <tr class="invoice-row {% if invoice.status == 'overdue' %}table-danger{% elif invoice.status == 'paid' %}table-success{% endif %}">
+                                    <td>
+                                        <strong>{{ invoice.invoice_number }}</strong>
+                                        {% if invoice.notes %}
+                                        <br>
+                                        <small class="text-muted">{{ invoice.notes|truncatechars:30 }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle-sm me-2">
+                                                <span class="initials">{{ invoice.user.get_full_name|first|upper }}</span>
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ invoice.user.get_full_name }}</div>
+                                                <small class="text-muted">{{ invoice.user.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {{ invoice.issue_date|date:"d M Y" }}
+                                    </td>
+                                    <td>
+                                        <div>
+                                            {{ invoice.due_date|date:"d M Y" }}
+                                            {% if invoice.status == 'overdue' %}
+                                            <br>
+                                            <small class="text-danger">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                {% trans "Overdue" %}
+                                            </small>
+                                            {% elif invoice.due_date|timeuntil:invoice.issue_date %}
+                                            <br>
+                                            <small class="text-muted">
+                                                {{ invoice.due_date|timeuntil:invoice.issue_date }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-end">
+                                            <div class="h6 mb-0">{{ invoice.total_amount|floatformat:2|intcomma }} SAR</div>
+                                            <small class="text-muted">
+                                                {% if invoice.paid_amount > 0 %}
+                                                {% trans "Paid:" %} {{ invoice.paid_amount|floatformat:2 }} SAR
+                                                {% else %}
+                                                {% trans "Unpaid" %}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if invoice.status == 'paid' %}bg-success
+                                            {% elif invoice.status == 'overdue' %}bg-danger
+                                            {% elif invoice.status == 'partial_paid' %}bg-warning
+                                            {% elif invoice.status == 'issued' %}bg-info
+                                            {% elif invoice.status == 'draft' %}bg-secondary
+                                            {% else %}bg-light text-dark{% endif %}">
+                                            {% if invoice.status == 'paid' %}
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            {% elif invoice.status == 'overdue' %}
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            {% elif invoice.status == 'partial_paid' %}
+                                            <i class="fas fa-clock me-1"></i>
+                                            {% elif invoice.status == 'issued' %}
+                                            <i class="fas fa-paper-plane me-1"></i>
+                                            {% elif invoice.status == 'draft' %}
+                                            <i class="fas fa-edit me-1"></i>
+                                            {% endif %}
+                                            {{ invoice.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if invoice.flight_booking %}
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-plane me-1"></i>{% trans "Flight" %}
+                                        </span>
+                                        {% elif invoice.hotel_booking %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-hotel me-1"></i>{% trans "Hotel" %}
+                                        </span>
+                                        {% elif invoice.hajj_package %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-kaaba me-1"></i>{% trans "Hajj" %}
+                                        </span>
+                                        {% elif invoice.umrah_package %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-mosque me-1"></i>{% trans "Umrah" %}
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{% trans "General" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" 
+                                                    class="btn btn-outline-primary view-invoice" 
+                                                    data-invoice-id="{{ invoice.id }}"
+                                                    title="{% trans 'View Details' %}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <a href="{% url 'download_invoice' invoice.id %}" 
+                                               class="btn btn-outline-success" 
+                                               title="{% trans 'Download PDF' %}">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            {% if invoice.status != 'paid' and invoice.status != 'cancelled' %}
+                                                {% if user.user_type in 'admin super_agent' or invoice.user == user %}
+                                                <a href="{% url 'payment' %}?invoice_id={{ invoice.id }}" 
+                                                   class="btn btn-outline-info" 
+                                                   title="{% trans 'Make Payment' %}">
+                                                    <i class="fas fa-credit-card"></i>
+                                                </a>
+                                                {% endif %}
+                                            {% endif %}
+                                            {% if invoice.status == 'draft' and user.user_type in 'admin super_agent' %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-warning send-invoice" 
+                                                    data-invoice-id="{{ invoice.id }}"
+                                                    title="{% trans 'Send to Customer' %}">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                            {% endif %}
+                                            {% if invoice.status in 'draft issued partial_paid' and user.user_type in 'admin super_agent' %}
+                                            <button type="button" 
+                                                    class="btn btn-outline-danger cancel-invoice" 
+                                                    data-invoice-id="{{ invoice.id }}"
+                                                    title="{% trans 'Cancel Invoice' %}">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if invoices.has_other_pages %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if invoices.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ invoices.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                            </li>
+                            {% endif %}
+                            
+                            {% for i in invoices.paginator.page_range %}
+                                {% if invoices.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                                {% elif i > invoices.number|add:'-3' and i < invoices.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if invoices.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ invoices.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted mb-3">{% trans "No Invoices Found" %}</h5>
+                        <p class="text-muted mb-4">
+                            {% if user.user_type in 'admin super_agent' %}
+                            {% trans "You haven't created any invoices yet. Start by creating your first invoice." %}
+                            {% else %}
+                            {% trans "You don't have any invoices yet. Invoices will appear here when they are issued to you." %}
+                            {% endif %}
+                        </p>
+                        {% if user.user_type in 'admin super_agent' %}
+                        <a href="#" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>{% trans "Create First Invoice" %}
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mt-4">
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-bar me-2"></i>{% trans "Status Distribution" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-calendar-alt me-2"></i>{% trans "Upcoming Due Dates" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Invoice #" %}</th>
+                                    <th>{% trans "Customer" %}</th>
+                                    <th>{% trans "Due Date" %}</th>
+                                    <th>{% trans "Amount" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Action" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="upcomingInvoices">
+                                <!-- Filled by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invoice Detail Modal -->
+<div class="modal fade" id="invoiceDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Invoice Details" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="invoiceDetailContent">
+                <!-- Content loaded via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "Close" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="printInvoice">
+                    <i class="fas fa-print me-2"></i>{% trans "Print Invoice" %}
+                </button>
+                <button type="button" class="btn btn-success" id="downloadInvoice">
+                    <i class="fas fa-download me-2"></i>{% trans "Download PDF" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send Invoice Modal -->
+<div class="modal fade" id="sendInvoiceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-primary">
+                    <i class="fas fa-paper-plane me-2"></i>{% trans "Send Invoice" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>{% trans "Send this invoice to the customer via email?" %}</p>
+                <div class="mb-3">
+                    <label class="form-label">{% trans "Additional Message (Optional)" %}</label>
+                    <textarea class="form-control" id="sendMessage" rows="3" 
+                              placeholder="{% trans 'Add a personal message to the customer...' %}"></textarea>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {% trans "The invoice will be marked as 'Issued' and sent to the customer's email address." %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="confirmSend">
+                    {% trans "Send Invoice" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Invoice Modal -->
+<div class="modal fade" id="cancelInvoiceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>{% trans "Cancel Invoice" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>{% trans "Are you sure you want to cancel this invoice?" %}</p>
+                <div class="mb-3">
+                    <label class="form-label">{% trans "Reason for Cancellation" %}</label>
+                    <textarea class="form-control" id="cancelReason" rows="3" required
+                              placeholder="{% trans 'Please specify the reason for cancellation...' %}"></textarea>
+                </div>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {% trans "This action cannot be undone. The invoice will be marked as cancelled and cannot be used for payments." %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {% trans "No, Keep Invoice" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmCancel">
+                    {% trans "Yes, Cancel Invoice" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal instances
+        const invoiceDetailModal = new bootstrap.Modal(document.getElementById('invoiceDetailModal'));
+        const sendInvoiceModal = new bootstrap.Modal(document.getElementById('sendInvoiceModal'));
+        const cancelInvoiceModal = new bootstrap.Modal(document.getElementById('cancelInvoiceModal'));
+        
+        let currentInvoiceId = null;
+        
+        // View Invoice Details
+        document.querySelectorAll('.view-invoice').forEach(button => {
+            button.addEventListener('click', function() {
+                currentInvoiceId = this.getAttribute('data-invoice-id');
+                loadInvoiceDetails(currentInvoiceId);
+            });
+        });
+        
+        // Send Invoice
+        document.querySelectorAll('.send-invoice').forEach(button => {
+            button.addEventListener('click', function() {
+                currentInvoiceId = this.getAttribute('data-invoice-id');
+                sendInvoiceModal.show();
+            });
+        });
+        
+        // Cancel Invoice
+        document.querySelectorAll('.cancel-invoice').forEach(button => {
+            button.addEventListener('click', function() {
+                currentInvoiceId = this.getAttribute('data-invoice-id');
+                cancelInvoiceModal.show();
+            });
+        });
+        
+        // Confirm Send
+        document.getElementById('confirmSend').addEventListener('click', function() {
+            const message = document.getElementById('sendMessage').value;
+            if (currentInvoiceId) {
+                sendInvoice(currentInvoiceId, message);
+            }
+        });
+        
+        // Confirm Cancel
+        document.getElementById('confirmCancel').addEventListener('click', function() {
+            const reason = document.getElementById('cancelReason').value;
+            if (!reason.trim()) {
+                alert('{% trans "Please provide a reason for cancellation." %}');
+                return;
+            }
+            if (currentInvoiceId) {
+                cancelInvoice(currentInvoiceId, reason);
+            }
+        });
+        
+        // Print Invoice
+        document.getElementById('printInvoice').addEventListener('click', function() {
+            window.print();
+        });
+        
+        // Download Invoice
+        document.getElementById('downloadInvoice').addEventListener('click', function() {
+            if (currentInvoiceId) {
+                window.location.href = `/invoices/${currentInvoiceId}/download/`;
+            }
+        });
+        
+        // Load invoice details via AJAX
+        function loadInvoiceDetails(invoiceId) {
+            const contentDiv = document.getElementById('invoiceDetailContent');
+            contentDiv.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{% trans "Loading..." %}</span>
+                    </div>
+                    <p class="mt-3">{% trans "Loading invoice details..." %}</p>
+                </div>
+            `;
+            
+            invoiceDetailModal.show();
+            
+            fetch(`/api/invoice/${invoiceId}/details/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        contentDiv.innerHTML = formatInvoiceDetails(data.invoice);
+                    } else {
+                        contentDiv.innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                ${data.error}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    contentDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {% trans "Error loading invoice details. Please try again." %}
+                        </div>
+                    `;
+                });
+        }
+        
+        function formatInvoiceDetails(invoice) {
+            const statusColor = getStatusColor(invoice.status);
+            
+            return `
+                <!-- Invoice Header -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4 class="text-primary">{% trans "INVOICE" %}</h4>
+                        <h2 class="mb-0">${invoice.invoice_number}</h2>
+                        <p class="text-muted mb-0">${invoice.get_status_display}</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="mb-2">
+                            <span class="badge bg-${statusColor} fs-6">
+                                ${invoice.get_status_display}
+                            </span>
+                        </div>
+                        <p class="mb-1">
+                            <strong>{% trans "Issue Date:" %}</strong> ${invoice.issue_date}
+                        </p>
+                        <p class="mb-1">
+                            <strong>{% trans "Due Date:" %}</strong> 
+                            <span class="${invoice.status === 'overdue' ? 'text-danger' : ''}">
+                                ${invoice.due_date}
+                            </span>
+                        </p>
+                        ${invoice.payment_date ? `
+                        <p class="mb-0">
+                            <strong>{% trans "Payment Date:" %}</strong> ${invoice.payment_date}
+                        </p>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <!-- Company and Customer Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h6 class="mb-0">{% trans "From" %}</h6>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="mb-2">Mushqila Travel SAR</h5>
+                                <p class="mb-1">{% trans "CR Number:" %} 1010666666</p>
+                                <p class="mb-1">{% trans "VAT Number:" %} 310456789012345</p>
+                                <p class="mb-1">Riyadh, Saudi Arabia</p>
+                                <p class="mb-0">support@mushqila.com</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white py-2">
+                                <h6 class="mb-0">{% trans "Bill To" %}</h6>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="mb-2">${invoice.user.full_name}</h5>
+                                <p class="mb-1">${invoice.user.email}</p>
+                                ${invoice.user.phone ? `<p class="mb-1">${invoice.user.phone}</p>` : ''}
+                                ${invoice.user.company_name_en ? `<p class="mb-1">${invoice.user.company_name_en}</p>` : ''}
+                                ${invoice.user.company_registration ? `<p class="mb-1">{% trans "CR:" %} ${invoice.user.company_registration}</p>` : ''}
+                                ${invoice.user.vat_number ? `<p class="mb-1">{% trans "VAT:" %} ${invoice.user.vat_number}</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Invoice Items -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Description" %}</th>
+                                        <th class="text-end">{% trans "Quantity" %}</th>
+                                        <th class="text-end">{% trans "Unit Price" %}</th>
+                                        <th class="text-end">{% trans "Total" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${invoice.items ? invoice.items.map(item => `
+                                    <tr>
+                                        <td>
+                                            <strong>${item.description}</strong>
+                                            ${item.details ? `<br><small class="text-muted">${item.details}</small>` : ''}
+                                        </td>
+                                        <td class="text-end">${item.quantity || 1}</td>
+                                        <td class="text-end">${item.unit_price} SAR</td>
+                                        <td class="text-end">${item.total} SAR</td>
+                                    </tr>
+                                    `).join('') : `
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            {% trans "No items specified" %}
+                                        </td>
+                                    </tr>
+                                    `}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>{% trans "Subtotal" %}</strong></td>
+                                        <td class="text-end">${invoice.subtotal} SAR</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>{% trans "VAT (15%)" %}</strong></td>
+                                        <td class="text-end">${invoice.vat_amount} SAR</td>
+                                    </tr>
+                                    <tr class="table-success">
+                                        <td colspan="3" class="text-end"><strong>{% trans "Total Amount" %}</strong></td>
+                                        <td class="text-end"><strong>${invoice.total_amount} SAR</strong></td>
+                                    </tr>
+                                    ${invoice.paid_amount > 0 ? `
+                                    <tr>
+                                        <td colspan="3" class="text-end"><strong>{% trans "Paid Amount" %}</strong></td>
+                                        <td class="text-end">${invoice.paid_amount} SAR</td>
+                                    </tr>
+                                    <tr class="table-info">
+                                        <td colspan="3" class="text-end"><strong>{% trans "Balance Due" %}</strong></td>
+                                        <td class="text-end"><strong>${invoice.total_amount - invoice.paid_amount} SAR</strong></td>
+                                    </tr>
+                                    ` : ''}
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Information -->
+                ${invoice.payments && invoice.payments.length > 0 ? `
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="mb-3">{% trans "Payment History" %}</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Date" %}</th>
+                                        <th>{% trans "Payment ID" %}</th>
+                                        <th>{% trans "Method" %}</th>
+                                        <th class="text-end">{% trans "Amount" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${invoice.payments.map(payment => `
+                                    <tr>
+                                        <td>${payment.date}</td>
+                                        <td>${payment.payment_id}</td>
+                                        <td>${payment.method}</td>
+                                        <td class="text-end">${payment.amount} SAR</td>
+                                        <td><span class="badge bg-success">${payment.status}</span></td>
+                                    </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <!-- Notes -->
+                ${invoice.notes ? `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-secondary">
+                            <div class="card-header py-2">
+                                <h6 class="mb-0">{% trans "Notes" %}</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0">${invoice.notes}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        function getStatusColor(status) {
+            switch(status) {
+                case 'paid': return 'success';
+                case 'overdue': return 'danger';
+                case 'partial_paid': return 'warning';
+                case 'issued': return 'info';
+                case 'draft': return 'secondary';
+                case 'cancelled': return 'dark';
+                default: return 'light';
+            }
+        }
+        
+        function sendInvoice(invoiceId, message) {
+            fetch(`/api/invoice/${invoiceId}/send/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                sendInvoiceModal.hide();
+                if (data.success) {
+                    showToast('{% trans "Invoice sent successfully" %}', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.error || '{% trans "Error sending invoice" %}', 'danger');
+                }
+            })
+            .catch(error => {
+                sendInvoiceModal.hide();
+                showToast('{% trans "Error sending invoice" %}', 'danger');
+            });
+        }
+        
+        function cancelInvoice(invoiceId, reason) {
+            fetch(`/api/invoice/${invoiceId}/cancel/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ reason: reason })
+            })
+            .then(response => response.json())
+            .then(data => {
+                cancelInvoiceModal.hide();
+                if (data.success) {
+                    showToast('{% trans "Invoice cancelled successfully" %}', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.error || '{% trans "Error cancelling invoice" %}', 'danger');
+                }
+            })
+            .catch(error => {
+                cancelInvoiceModal.hide();
+                showToast('{% trans "Error cancelling invoice" %}', 'danger');
+            });
+        }
+        
+        // Export functions
+        window.exportToCSV = function() {
+            showToast('{% trans "Exporting to CSV..." %}', 'info');
+            // In production, implement actual CSV export
+            setTimeout(() => {
+                showToast('{% trans "CSV export started" %}', 'success');
+            }, 1000);
+        };
+        
+        window.exportToPDF = function() {
+            showToast('{% trans "Generating PDF..." %}', 'info');
+            // In production, implement actual PDF export
+            setTimeout(() => {
+                showToast('{% trans "PDF generated successfully" %}', 'success');
+            }, 1500);
+        };
+        
+        window.exportToExcel = function() {
+            showToast('{% trans "Exporting to Excel..." %}', 'info');
+            // In production, implement actual Excel export
+            setTimeout(() => {
+                showToast('{% trans "Excel export started" %}', 'success');
+            }, 1000);
+        };
+        
+        // Initialize charts
+        initializeCharts();
+        
+        // Load upcoming invoices
+        loadUpcomingInvoices();
+        
+        function initializeCharts() {
+            // Status Distribution Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            const statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        '{% trans "Paid" %}',
+                        '{% trans "Issued" %}',
+                        '{% trans "Overdue" %}',
+                        '{% trans "Partial Paid" %}',
+                        '{% trans "Draft" %}'
+                    ],
+                    datasets: [{
+                        data: [40, 25, 15, 10, 10],
+                        backgroundColor: [
+                            '#28a745', // Paid - Green
+                            '#17a2b8', // Issued - Cyan
+                            '#dc3545', // Overdue - Red
+                            '#ffc107', // Partial - Yellow
+                            '#6c757d'  // Draft - Gray
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function loadUpcomingInvoices() {
+            fetch('/api/invoices/upcoming/')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('upcomingInvoices');
+                    if (data.length > 0) {
+                        tbody.innerHTML = data.map(invoice => `
+                            <tr>
+                                <td><strong>${invoice.invoice_number}</strong></td>
+                                <td>${invoice.customer_name}</td>
+                                <td>
+                                    <span class="${invoice.days_until_due <= 3 ? 'text-danger' : 'text-warning'}">
+                                        ${invoice.due_date}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        ${invoice.days_until_due} {% trans "days" %}
+                                    </small>
+                                </td>
+                                <td class="text-end">${invoice.amount} SAR</td>
+                                <td>
+                                    <span class="badge ${getStatusColor(invoice.status)}">
+                                        ${invoice.status_display}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/invoices/${invoice.id}/" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">
+                                    {% trans "No upcoming invoices due" %}
+                                </td>
+                            </tr>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading upcoming invoices:', error);
+                });
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                document.body.removeChild(toast);
+            });
+        }
+        
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            fetch(window.location.href, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Update statistics cards
+                const statElements = {
+                    'total_invoices': doc.querySelector('.card.border-left-primary .h5'),
+                    'total_paid': doc.querySelector('.card.border-left-success .h5'),
+                    'total_outstanding': doc.querySelector('.card.border-left-warning .h5'),
+                    'overdue_count': doc.querySelector('.card.border-left-danger .h5'),
+                    'overdue_percentage': doc.querySelector('.card.border-left-danger .progress-bar')
+                };
+                
+                for (const [key, element] of Object.entries(statElements)) {
+                    if (element) {
+                        const target = document.querySelector(`.card.border-left-${getBorderColor(key)} .${key === 'overdue_percentage' ? 'progress-bar' : 'h5'}`);
+                        if (target) {
+                            if (key === 'overdue_percentage') {
+                                target.style.width = element.style.width;
+                            } else {
+                                target.textContent = element.textContent;
+                            }
+                        }
+                    }
+                }
+            });
+        }, 300000); // 5 minutes
+    });
+    
+    function getBorderColor(key) {
+        const colors = {
+            'total_invoices': 'primary',
+            'total_paid': 'success',
+            'total_outstanding': 'warning',
+            'overdue_count': 'danger'
+        };
+        return colors[key] || 'primary';
+    }
+</script>
+
+<style>
+    .card {
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+        border-top: none;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+    
+    .invoice-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .avatar-circle-sm {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #4e73df;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .btn-group .btn {
+        border-radius: 4px;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .page-link {
+        border-radius: 4px;
+        margin: 0 3px;
+    }
+    
+    .dropdown-menu {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .dropdown-item {
+        border-radius: 4px;
+        margin: 2px 5px;
+        width: calc(100% - 10px);
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .toast {
+        z-index: 1060;
+    }
+    
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+    }
+    
+    .progress-bar {
+        border-radius: 4px;
+    }
+    
+    @media (max-width: 768px) {
+        .h3, .h5, .h6 {
+            font-size: 1rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+            padding: 3px 6px;
+        }
+        
+        .avatar-circle-sm {
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+        }
+    }
+    
+    @media print {
+        .btn, .dropdown, .modal, .card-header {
+            display: none !important;
+        }
+        
+        .card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+        }
+        
+        .table {
+            border-collapse: collapse;
+        }
+        
+        .table th,
+        .table td {
+            border: 1px solid #ddd !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,754 @@
+{% extends 'accounts/base.html' %}
+{% load i18n %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}{% trans "Activity Log" %} | Mushqila Platform{% endblock %}
+
+{% block page_title %}{% trans "Activity Log" %}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="ms-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard_redirect' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'accounts:profile' %}">{% trans "Profile" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Activity Log" %}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-1">{% trans "Your Activity History" %}</h5>
+                            <p class="text-muted mb-0">
+                                {% trans "Track all your activities on the Mushqila platform" %}
+                            </p>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-download me-2"></i>{% trans "Export" %}
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="exportActivityLog('csv')">
+                                    <i class="fas fa-file-csv me-2"></i>{% trans "Export as CSV" %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportActivityLog('pdf')">
+                                    <i class="fas fa-file-pdf me-2"></i>{% trans "Export as PDF" %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportActivityLog('excel')">
+                                    <i class="fas fa-file-excel me-2"></i>{% trans "Export as Excel" %}
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Statistics -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% trans "Total Activities" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_activities|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-history fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                {% trans "Today's Activities" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ today_activities }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                {% trans "This Week" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ week_activities }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-week fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                {% trans "This Month" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ month_activities }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="GET" id="filterForm">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Activity Type" %}</label>
+                                <select name="activity_type" class="form-select">
+                                    <option value="">{% trans "All Types" %}</option>
+                                    {% for type_code, type_name in activity_types %}
+                                    <option value="{{ type_code }}" {% if request.GET.activity_type == type_code %}selected{% endif %}>
+                                        {{ type_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Date From" %}</label>
+                                <input type="date" name="date_from" class="form-control" 
+                                       value="{{ request.GET.date_from }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Date To" %}</label>
+                                <input type="date" name="date_to" class="form-control" 
+                                       value="{{ request.GET.date_to }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary flex-grow-1">
+                                        <i class="fas fa-filter me-2"></i>{% trans "Filter" %}
+                                    </button>
+                                    <a href="{% url 'accounts:activity_log' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-redo me-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Log Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    {% if page_obj %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="activityTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">{% trans "Date & Time" %}</th>
+                                    <th>{% trans "Activity Type" %}</th>
+                                    <th>{% trans "Description" %}</th>
+                                    <th>{% trans "IP Address" %}</th>
+                                    <th class="text-center">{% trans "Status" %}</th>
+                                    <th class="text-end pe-4">{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in page_obj %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold">{{ activity.created_at|date:"d M Y" }}</span>
+                                            <small class="text-muted">{{ activity.created_at|time:"H:i:s" }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ activity.get_badge_color }}">
+                                            {{ activity.get_activity_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-start">
+                                            <div class="me-2">
+                                                <i class="fas fa-{{ activity.get_icon }} text-muted"></i>
+                                            </div>
+                                            <div>
+                                                {{ activity.description }}
+                                                {% if activity.metadata %}
+                                                <small class="text-muted d-block mt-1">
+                                                    {% for key, value in activity.metadata.items %}
+                                                    <span class="badge bg-light text-dark me-1">{{ key }}: {{ value }}</span>
+                                                    {% endfor %}
+                                                </small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if activity.ip_address %}
+                                        <span class="badge bg-light text-dark">{{ activity.ip_address }}</span>
+                                        {% if activity.location %}
+                                        <small class="text-muted d-block">{{ activity.location }}</small>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="text-muted">{% trans "N/A" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if activity.success %}
+                                        <i class="fas fa-check-circle text-success" title="{% trans 'Success' %}"></i>
+                                        {% else %}
+                                        <i class="fas fa-times-circle text-danger" title="{% trans 'Failed' %}"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-primary" 
+                                                onclick="viewActivityDetails('{{ activity.id }}')"
+                                                title="{% trans 'View Details' %}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <div class="card-footer bg-white border-top-0">
+                        <nav aria-label="Activity log pagination">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                            
+                            <div class="text-center mt-2">
+                                <small class="text-muted">
+                                    {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=page_obj.paginator.count %}
+                                    Showing {{ start }} to {{ end }} of {{ total }} entries
+                                    {% endblocktrans %}
+                                </small>
+                            </div>
+                        </nav>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <!-- No Activities Found -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-history fa-4x text-muted"></i>
+                        </div>
+                        <h5 class="text-muted mb-3">{% trans "No Activities Found" %}</h5>
+                        <p class="text-muted mb-4">
+                            {% trans "Your activity log is empty. Activities will appear here as you use the platform." %}
+                        </p>
+                        <a href="{% url 'accounts:dashboard_redirect' %}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>{% trans "Go to Dashboard" %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Types Distribution -->
+    <div class="row mt-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>{% trans "Activity Distribution" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="activityChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>{% trans "Recent Activity Timeline" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for activity in recent_activities|slice:":5" %}
+                        <div class="timeline-item {% if forloop.first %}timeline-item-first{% endif %}">
+                            <div class="timeline-marker bg-{{ activity.get_badge_color }}"></div>
+                            <div class="timeline-content">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-1">{{ activity.get_activity_type_display }}</h6>
+                                    <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                                </div>
+                                <p class="mb-0 small">{{ activity.description|truncatechars:50 }}</p>
+                                {% if activity.ip_address %}
+                                <small class="text-muted">
+                                    <i class="fas fa-globe me-1"></i>{{ activity.ip_address }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Log Modal -->
+    <div class="modal fade" id="clearLogModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{% trans "Clear Activity Log" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% trans "Are you sure you want to clear your activity log? This action cannot be undone." %}
+                    </div>
+                    <p class="text-muted">
+                        {% trans "This will delete all your activity history except for the last 30 days." %}
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        {% trans "Cancel" %}
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="clearActivityLog()">
+                        <i class="fas fa-trash me-2"></i>{% trans "Clear Log" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Details Modal -->
+    <div class="modal fade" id="activityDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{% trans "Activity Details" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="activityDetailsContent">
+                    <!-- Details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 20px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #e9ecef;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-item-first {
+        margin-top: 0.5rem;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -20px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        z-index: 1;
+    }
+    
+    .timeline-content {
+        padding-left: 10px;
+    }
+    
+    .table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+        border-top: none;
+        padding: 1rem;
+    }
+    
+    .table td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+    
+    .bg-primary { background-color: #0d6efd !important; }
+    .bg-success { background-color: #198754 !important; }
+    .bg-info { background-color: #0dcaf0 !important; }
+    .bg-warning { background-color: #ffc107 !important; }
+    .bg-danger { background-color: #dc3545 !important; }
+    .bg-secondary { background-color: #6c757d !important; }
+    
+    @media (max-width: 768px) {
+        .timeline::before {
+            left: 8px;
+        }
+        
+        .timeline-marker {
+            left: -16px;
+        }
+        
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    // Initialize activity chart
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize activity distribution chart
+        {% if activity_distribution %}
+        const activityChartOptions = {
+            series: {{ activity_distribution.values|safe }},
+            chart: {
+                type: 'donut',
+                height: 300
+            },
+            labels: {{ activity_distribution.labels|safe }},
+            colors: ['#0d6efd', '#198754', '#0dcaf0', '#ffc107', '#dc3545', '#6c757d'],
+            legend: {
+                position: 'bottom'
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '60%'
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        height: 250
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }]
+        };
+        
+        const activityChart = new ApexCharts(document.querySelector("#activityChart"), activityChartOptions);
+        activityChart.render();
+        {% endif %}
+        
+        // Initialize filter form reset
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            // Add loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Filtering...';
+            submitBtn.disabled = true;
+            
+            // Re-enable button after 2 seconds if form submission fails
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+        
+        // Initialize table sorting
+        const table = document.getElementById('activityTable');
+        if (table) {
+            const headers = table.querySelectorAll('th[data-sort]');
+            headers.forEach(header => {
+                header.style.cursor = 'pointer';
+                header.addEventListener('click', () => {
+                    const sortField = header.getAttribute('data-sort');
+                    const currentSort = getUrlParameter('sort');
+                    const currentOrder = getUrlParameter('order');
+                    
+                    let newOrder = 'asc';
+                    if (currentSort === sortField && currentOrder === 'asc') {
+                        newOrder = 'desc';
+                    }
+                    
+                    updateUrlParameter('sort', sortField);
+                    updateUrlParameter('order', newOrder);
+                    window.location.reload();
+                });
+            });
+        }
+    });
+    
+    // View activity details
+    function viewActivityDetails(activityId) {
+        // Create a simple modal with activity details
+        const modalContent = document.getElementById('activityDetailsContent');
+        const activityRow = document.querySelector(`tr[data-activity-id="${activityId}"]`);
+        
+        if (activityRow) {
+            const activityData = {
+                date: activityRow.querySelector('.activity-date').textContent,
+                type: activityRow.querySelector('.activity-type').textContent,
+                description: activityRow.querySelector('.activity-description').textContent,
+                ip: activityRow.querySelector('.activity-ip').textContent,
+                status: activityRow.querySelector('.activity-status').textContent
+            };
+            
+            modalContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">{% trans "Activity Type" %}</h6>
+                        <p><span class="badge bg-primary">${activityData.type}</span></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">{% trans "Date & Time" %}</h6>
+                        <p>${activityData.date}</p>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <h6 class="text-muted">{% trans "Description" %}</h6>
+                        <p>${activityData.description}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">{% trans "IP Address" %}</h6>
+                        <p>${activityData.ip}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">{% trans "Status" %}</h6>
+                        <p>${activityData.status}</p>
+                    </div>
+                </div>
+            `;
+            
+            const modal = new bootstrap.Modal(document.getElementById('activityDetailsModal'));
+            modal.show();
+        } else {
+            // If we can't find the row, show a generic message
+            modalContent.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {% trans "Activity details not found or have been removed." %}
+                </div>
+            `;
+            const modal = new bootstrap.Modal(document.getElementById('activityDetailsModal'));
+            modal.show();
+        }
+    }
+    
+    // Export activity log
+    function exportActivityLog(format) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('format', format);
+        
+        // Use current URL for export
+        const url = `${window.location.pathname}?${params.toString()}`;
+        window.open(url, '_blank');
+    }
+    
+    // Clear activity log
+    function clearActivityLog() {
+        if (!confirm('{% trans "Are you sure you want to clear your activity log? This action cannot be undone." %}')) {
+            return;
+        }
+        
+        // Show loading
+        const clearBtn = document.querySelector('#clearLogModal .btn-danger');
+        const originalText = clearBtn.innerHTML;
+        clearBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Clearing...';
+        clearBtn.disabled = true;
+        
+        // Simulate API call
+        setTimeout(() => {
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('clearLogModal')).hide();
+            
+            // Show success message
+            showNotification('{% trans "Activity log cleared successfully" %}', 'success');
+            
+            // Reset button
+            clearBtn.innerHTML = originalText;
+            clearBtn.disabled = false;
+            
+            // Refresh the page after 1 second
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }, 1500);
+    }
+    
+    // Utility functions for URL parameters
+    function getUrlParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+    
+    function updateUrlParameter(key, value) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set(key, value);
+        return urlParams.toString();
+    }
+    
+    // Auto-refresh activity log every 60 seconds if there are recent activities
+    {% if today_activities > 0 %}
+    let refreshInterval;
+    
+    function refreshActivityLog() {
+        const table = document.getElementById('activityTable');
+        if (table && document.visibilityState === 'visible') {
+            fetch(window.location.href, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTable = doc.querySelector('#activityTable tbody');
+                
+                if (newTable) {
+                    table.querySelector('tbody').innerHTML = newTable.innerHTML;
+                    showNotification('{% trans "Activity log updated" %}', 'info');
+                }
+            })
+            .catch(error => console.error('Error refreshing activity log:', error));
+        }
+    }
+    
+    // Start auto-refresh
+    refreshInterval = setInterval(refreshActivityLog, 60000);
+    
+    // Stop auto-refresh when page is not visible
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            clearInterval(refreshInterval);
+        } else {
+            refreshInterval = setInterval(refreshActivityLog, 60000);
+        }
+    });
+    {% endif %}
+    
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed bottom-0 end-0 m-3`;
+        alert.style.zIndex = '1060';
+        alert.style.maxWidth = '350px';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 3000);
+    }
+</script>
+{% endblock %}

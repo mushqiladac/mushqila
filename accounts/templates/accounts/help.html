@@ -1,0 +1,105 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold text-primary mb-3">
+                    <i class="fas fa-question-circle me-2"></i>Help Center
+                </h1>
+                <p class="lead text-muted">
+                    Find answers to common questions and get support
+                </p>
+            </div>
+
+            <!-- Search Box -->
+            <div class="card shadow-sm mb-5">
+                <div class="card-body p-4">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light border-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-0" 
+                               placeholder="What can we help you with?">
+                        <button class="btn btn-primary px-4" type="button">
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Sections -->
+            <div class="row g-4 mb-5">
+                {% for section in help_sections %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm hover-shadow">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="{{ section.icon }} fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title mb-3">{{ section.title }}</h5>
+                            <ul class="list-unstyled text-start">
+                                {% for question in section.questions %}
+                                <li class="mb-2">
+                                    <i class="fas fa-chevron-right text-primary me-2 small"></i>
+                                    <a href="#" class="text-decoration-none">{{ question }}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Contact Support -->
+            <div class="card border-primary shadow">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-headset me-2"></i>Still Need Help?
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <div class="p-3">
+                                <i class="fas fa-phone fa-2x text-primary mb-3"></i>
+                                <h5>Call Us</h5>
+                                <p class="mb-1">Saudi Arabia</p>
+                                <h4 class="text-primary">+966 11 123 4567</h4>
+                                <small class="text-muted">Sun-Thu: 9AM-6PM (Riyadh Time)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <div class="p-3">
+                                <i class="fas fa-envelope fa-2x text-primary mb-3"></i>
+                                <h5>Email Us</h5>
+                                <p class="mb-1">General Support</p>
+                                <h5 class="text-primary">support@mushqila.com</h5>
+                                <p class="mb-1">Hajj/Umrah Support</p>
+                                <h5 class="text-primary">hajj@mushqila.com</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="p-3">
+                                <i class="fas fa-comments fa-2x text-primary mb-3"></i>
+                                <h5>Live Chat</h5>
+                                <p>Available during business hours</p>
+                                <a href="{% url 'accounts:contact' %}" 
+                                   class="btn btn-outline-primary">
+                                    Start Chat
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

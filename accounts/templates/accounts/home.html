@@ -1,0 +1,1209 @@
+<!------------ accounts/templates/accounts/home.html ------->
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Mushqila B2B - Saudi Arabia's Premier Travel Agent Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Saudi Themed Color Scheme */
+    :root {
+        --saudi-green: #006C35;
+        --saudi-dark-green: #005028;
+        --saudi-gold: #C69214;
+        --saudi-sand: #F5E8C8;
+        --saudi-blue: #0D6EFD;
+        --saudi-dark-blue: #0B5ED7;
+    }
+    
+    /* Modern Hero Section with Saudi Theme */
+    .hero-section {
+        background: linear-gradient(135deg, var(--saudi-dark-green) 0%, var(--saudi-green) 50%, #008041 100%);
+        color: white;
+        padding: 140px 0 90px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E") center/cover no-repeat;
+        opacity: 0.1;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .hero-badge {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        padding: 8px 20px;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .hero-badge i {
+        color: var(--saudi-gold);
+        margin-right: 10px;
+    }
+    
+    /* Feature Cards */
+    .feature-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px 30px;
+        height: 100%;
+        transition: all 0.3s ease;
+        border: 1px solid #e8f5e9;
+        box-shadow: 0 5px 15px rgba(0, 108, 53, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--saudi-green), var(--saudi-gold));
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 108, 53, 0.1);
+        border-color: var(--saudi-green);
+    }
+    
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--saudi-green), var(--saudi-dark-green));
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 25px;
+        transition: all 0.3s;
+    }
+    
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1) rotate(5deg);
+        background: linear-gradient(135deg, var(--saudi-gold), #e6b400);
+    }
+    
+    .feature-icon i {
+        font-size: 28px;
+        color: white;
+    }
+    
+    /* Stats Section */
+    .stats-section {
+        background: linear-gradient(135deg, #f8fff9 0%, #f0f9f3 100%);
+        padding: 80px 0;
+        position: relative;
+    }
+    
+    .stats-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--saudi-green), var(--saudi-gold));
+    }
+    
+    .stat-number {
+        font-size: 3.2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--saudi-green), var(--saudi-gold));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    /* Saudi Flag Inspired Elements */
+    .saudi-flag-badge {
+        background: linear-gradient(135deg, var(--saudi-green), var(--saudi-dark-green));
+        color: white;
+        padding: 6px 20px;
+        border-radius: 30px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .saudi-flag-badge i {
+        margin-right: 8px;
+    }
+    
+    /* Service Cards with Saudi Theme */
+    .service-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #e8f5e9;
+        box-shadow: 0 5px 20px rgba(0, 108, 53, 0.05);
+        height: 100%;
+    }
+    
+    .service-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0, 108, 53, 0.15);
+        border-color: var(--saudi-green);
+    }
+    
+    .service-image {
+        height: 220px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+    
+    .service-image::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+    }
+    
+    .service-tag {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: var(--saudi-green);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, var(--saudi-dark-green) 0%, var(--saudi-green) 100%);
+        color: white;
+        padding: 100px 0;
+        border-radius: 30px;
+        margin: 100px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 40c0-9.94 8.06-18 18-18s18 8.06 18 18-8.06 18-18 18-18-8.06-18-18zm18-8c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm30 30c0-9.94 8.06-18 18-18s18 8.06 18 18-8.06 18-18 18-18-8.06-18-18zm18-8c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zM20 90c0-9.94 8.06-18 18-18s18 8.06 18 18-8.06 18-18 18-18-8.06-18-18zm18-8c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zM70 20c0-9.94 8.06-18 18-18s18 8.06 18 18-8.06 18-18 18-18-8.06-18-18zm18-8c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E") center/cover no-repeat;
+        opacity: 0.05;
+    }
+    
+    /* How It Works - Saudi Style */
+    .step-card {
+        text-align: center;
+        padding: 30px;
+        position: relative;
+    }
+    
+    .step-number {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--saudi-green), var(--saudi-dark-green));
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0 auto 20px;
+        position: relative;
+        z-index: 2;
+        border: 4px solid white;
+        box-shadow: 0 5px 15px rgba(0, 108, 53, 0.2);
+    }
+    
+    .step-line {
+        position: absolute;
+        top: 30px;
+        left: 50%;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--saudi-green), var(--saudi-gold));
+        z-index: 1;
+        opacity: 0.3;
+    }
+    
+    /* Testimonials */
+    .testimonial-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px 30px;
+        margin: 15px;
+        box-shadow: 0 8px 25px rgba(0, 108, 53, 0.08);
+        border: 1px solid #e8f5e9;
+        position: relative;
+    }
+    
+    .testimonial-card::before {
+        content: '"';
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        font-size: 80px;
+        color: var(--saudi-green);
+        opacity: 0.1;
+        font-family: serif;
+    }
+    
+    .testimonial-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--saudi-green);
+        box-shadow: 0 5px 15px rgba(0, 108, 53, 0.2);
+    }
+    
+    /* Saudi Partners Section */
+    .partner-section {
+        background: #f8fff9;
+        padding: 60px 0;
+        border-top: 1px solid #e8f5e9;
+        border-bottom: 1px solid #e8f5e9;
+    }
+    
+    .partner-logo {
+        height: 50px;
+        object-fit: contain;
+        filter: grayscale(100%);
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+    
+    .partner-logo:hover {
+        filter: grayscale(0);
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    
+    /* Animations */
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(2deg); }
+    }
+    
+    .floating {
+        animation: float 4s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(0, 108, 53, 0.3); }
+        50% { box-shadow: 0 0 40px rgba(0, 108, 53, 0.6); }
+    }
+    
+    .pulse-glow {
+        animation: pulse-glow 3s ease-in-out infinite;
+    }
+    
+    /* Custom Button Styles */
+    .btn-saudi-primary {
+        background: linear-gradient(135deg, var(--saudi-green), var(--saudi-dark-green));
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 12px 30px;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+    
+    .btn-saudi-primary:hover {
+        background: linear-gradient(135deg, var(--saudi-dark-green), #00451c);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 108, 53, 0.3);
+        color: white;
+    }
+    
+    .btn-saudi-outline {
+        background: transparent;
+        border: 2px solid var(--saudi-green);
+        color: var(--saudi-green);
+        font-weight: 600;
+        padding: 12px 30px;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+    
+    .btn-saudi-outline:hover {
+        background: var(--saudi-green);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 108, 53, 0.2);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-section {
+            padding: 100px 0 60px;
+        }
+        
+        .step-line {
+            display: none;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+        }
+        
+        .service-image {
+            height: 180px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .feature-card, .testimonial-card {
+            padding: 25px 20px;
+        }
+        
+        .hero-section {
+            padding: 80px 0 40px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-badge">
+                    <i class="fas fa-star"></i>
+                    <span>Saudi Arabia's #1 B2B Travel Platform</span>
+                </div>
+                
+                <h1 class="hero-title">
+                    Empowering Saudi <span class="text-warning">Travel Agents</span> with Excellence
+                </h1>
+                
+                <p class="hero-subtitle">
+                    Join Saudi Arabia's premier B2B travel platform. Access real-time inventory for Hajj, Umrah, flights, hotels, and exclusive Saudi deals with our cutting-edge technology.
+                </p>
+                
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <a href="{% url 'accounts:register' %}" class="btn-saudi-primary btn-lg">
+                        <i class="fas fa-rocket me-2"></i> Start Free Trial
+                    </a>
+                    <a href="#features" class="btn-saudi-outline btn-lg">
+                        <i class="fas fa-play-circle me-2"></i> Watch Demo
+                    </a>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-warning fa-lg me-2"></i>
+                            <span>Free Onboarding</span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-warning fa-lg me-2"></i>
+                            <span>Saudi Compliance</span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-check-circle text-warning fa-lg me-2"></i>
+                            <span>24/7 Arabic Support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 text-center">
+                <div class="position-relative floating">
+                    <div class="pulse-glow" style="background: linear-gradient(135deg, var(--saudi-green) 0%, var(--saudi-dark-green) 100%); height: 400px; border-radius: 25px;" class="shadow-lg">
+                        <div class="h-100 d-flex flex-column justify-content-center align-items-center text-white p-5">
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-center mb-3">
+                                    <div class="saudi-flag-badge me-2">
+                                        <i class="fas fa-hajj"></i> Hajj
+                                    </div>
+                                    <div class="saudi-flag-badge">
+                                        <i class="fas fa-mosque"></i> Umrah
+                                    </div>
+                                </div>
+                                <h2 class="mb-3">Saudi Travel Dashboard</h2>
+                                <p class="mb-0">Real-time Hajj & Umrah Inventory</p>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <div class="text-center">
+                                    <i class="fas fa-plane fa-2x mb-2"></i>
+                                    <div>Flights</div>
+                                </div>
+                                <div class="text-center">
+                                    <i class="fas fa-hotel fa-2x mb-2"></i>
+                                    <div>Hotels</div>
+                                </div>
+                                <div class="text-center">
+                                    <i class="fas fa-suitcase fa-2x mb-2"></i>
+                                    <div>Packages</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Elements -->
+                    <div class="position-absolute top-0 start-0 bg-white text-dark p-3 rounded-circle m-3 shadow" style="transform: translate(-20px, -20px);">
+                        <i class="fas fa-calendar-alt fa-2x"></i>
+                    </div>
+                    <div class="position-absolute top-0 end-0 bg-warning text-dark p-3 rounded-circle m-3 shadow" style="transform: translate(20px, -20px);">
+                        <i class="fas fa-percentage fa-2x"></i>
+                    </div>
+                    <div class="position-absolute bottom-0 start-0 bg-info text-white p-3 rounded-circle m-3 shadow" style="transform: translate(-20px, 20px);">
+                        <i class="fas fa-headset fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Saudi Partner Airlines Section -->
+<section class="partner-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h3 class="fw-bold mb-3">Official Partners</h3>
+            <p class="text-muted">Trusted by Saudi Arabia's leading travel providers</p>
+        </div>
+        
+        <div class="row align-items-center justify-content-center g-5">
+            <div class="col-auto">
+                <div class="bg-dark text-white p-3 rounded d-flex align-items-center justify-content-center" style="height: 50px; width: 150px;">
+                    <i class="fas fa-plane me-2"></i>
+                    <span class="fw-bold">Saudia</span>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="bg-primary text-white p-3 rounded d-flex align-items-center justify-content-center" style="height: 50px; width: 120px;">
+                    <span class="fw-bold">Flynas</span>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="bg-success text-white p-3 rounded d-flex align-items-center justify-content-center" style="height: 50px; width: 130px;">
+                    <i class="fas fa-plane-departure me-2"></i>
+                    <span class="fw-bold">Flyadeal</span>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="bg-dark text-white p-3 rounded d-flex align-items-center justify-content-center" style="height: 50px; width: 180px;">
+                    <i class="fas fa-hotel me-2"></i>
+                    <span class="fw-bold">مطارات الرياض</span>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="bg-primary text-white p-3 rounded d-flex align-items-center justify-content-center" style="height: 50px; width: 200px;">
+                    <i class="fas fa-landmark me-2"></i>
+                    <span class="fw-bold">الهيئة السعودية للسياحة</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-number" data-count="2500">2,500+</div>
+                <p class="text-muted">Saudi Travel Agents</p>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-number" data-count="99.9">99.9%</div>
+                <p class="text-muted">Platform Uptime</p>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-number" data-count="50">50+</div>
+                <p>Saudi Airlines & Hotels</p>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-number" data-count="24">24/7</div>
+                <p>Arabic Support</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="saudi-flag-badge mb-3">
+                <i class="fas fa-crown"></i> Exclusive Features
+            </span>
+            <h2 class="display-5 fw-bold mb-3">Why Saudi Agents Choose Mushqila</h2>
+            <p class="text-muted fs-5">Built for Saudi Arabia's unique travel market</p>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Hajj & Umrah Specialized -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-kaaba"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Hajj & Umrah Specialized</h4>
+                    <p class="text-muted">
+                        Complete Hajj and Umrah package management with real-time quota availability, Ministry of Hajj compliance, and exclusive contracts.
+                    </p>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Ministry of Hajj integration</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Real-time quota management</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Makkah & Madinah hotel contracts</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Saudi-Compliant Platform -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">100% Saudi Compliant</h4>
+                    <p class="text-muted">
+                        Fully compliant with Saudi regulations including VAT, Zakat, SCTA requirements, and Saudi payment systems.
+                    </p>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> VAT & Zakat compliant invoices</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> SCTA license integration</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Mada & STC Pay ready</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Arabic First Platform -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Arabic-First Experience</h4>
+                    <p class="text-muted">
+                        Full Arabic interface with right-to-left support, Arabic contracts, and 24/7 Arabic customer support.
+                    </p>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Complete Arabic interface</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Arabic legal documents</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Arabic support team</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Real-time Saudi Inventory -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Real-time Saudi Inventory</h4>
+                    <p class="text-muted">
+                        Live access to Saudi airlines, hotels, and ground services with instant confirmation and booking.
+                    </p>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Live flight availability</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Real-time hotel inventory</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Instant booking confirmation</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Saudi Payment Solutions -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Saudi Payment Solutions</h4>
+                    <p class="text-muted">
+                        Integrated with Saudi payment gateways including Mada, STC Pay, and local bank transfers.
+                    </p>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Mada card processing</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> STC Pay integration</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Saudi bank transfers</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 24/7 Saudi Support -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">24/7 Saudi Support</h4>
+                    <p class="text-muted">
+                        Dedicated Arabic-speaking support team available 24/7 via phone, WhatsApp, and email.
+                    </p>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Arabic phone support</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> WhatsApp business</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Dedicated account manager</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works - Saudi Focus -->
+<section class="py-5 bg-light" id="how-it-works">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="saudi-flag-badge mb-3">
+                <i class="fas fa-cogs"></i> Simple Process
+            </span>
+            <h2 class="display-5 fw-bold mb-3">Start in 3 Easy Steps</h2>
+            <p class="text-muted fs-5">Get your Saudi travel agency online today</p>
+        </div>
+        
+        <div class="row position-relative">
+            <div class="col-lg-4">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-line d-none d-lg-block"></div>
+                    <h4 class="fw-bold mb-3">Register & Verify</h4>
+                    <p class="text-muted">
+                        Submit your Saudi Commercial Registration and business documents. Get verified within 24 hours.
+                    </p>
+                    <div class="mt-4">
+                        <i class="fas fa-id-card fa-3x" style="color: var(--saudi-green);"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-line d-none d-lg-block"></div>
+                    <h4 class="fw-bold mb-3">Get Saudi Dashboard</h4>
+                    <p class="text-muted">
+                        Access your personalized dashboard with Saudi-specific features and Arabic interface.
+                    </p>
+                    <div class="mt-4">
+                        <i class="fas fa-tachometer-alt fa-3x" style="color: var(--saudi-blue);"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4 class="fw-bold mb-3">Start Saudi Bookings</h4>
+                    <p class="text-muted">
+                        Begin booking Hajj, Umrah, domestic flights, and Saudi hotel packages immediately.
+                    </p>
+                    <div class="mt-4">
+                        <i class="fas fa-hajj fa-3x" style="color: var(--saudi-gold);"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'accounts:register' %}" class="btn-saudi-primary btn-lg px-5 py-3">
+                <i class="fas fa-play me-2"></i> Start Your Journey
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Services - Saudi Focus -->
+<section class="py-5" id="services">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="saudi-flag-badge mb-3">
+                <i class="fas fa-concierge-bell"></i> Our Services
+            </span>
+            <h2 class="display-5 fw-bold mb-3">Complete Saudi Travel Solutions</h2>
+            <p class="text-muted fs-5">Everything for the Saudi travel market</p>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Hajj Packages -->
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-image" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-156511236159-9d5b7b4b9e8c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover;">
+                        <div class="p-4 text-white h-100 d-flex flex-column justify-content-end">
+                            <span class="service-tag">Ministry Approved</span>
+                            <h3 class="fw-bold mt-2">Hajj Packages</h3>
+                            <p>Complete Hajj solutions with Ministry quota</p>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Ministry of Hajj approved quota</li>
+                            <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Makkah & Madinah 5-star hotels</li>
+                            <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Saudi visa processing</li>
+                            <li><i class="fas fa-check text-primary me-2"></i> Group transportation included</li>
+                        </ul>
+                        <div class="text-center mt-3">
+                            <a href="#" class="btn btn-outline-primary btn-sm">View Packages</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Umrah Packages -->
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-image" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1548013146-72479768bada?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover;">
+                        <div class="p-4 text-white h-100 d-flex flex-column justify-content-end">
+                            <span class="service-tag">Year-round</span>
+                            <h3 class="fw-bold mt-2">Umrah Packages</h3>
+                            <p>Affordable packages for all budgets</p>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Economy to luxury options</li>
+                            <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Group & family discounts</li>
+                            <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Flexible travel dates</li>
+                            <li><i class="fas fa-check text-primary me-2"></i> Ziyarat tours included</li>
+                        </ul>
+                        <div class="text-center mt-3">
+                            <a href="#" class="btn btn-outline-primary btn-sm">View Packages</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Saudi Domestic Flights -->
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-image" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80') center/cover;">
+                        <div class="p-4 text-white h-100 d-flex flex-column justify-content-end">
+                            <span class="service-tag">All Saudi Airlines</span>
+                            <h3 class="fw-bold mt-2">Domestic Flights</h3>
+                            <p>Saudi Arabia domestic travel</p>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Saudia, Flynas, Flyadeal</li>
+                            <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Corporate & group rates</li>
+                            <li class="mb-2"><i class="fas fa-check text-primary me-2"></i> Instant e-tickets</li>
+                            <li><i class="fas fa-check text-primary me-2"></i> Real-time seat availability</li>
+                        </ul>
+                        <div class="text-center mt-3">
+                            <a href="#" class="btn btn-outline-primary btn-sm">Book Flights</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5 bg-light" id="testimonials">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="saudi-flag-badge mb-3">
+                <i class="fas fa-comments"></i> Testimonials
+            </span>
+            <h2 class="display-5 fw-bold mb-3">What Saudi Agents Say</h2>
+            <p class="text-muted fs-5">Trusted by travel agents across Saudi Arabia</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="testimonial-avatar bg-primary text-white d-flex align-items-center justify-content-center me-3">
+                            <i class="fas fa-user fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Ahmed Al-Mansouri</h5>
+                            <p class="text-muted mb-0">Travel Agent, Riyadh</p>
+                        </div>
+                    </div>
+                    <p class="mb-0">
+                        "Mushqila transformed our Hajj business. The real-time quota management and Ministry integration saved us hours of work. Our revenue increased by 300% in the first season."
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="testimonial-avatar bg-success text-white d-flex align-items-center justify-content-center me-3">
+                            <i class="fas fa-user fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Fatima Al-Ghamdi</h5>
+                            <p class="text-muted mb-0">Umrah Specialist, Jeddah</p>
+                        </div>
+                    </div>
+                    <p class="mb-0">
+                        "The Arabic interface and local payment options made it easy for our team. The 24/7 Arabic support is exceptional. Highly recommended for Saudi travel agencies."
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="testimonial-avatar bg-warning text-dark d-flex align-items-center justify-content-center me-3">
+                            <i class="fas fa-user fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Khalid Al-Otaibi</h5>
+                            <p class="text-muted mb-0">Corporate Travel, Dammam</p>
+                        </div>
+                    </div>
+                    <p class="mb-0">
+                        "Best B2B platform for Saudi domestic flights. The corporate rates and instant booking confirmation helped us serve our corporate clients better."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container text-center position-relative">
+        <h2 class="display-4 fw-bold mb-4">Ready to Grow Your Saudi Travel Business?</h2>
+        <p class="fs-5 mb-5 opacity-90">
+            Join thousands of successful Saudi travel agents. Start your 30-day free trial today - 
+            No Saudi Commercial Registration required for trial!
+        </p>
+        
+        <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+            <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg px-5 py-3 fw-bold">
+                <i class="fas fa-calendar-check me-2"></i> Start Free Trial
+            </a>
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg px-5 py-3">
+                <i class="fas fa-sign-in-alt me-2"></i> Agent Login
+            </a>
+        </div>
+        
+        <div class="row mt-5 text-light">
+            <div class="col-md-4 mb-4">
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="fas fa-headset fa-2x me-3 text-warning"></i>
+                    <div class="text-start">
+                        <p class="mb-0 fw-bold">24/7 Arabic Support</p>
+                        <p class="mb-0 opacity-90">+966 50 099 3174</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="fas fa-map-marker-alt fa-2x me-3 text-warning"></i>
+                    <div class="text-start">
+                        <p class="mb-0 fw-bold">Riyadh Office</p>
+                        <p class="mb-0 opacity-90">Prince Bandar Street, Ar Rawdah</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="d-flex align-items-center justify-content-center">
+                    <i class="fas fa-clock fa-2x me-3 text-warning"></i>
+                    <div class="text-start">
+                        <p class="mb-0 fw-bold">Quick Setup</p>
+                        <p class="mb-0 opacity-90">Get started in 24 hours</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ - Saudi Focus -->
+<section class="py-5" id="faq">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="saudi-flag-badge mb-3">
+                <i class="fas fa-question-circle"></i> Common Questions
+            </span>
+            <h2 class="display-5 fw-bold mb-3">Frequently Asked Questions</h2>
+            <p class="text-muted fs-5">Answers for Saudi travel agents</p>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                What Saudi documents are required for registration?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                You'll need: Saudi Commercial Registration (CR), VAT Certificate, Chamber of Commerce membership, 
+                                and owner's Saudi ID/Iqama. For Hajj/Umrah agents, Ministry of Hajj license is required.
+                                Verification takes 24-48 hours.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                Is the platform available in Arabic?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! Mushqila is built Arabic-first with complete right-to-left support, Arabic contracts, 
+                                invoices, and 24/7 Arabic customer support. You can switch between English and Arabic anytime.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Do you support Saudi payment methods?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Absolutely. We support all major Saudi payment methods including Mada, Apple Pay, STC Pay, 
+                                bank transfers (SAR), and cash deposits. All transactions are VAT-compliant with proper 
+                                Saudi invoice formats.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                How does Hajj quota management work?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Our platform integrates directly with Ministry of Hajj systems for real-time quota management. 
+                                You can view available quotas, allocate to customers, and get instant confirmations. 
+                                All documentation is automatically generated for Ministry submission.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                What support is available during Hajj season?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                During Hajj season, we provide 24/7 dedicated support including on-ground assistance in Makkah 
+                                and Madinah, emergency contact numbers, and priority technical support. Our team is specially 
+                                trained for Hajj season operations.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-5">
+                    <a href="#" class="btn-saudi-outline btn-lg">
+                        <i class="fas fa-comments me-2"></i> More Questions? Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Animate stats counters
+        $('.stat-number').each(function() {
+            var $this = $(this);
+            var countTo = parseFloat($this.attr('data-count'));
+            var suffix = $this.text().replace(/[0-9.]/g, '');
+            
+            $({ countNum: 0 }).animate({
+                countNum: countTo
+            }, {
+                duration: 2500,
+                easing: 'swing',
+                step: function() {
+                    if (countTo % 1 === 0) {
+                        $this.text(Math.floor(this.countNum) + suffix);
+                    } else {
+                        $this.text(this.countNum.toFixed(1) + suffix);
+                    }
+                },
+                complete: function() {
+                    $this.text(countTo + suffix);
+                }
+            });
+        });
+        
+        // Smooth scrolling with offset for fixed navbar
+        $('a[href^="#"]').on('click', function(e) {
+            e.preventDefault();
+            var target = this.hash;
+            var $target = $(target);
+            
+            if ($target.length) {
+                $('html, body').stop().animate({
+                    'scrollTop': $target.offset().top - 100
+                }, 1000, 'swing', function() {
+                    window.location.hash = target;
+                });
+            }
+        });
+        
+        // Add active class to nav links on scroll
+        $(window).on('scroll', function() {
+            var scrollPos = $(document).scrollTop() + 100;
+            $('a[href^="#"]').each(function() {
+                var currLink = $(this);
+                var refElement = $(currLink.attr("href"));
+                if (refElement.length && refElement.position().top <= scrollPos && refElement.position().top + refElement.height() > scrollPos) {
+                    $('a[href^="#"]').removeClass("active");
+                    currLink.addClass("active");
+                }
+            });
+        });
+        
+        // Parallax effect for hero section
+        $(window).on('scroll', function() {
+            var scrolled = $(window).scrollTop();
+            $('.hero-section').css('background-position', 'center ' + (scrolled * 0.5) + 'px');
+        });
+        
+        // Initialize tooltips
+        $('[data-bs-toggle="tooltip"]').tooltip();
+        
+        // Animate elements on scroll
+        $(window).on('scroll', function() {
+            $('.feature-card, .service-card, .testimonial-card').each(function() {
+                var elementTop = $(this).offset().top;
+                var elementBottom = elementTop + $(this).outerHeight();
+                var viewportTop = $(window).scrollTop();
+                var viewportBottom = viewportTop + $(window).height();
+                
+                if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                    $(this).addClass('animated');
+                }
+            });
+        });
+        
+        // Trigger scroll event once on load
+        $(window).trigger('scroll');
+        
+        // Handle form submissions
+        $('form').on('submit', function(e) {
+            var form = $(this);
+            var submitBtn = form.find('button[type="submit"]');
+            var originalText = submitBtn.html();
+            
+            // Show loading state
+            submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Processing...');
+            submitBtn.prop('disabled', true);
+            
+            // Simulate form submission (replace with actual AJAX call)
+            setTimeout(function() {
+                submitBtn.html(originalText);
+                submitBtn.prop('disabled', false);
+                
+                // Show success message
+                $('.toast-container').html(`
+                    <div class="toast show" role="alert">
+                        <div class="toast-header bg-success text-white">
+                            <strong class="me-auto">Success</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">
+                            Form submitted successfully!
+                        </div>
+                    </div>
+                `);
+                
+                // Auto-hide toast after 5 seconds
+                setTimeout(function() {
+                    $('.toast').toast('hide');
+                }, 5000);
+            }, 2000);
+            
+            return false; // Prevent actual form submission for demo
+        });
+        
+        // Demo video modal
+        $('#demoVideoModal').on('shown.bs.modal', function () {
+            // Load video here if needed
+        });
+        
+        // Partner logo animation
+        $('.partner-logo').hover(
+            function() {
+                $(this).css('transform', 'scale(1.1)');
+            },
+            function() {
+                $(this).css('transform', 'scale(1)');
+            }
+        );
+        
+        // Initialize accordion
+        $('.accordion-button').on('click', function() {
+            $(this).toggleClass('collapsed');
+        });
+    });
+</script>
+{% endblock %}

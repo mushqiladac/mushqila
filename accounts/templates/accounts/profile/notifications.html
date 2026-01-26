@@ -1,0 +1,889 @@
+{% extends 'accounts/base.html' %}
+{% load i18n %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}{% trans "Notifications" %} | Mushqila Platform{% endblock %}
+
+{% block page_title %}{% trans "Notifications" %}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="ms-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard_redirect' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'accounts:profile' %}">{% trans "Profile" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Notifications" %}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-1">{% trans "Your Notifications" %}</h5>
+                            <p class="text-muted mb-0">
+                                {% trans "Stay updated with platform alerts and messages" %}
+                            </p>
+                        </div>
+                        <div class="btn-group">
+                            {% if unread_count > 0 %}
+                            <form method="POST" action="{% url 'accounts:mark_all_notifications_read' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check-double me-2"></i>{% trans "Mark All Read" %}
+                                </button>
+                            </form>
+                            {% endif %}
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#clearNotificationsModal">
+                                <i class="fas fa-trash me-2"></i>{% trans "Clear All" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Statistics -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% trans "Total Notifications" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_count|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-bell fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                {% trans "Unread" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ unread_count|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-envelope fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                {% trans "Today" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ today_count|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                {% trans "This Week" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ week_count|intcomma }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-week fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="GET" id="filterForm">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">{% trans "Notification Type" %}</label>
+                                <select name="notification_type" class="form-select">
+                                    <option value="">{% trans "All Types" %}</option>
+                                    {% for type_code, type_name in notification_types %}
+                                    <option value="{{ type_code }}" {% if request.GET.notification_type == type_code %}selected{% endif %}>
+                                        {{ type_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label class="form-label">{% trans "Status" %}</label>
+                                <select name="status" class="form-select">
+                                    <option value="">{% trans "All" %}</option>
+                                    <option value="unread" {% if request.GET.status == 'unread' %}selected{% endif %}>
+                                        {% trans "Unread" %}
+                                    </option>
+                                    <option value="read" {% if request.GET.status == 'read' %}selected{% endif %}>
+                                        {% trans "Read" %}
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label class="form-label">{% trans "Date From" %}</label>
+                                <input type="date" name="date_from" class="form-control" 
+                                       value="{{ request.GET.date_from }}">
+                            </div>
+                            
+                            <div class="col-md-2">
+                                <label class="form-label">{% trans "Date To" %}</label>
+                                <input type="date" name="date_to" class="form-control" 
+                                       value="{{ request.GET.date_to }}">
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary flex-grow-1">
+                                        <i class="fas fa-filter me-2"></i>{% trans "Filter" %}
+                                    </button>
+                                    <a href="{% url 'accounts:notifications' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-redo me-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    {% if page_obj %}
+                    <div class="list-group list-group-flush">
+                        {% for notification in page_obj %}
+                        <div class="list-group-item border-0 px-4 py-3 {% if not notification.is_read %}bg-light{% endif %} notification-item"
+                             data-notification-id="{{ notification.id }}">
+                            <div class="d-flex gap-3">
+                                <!-- Notification Icon -->
+                                <div class="flex-shrink-0">
+                                    <div class="notification-icon rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 48px; height: 48px; background-color: {{ notification.get_icon_bg_color }};">
+                                        <i class="{{ notification.get_icon }} text-white"></i>
+                                    </div>
+                                </div>
+                                
+                                <!-- Notification Content -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h6 class="mb-0 {% if not notification.is_read %}fw-bold{% endif %}">
+                                            {{ notification.title }}
+                                            {% if not notification.is_read %}
+                                            <span class="badge bg-danger ms-2">{% trans "NEW" %}</span>
+                                            {% endif %}
+                                        </h6>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-link text-muted" type="button" 
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                {% if not notification.is_read %}
+                                                <li>
+                                                    <form method="POST" action="{% url 'accounts:mark_notification_read' notification.id %}" class="d-inline">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="fas fa-check me-2"></i>{% trans "Mark as Read" %}
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                {% endif %}
+                                                <li>
+                                                    <button class="dropdown-item" onclick="viewNotificationDetails('{{ notification.id }}')">
+                                                        <i class="fas fa-eye me-2"></i>{% trans "View Details" %}
+                                                    </button>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <button class="dropdown-item text-danger" onclick="deleteNotification('{{ notification.id }}')">
+                                                        <i class="fas fa-trash me-2"></i>{% trans "Delete" %}
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="mb-2 text-muted">
+                                        {{ notification.message|truncatechars:150 }}
+                                    </p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex gap-2">
+                                            <span class="badge {% if notification.notification_type == 'success' %}bg-success
+                                                              {% elif notification.notification_type == 'error' %}bg-danger
+                                                              {% elif notification.notification_type == 'warning' %}bg-warning
+                                                              {% else %}bg-info{% endif %}">
+                                                {{ notification.get_notification_type_display }}
+                                            </span>
+                                            {% if notification.action_url %}
+                                            <a href="{{ notification.action_url }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-external-link-alt me-1"></i>{% trans "View" %}
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted" title="{{ notification.created_at|date:'DATETIME_FORMAT' }}">
+                                            {{ notification.created_at|timesince }} {% trans "ago" %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <div class="card-footer bg-white border-top-0">
+                        <nav aria-label="Notifications pagination">
+                            <ul class="pagination justify-content-center mb-0">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                            
+                            <div class="text-center mt-2">
+                                <small class="text-muted">
+                                    {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=page_obj.paginator.count %}
+                                    Showing {{ start }} to {{ end }} of {{ total }} notifications
+                                    {% endblocktrans %}
+                                </small>
+                            </div>
+                        </nav>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <!-- No Notifications Found -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-bell-slash fa-4x text-muted"></i>
+                        </div>
+                        <h5 class="text-muted mb-3">{% trans "No Notifications Found" %}</h5>
+                        <p class="text-muted mb-4">
+                            {% trans "You're all caught up! No notifications to display." %}
+                        </p>
+                        <a href="{% url 'accounts:dashboard_redirect' %}" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>{% trans "Go to Dashboard" %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Distribution -->
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>{% trans "Notification Statistics" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="notificationChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>{% trans "Notification Settings" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% trans "Notification settings can be configured in your profile settings." %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Email Notifications" %}</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications" 
+                                   name="email_notifications" checked disabled>
+                            <label class="form-check-label" for="emailNotifications">
+                                {% trans "Receive email notifications" %}
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Push Notifications" %}</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="pushNotifications" 
+                                   name="push_notifications" checked disabled>
+                            <label class="form-check-label" for="pushNotifications">
+                                {% trans "Enable browser notifications" %}
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-primary w-100">
+                        <i class="fas fa-user-cog me-2"></i>{% trans "Go to Profile Settings" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clear Notifications Modal -->
+<div class="modal fade" id="clearNotificationsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Clear All Notifications" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {% trans "Are you sure you want to clear all notifications? This action cannot be undone." %}
+                </div>
+                <p class="text-muted">
+                    {% trans "This will permanently delete all your notifications." %}
+                </p>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="keepUnread">
+                    <label class="form-check-label" for="keepUnread">
+                        {% trans "Keep unread notifications" %}
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="button" class="btn btn-danger" onclick="clearAllNotifications()">
+                    <i class="fas fa-trash me-2"></i>{% trans "Clear All" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Details Modal -->
+<div class="modal fade" id="notificationDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Notification Details" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="notificationDetailsContent">
+                <!-- Details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "Close" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="actionButton" style="display: none;">
+                    {% trans "Take Action" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize notification chart
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize notification statistics chart
+        {% if notification_statistics %}
+        const notificationChartOptions = {
+            series: [{
+                name: '{% trans "Notifications" %}',
+                data: {{ notification_statistics.data|safe }}
+            }],
+            chart: {
+                type: 'bar',
+                height: 300,
+                toolbar: {
+                    show: false
+                }
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    horizontal: false,
+                    columnWidth: '60%'
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            xaxis: {
+                categories: {{ notification_statistics.categories|safe }}
+            },
+            yaxis: {
+                title: {
+                    text: '{% trans "Number of Notifications" %}'
+                }
+            },
+            fill: {
+                opacity: 1,
+                colors: ['#0d6efd']
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return val + ' {% trans "notifications" %}'
+                    }
+                }
+            }
+        };
+        
+        const notificationChart = new ApexCharts(document.querySelector("#notificationChart"), notificationChartOptions);
+        notificationChart.render();
+        {% endif %}
+        
+        // Mark notification as read when clicked
+        document.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Don't trigger if clicking dropdown or action buttons
+                if (e.target.closest('.dropdown') || e.target.closest('a') || e.target.closest('button')) {
+                    return;
+                }
+                
+                const notificationId = this.getAttribute('data-notification-id');
+                markNotificationAsRead(notificationId);
+                
+                // Update UI
+                this.classList.remove('bg-light');
+                const badge = this.querySelector('.badge.bg-danger');
+                if (badge) {
+                    badge.remove();
+                }
+                
+                const title = this.querySelector('h6');
+                if (title) {
+                    title.classList.remove('fw-bold');
+                }
+            });
+        });
+        
+        // Initialize filter form
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            // Add loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Filtering...';
+            submitBtn.disabled = true;
+            
+            // Re-enable button after 2 seconds if form submission fails
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+        
+        // Request browser notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            setTimeout(() => {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        showNotification('{% trans "Browser notifications enabled" %}', 'success');
+                    }
+                });
+            }, 3000);
+        }
+    });
+    
+    // Mark notification as read
+    function markNotificationAsRead(notificationId) {
+        fetch(`/api/v1/notifications/${notificationId}/read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update unread count in header
+                const unreadBadge = document.querySelector('.navbar .fa-bell + .badge');
+                if (unreadBadge) {
+                    const currentCount = parseInt(unreadBadge.textContent);
+                    if (currentCount > 0) {
+                        unreadBadge.textContent = currentCount - 1;
+                        if (currentCount === 1) {
+                            unreadBadge.remove();
+                        }
+                    }
+                }
+                
+                // Update statistics
+                const unreadCountElement = document.querySelector('.card.border-left-warning .h5');
+                if (unreadCountElement) {
+                    const currentUnread = parseInt(unreadCountElement.textContent);
+                    unreadCountElement.textContent = currentUnread - 1;
+                }
+            }
+        })
+        .catch(error => console.error('Error marking notification as read:', error));
+    }
+    
+    // View notification details
+    function viewNotificationDetails(notificationId) {
+        // Simple implementation without API call
+        const notificationItem = document.querySelector(`.notification-item[data-notification-id="${notificationId}"]`);
+        
+        if (notificationItem) {
+            const title = notificationItem.querySelector('h6').textContent.replace('NEW', '').trim();
+            const message = notificationItem.querySelector('p.text-muted').textContent;
+            const type = notificationItem.querySelector('.badge').textContent;
+            const time = notificationItem.querySelector('small.text-muted').textContent;
+            const isUnread = notificationItem.classList.contains('bg-light');
+            
+            const modalContent = document.getElementById('notificationDetailsContent');
+            const actionButton = document.getElementById('actionButton');
+            
+            modalContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="notification-icon rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                             style="width: 64px; height: 64px; background-color: ${getColorForType(type)};">
+                            <i class="${getIconForType(type)} fa-2x text-white"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <h5 class="mb-3">${title}</h5>
+                        <div class="mb-4">
+                            <p class="mb-0">${message}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">{% trans "Type" %}</h6>
+                        <p><span class="badge ${getBadgeClassForType(type)}">${type}</span></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">{% trans "Status" %}</h6>
+                        <p>
+                            <span class="badge ${isUnread ? 'bg-warning' : 'bg-success'}">
+                                ${isUnread ? '{% trans "Unread" %}' : '{% trans "Read" %}'}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="text-muted">{% trans "Received" %}</h6>
+                        <p>${time}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Check if there's an action URL
+            const actionLink = notificationItem.querySelector('a.btn-outline-primary');
+            if (actionLink && actionLink.href) {
+                actionButton.style.display = 'block';
+                actionButton.onclick = () => {
+                    window.location.href = actionLink.href;
+                    bootstrap.Modal.getInstance(document.getElementById('notificationDetailsModal')).hide();
+                };
+            } else {
+                actionButton.style.display = 'none';
+            }
+            
+            // Mark as read if unread
+            if (isUnread) {
+                markNotificationAsRead(notificationId);
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('notificationDetailsModal'));
+            modal.show();
+        }
+    }
+    
+    // Helper functions
+    function getColorForType(type) {
+        if (type.includes('Success')) return '#198754';
+        if (type.includes('Error') || type.includes('Failed')) return '#dc3545';
+        if (type.includes('Warning')) return '#ffc107';
+        return '#0d6efd';
+    }
+    
+    function getIconForType(type) {
+        if (type.includes('Success')) return 'fas fa-check-circle';
+        if (type.includes('Error') || type.includes('Failed')) return 'fas fa-exclamation-circle';
+        if (type.includes('Warning')) return 'fas fa-exclamation-triangle';
+        return 'fas fa-info-circle';
+    }
+    
+    function getBadgeClassForType(type) {
+        if (type.includes('Success')) return 'bg-success';
+        if (type.includes('Error') || type.includes('Failed')) return 'bg-danger';
+        if (type.includes('Warning')) return 'bg-warning';
+        return 'bg-info';
+    }
+    
+    // Delete notification
+    function deleteNotification(notificationId) {
+        if (!confirm('{% trans "Are you sure you want to delete this notification?" %}')) {
+            return;
+        }
+        
+        // Show loading
+        const notificationItem = document.querySelector(`.notification-item[data-notification-id="${notificationId}"]`);
+        if (notificationItem) {
+            notificationItem.style.opacity = '0.5';
+        }
+        
+        // Simulate delete
+        setTimeout(() => {
+            if (notificationItem) {
+                notificationItem.remove();
+                showNotification('{% trans "Notification deleted successfully" %}', 'success');
+                
+                // Update statistics
+                updateNotificationStatistics(-1, true);
+            }
+        }, 500);
+    }
+    
+    // Clear all notifications
+    function clearAllNotifications() {
+        const keepUnread = document.getElementById('keepUnread').checked;
+        
+        // Show loading
+        const clearBtn = document.querySelector('#clearNotificationsModal .btn-danger');
+        const originalText = clearBtn.innerHTML;
+        clearBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Clearing...';
+        clearBtn.disabled = true;
+        
+        // Simulate clearing
+        setTimeout(() => {
+            const notificationsList = document.querySelector('.list-group');
+            if (notificationsList) {
+                if (keepUnread) {
+                    // Remove only read notifications
+                    document.querySelectorAll('.notification-item:not(.bg-light)').forEach(item => {
+                        item.remove();
+                    });
+                } else {
+                    // Remove all notifications
+                    notificationsList.innerHTML = `
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-check-circle fa-4x text-success"></i>
+                            </div>
+                            <h5 class="text-muted mb-3">{% trans "All Notifications Cleared" %}</h5>
+                            <p class="text-muted">
+                                {% trans "Your notifications have been successfully cleared." %}
+                            </p>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Update statistics
+            updateNotificationStatistics(-100, false);
+            
+            // Close modal
+            bootstrap.Modal.getInstance(document.getElementById('clearNotificationsModal')).hide();
+            
+            showNotification('{% trans "Notifications cleared successfully" %}', 'success');
+            
+            // Reset button
+            clearBtn.innerHTML = originalText;
+            clearBtn.disabled = false;
+        }, 1500);
+    }
+    
+    // Update notification statistics
+    function updateNotificationStatistics(countChange, wasUnread) {
+        // Update total count
+        const totalCountElement = document.querySelector('.card.border-left-primary .h5');
+        if (totalCountElement) {
+            const currentTotal = parseInt(totalCountElement.textContent.replace(/,/g, ''));
+            totalCountElement.textContent = Math.max(0, currentTotal + countChange).toLocaleString();
+        }
+        
+        // Update unread count if applicable
+        if (wasUnread) {
+            const unreadCountElement = document.querySelector('.card.border-left-warning .h5');
+            if (unreadCountElement) {
+                const currentUnread = parseInt(unreadCountElement.textContent.replace(/,/g, ''));
+                unreadCountElement.textContent = Math.max(0, currentUnread - 1).toLocaleString();
+            }
+        }
+    }
+    
+    // Show notification
+    function showNotification(message, type = 'info') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show position-fixed bottom-0 end-0 m-3`;
+        alert.style.zIndex = '1060';
+        alert.style.maxWidth = '350px';
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 3000);
+    }
+    
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+<style>
+    .notification-item {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #f1f1f1 !important;
+    }
+    
+    .notification-item:last-child {
+        border-bottom: none !important;
+    }
+    
+    .notification-item:hover {
+        background-color: #f8f9fa !important;
+        transform: translateX(2px);
+    }
+    
+    .notification-item.unread {
+        border-left: 3px solid #0d6efd;
+    }
+    
+    .notification-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .bg-primary { background-color: #0d6efd !important; }
+    .bg-success { background-color: #198754 !important; }
+    .bg-info { background-color: #0dcaf0 !important; }
+    .bg-warning { background-color: #ffc107 !important; }
+    .bg-danger { background-color: #dc3545 !important; }
+    
+    .badge {
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+    
+    .form-switch .form-check-input {
+        height: 1.5em;
+        width: 3em;
+    }
+    
+    @media (max-width: 768px) {
+        .notification-item {
+            padding: 1rem !important;
+        }
+        
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .notification-icon i {
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}

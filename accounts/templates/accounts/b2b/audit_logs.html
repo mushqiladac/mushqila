@@ -1,0 +1,367 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Audit Logs - B2B Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+.audit-logs-container {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.audit-logs-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.header-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+}
+
+.filters-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.log-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s ease;
+}
+
+.log-item:hover {
+    background-color: #f8f9fa;
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.log-timestamp {
+    font-weight: bold;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.log-user {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.log-action {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.log-details {
+    background: #f1f3f4;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    margin: 0.5rem 0;
+    word-break: break-word;
+}
+
+.log-ip {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.action-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.action-create { background: #d4edda; color: #155724; }
+.action-update { background: #cce5ff; color: #004085; }
+.action-delete { background: #f8d7da; color: #721c24; }
+.action-login { background: #d1ecf1; color: #0c5460; }
+.action-logout { background: #f8f9fa; color: #6c757d; }
+.action-api { background: #e2e3e5; color: #383d41; }
+.action-other { background: #fff3cd; color: #856404; }
+
+.level-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.level-info { background: #cce5ff; color: #004085; }
+.level-warning { background: #fff3cd; color: #856404; }
+.level-error { background: #f8d7da; color: #721c24; }
+.level-critical { background: #dc3545; color: white; }
+
+.btn-export {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.btn-export:hover {
+    transform: scale(1.05);
+    color: white;
+    text-decoration: none;
+}
+
+.pagination-container {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="audit-logs-container">
+    <div class="container">
+        <div class="audit-logs-card">
+            <!-- Header -->
+            <div class="header-section">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-2">
+                            <i class="fas fa-history"></i> Audit Logs
+                        </h2>
+                        <p class="mb-0 opacity-75">
+                            Complete audit trail of all B2B platform activities and API interactions
+                        </p>
+                    </div>
+                    <a href="{% url 'accounts:b2b_audit_logs' %}?export=csv" class="btn-export">
+                        <i class="fas fa-download"></i> Export CSV
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="action_filter" class="form-label">Action Type</label>
+                        <select class="form-control" id="action_filter" name="action">
+                            <option value="">All Actions</option>
+                            <option value="create" {% if request.GET.action == 'create' %}selected{% endif %}>Create</option>
+                            <option value="update" {% if request.GET.action == 'update' %}selected{% endif %}>Update</option>
+                            <option value="delete" {% if request.GET.action == 'delete' %}selected{% endif %}>Delete</option>
+                            <option value="login" {% if request.GET.action == 'login' %}selected{% endif %}>Login</option>
+                            <option value="logout" {% if request.GET.action == 'logout' %}selected{% endif %}>Logout</option>
+                            <option value="api" {% if request.GET.action == 'api' %}selected{% endif %}>API Call</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="user_filter" class="form-label">User</label>
+                        <input type="text" class="form-control" id="user_filter" name="user"
+                               value="{{ request.GET.user }}" placeholder="Search by user...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_from" class="form-label">From Date</label>
+                        <input type="date" class="form-control" id="date_from" name="date_from"
+                               value="{{ request.GET.date_from }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_to" class="form-label">To Date</label>
+                        <input type="date" class="form-control" id="date_to" name="date_to"
+                               value="{{ request.GET.date_to }}">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-search"></i> Filter Logs
+                        </button>
+                        <a href="{% url 'accounts:b2b_audit_logs' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Clear Filters
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Logs List -->
+            <div class="logs-container">
+                {% if audit_logs %}
+                    {% for log in audit_logs %}
+                    <div class="log-item">
+                        <div class="row align-items-start">
+                            <div class="col-md-3">
+                                <div class="log-timestamp">
+                                    {{ log.timestamp|date:"M d, Y H:i:s" }}
+                                </div>
+                                <div class="log-user">
+                                    <i class="fas fa-user"></i> {{ log.user.get_full_name|default:log.user.email }}
+                                </div>
+                                <div class="log-ip">
+                                    <i class="fas fa-globe"></i> {{ log.ip_address }}
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="action-badge action-{{ log.action|lower }} me-2">
+                                        {{ log.get_action_display }}
+                                    </span>
+                                    {% if log.level %}
+                                    <span class="level-badge level-{{ log.level|lower }}">
+                                        {{ log.level|upper }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="log-action">{{ log.description }}</div>
+                                {% if log.details %}
+                                <div class="log-details">
+                                    {{ log.details|truncatechars:500 }}
+                                    {% if log.details|length > 500 %}
+                                    <br><small><em>... (truncated)</em></small>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                {% if log.resource_type and log.resource_id %}
+                                <small class="text-muted">
+                                    <i class="fas fa-link"></i> {{ log.resource_type }} #{{ log.resource_id }}
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <h4>No Audit Logs Found</h4>
+                        <p>No activities match your current filters. Try adjusting your search criteria.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Pagination -->
+            {% if audit_logs and is_paginated %}
+            <div class="pagination-container">
+                <nav aria-label="Audit logs pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                <div class="text-center mt-2">
+                    <small class="text-muted">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ paginator.count }} entries
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+// Auto-refresh logs every 30 seconds
+let autoRefreshInterval;
+
+function startAutoRefresh() {
+    autoRefreshInterval = setInterval(function() {
+        // Only refresh if no filters are active and we're on page 1
+        const hasFilters = window.location.search.length > 0;
+        const isPage1 = !window.location.search.includes('page=') || window.location.search.includes('page=1');
+
+        if (!hasFilters && isPage1) {
+            location.reload();
+        }
+    }, 30000); // 30 seconds
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+}
+
+// Start auto-refresh when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    startAutoRefresh();
+
+    // Stop auto-refresh when user interacts with filters
+    document.querySelectorAll('input, select').forEach(element => {
+        element.addEventListener('focus', stopAutoRefresh);
+    });
+});
+
+// Highlight search terms in log details
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchTerm = urlParams.get('user') || urlParams.get('action');
+
+    if (searchTerm) {
+        const logDetails = document.querySelectorAll('.log-details');
+        logDetails.forEach(detail => {
+            const text = detail.textContent;
+            const highlightedText = text.replace(new RegExp(searchTerm, 'gi'),
+                match => `<mark>${match}</mark>`);
+            detail.innerHTML = highlightedText;
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

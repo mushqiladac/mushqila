@@ -1,0 +1,725 @@
+{% extends 'accounts/base_auth.html' %}
+{% load static %}
+
+{% block title %}Login - Mushqila B2B Travel Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Agent Login</h3>
+                    <p class="mb-0 mt-2 small">Access your B2B travel agent account</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Show form errors -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Login failed!</strong> Please check your credentials.
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" id="loginForm" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Login Type Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold mb-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login With
+                            </label>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="login_type" id="login_email" value="email" checked>
+                                    <label class="btn btn-outline-primary w-100" for="login_email">
+                                        <i class="fas fa-envelope me-2"></i>Email
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="login_type" id="login_phone" value="phone">
+                                    <label class="btn btn-outline-success w-100" for="login_phone">
+                                        <i class="fas fa-phone me-2"></i>Phone
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Email Field (Default) -->
+                        <div class="mb-4" id="emailFieldGroup">
+                            <label for="id_email" class="form-label fw-semibold">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="email" 
+                                       name="email" 
+                                       id="id_email"
+                                       class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                                       placeholder="your@email.com"
+                                       value="{{ form.email.value|default:'' }}"
+                                       required
+                                       autocomplete="email">
+                            </div>
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.email.errors %}
+                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Phone Field (Hidden by default) -->
+                        <div class="mb-4 d-none" id="phoneFieldGroup">
+                            <label for="id_phone" class="form-label fw-semibold">
+                                <i class="fas fa-phone me-2"></i>Saudi Phone Number
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>
+                                <input type="tel" 
+                                       name="phone" 
+                                       id="id_phone"
+                                       class="form-control {% if form.phone.errors %}is-invalid{% endif %}"
+                                       placeholder="+9665XXXXXXXX"
+                                       value="{{ form.phone.value|default:'' }}"
+                                       pattern="^\+9665\d{8}$"
+                                       autocomplete="tel">
+                            </div>
+                            <div class="form-text small">Format: +9665XXXXXXXX</div>
+                            {% if form.phone.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.phone.errors %}
+                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Password Field -->
+                        <div class="mb-4">
+                            <label for="id_password" class="form-label fw-semibold">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                <input type="password" 
+                                       name="password" 
+                                       id="id_password"
+                                       class="form-control {% if form.password.errors %}is-invalid{% endif %}"
+                                       placeholder="Enter your password"
+                                       required
+                                       autocomplete="current-password">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.password.errors %}
+                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe" name="remember_me">
+                                <label class="form-check-label small" for="rememberMe">
+                                    <i class="fas fa-check-circle me-1"></i>Remember me
+                                </label>
+                            </div>
+                            <div>
+                                <a href="{% url 'accounts:password_reset' %}" class="text-decoration-none small">
+                                    <i class="fas fa-key me-1"></i>Forgot password?
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-3" id="submitBtn">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In to Dashboard
+                            </button>
+                        </div>
+                        
+                        <!-- Demo Accounts (for development only) -->
+                        {% if DEBUG or request.get_host == '127.0.0.1:8000' or request.get_host == 'localhost:8000' %}
+                        <div class="card border-info mb-4">
+                            <div class="card-header bg-info bg-opacity-10 border-info py-2">
+                                <h6 class="mb-0"><i class="fas fa-vial me-2"></i>Demo Accounts (Development Only)</h6>
+                            </div>
+                            <div class="card-body py-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="border rounded p-2 bg-light demo-account" onclick="fillDemo('admin@mushqila.com', 'Admin@123')">
+                                            <small class="d-block fw-bold text-primary">Admin</small>
+                                            <small class="text-muted d-block">admin@mushqila.com</small>
+                                            <small class="text-muted">Password: Admin@123</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="border rounded p-2 bg-light demo-account" onclick="fillDemo('agent@mushqila.com', 'Agent@123')">
+                                            <small class="d-block fw-bold text-success">Agent</small>
+                                            <small class="text-muted d-block">agent@mushqila.com</small>
+                                            <small class="text-muted">Password: Agent@123</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="border rounded p-2 bg-light demo-account" onclick="fillDemo('super_agent@mushqila.com', 'Super@123')">
+                                            <small class="d-block fw-bold text-warning">Super Agent</small>
+                                            <small class="text-muted d-block">super_agent@mushqila.com</small>
+                                            <small class="text-muted">Password: Super@123</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="border rounded p-2 bg-light demo-account" onclick="fillDemo('supplier@mushqila.com', 'Supplier@123')">
+                                            <small class="d-block fw-bold text-info">Supplier</small>
+                                            <small class="text-muted d-block">supplier@mushqila.com</small>
+                                            <small class="text-muted">Password: Supplier@123</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-warning small mt-3 mb-0">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    These demo accounts are for testing only.
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+                
+                <!-- Registration Link -->
+                <div class="card-footer text-center py-3 bg-light">
+                    <p class="mb-0">
+                        New to Mushqila? 
+                        <a href="{% url 'accounts:register' %}" class="fw-bold text-decoration-none text-primary">
+                            <i class="fas fa-user-plus me-1"></i>Create Agent Account
+                        </a>
+                    </p>
+                    <p class="mb-0 small text-muted mt-1">
+                        For Hajj/Umrah service providers, 
+                        <a href="{% url 'accounts:register' %}?user_type=supplier" class="text-decoration-none">click here</a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Support Information -->
+            <div class="card mt-4 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <h5 class="mb-3"><i class="fas fa-headset me-2 text-primary"></i>Need Help?</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="fas fa-envelope text-primary me-3 fs-4"></i>
+                                <div class="text-start">
+                                    <small class="d-block text-muted">Email Support</small>
+                                    <strong>support@mushqila.com</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <i class="fas fa-phone text-primary me-3 fs-4"></i>
+                                <div class="text-start">
+                                    <small class="d-block text-muted">Call Us (KSA)</small>
+                                    <strong>+966 50 099 3174</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="#" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="fas fa-comments me-1"></i>Contact Support
+                        </a>
+                        <a href="{% url 'accounts:home' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-question-circle me-1"></i>Help Center
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Notice -->
+            <div class="alert alert-light border mt-4 small" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-shield-alt me-3 text-success fs-4"></i>
+                    <div>
+                        <strong class="d-block">Secure Login</strong>
+                        <span class="text-muted">Your information is protected with 256-bit SSL encryption.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Password toggle functionality
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('id_password');
+        
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                const icon = this.querySelector('i');
+                if (type === 'text') {
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        }
+        
+        // Login type switcher
+        const loginEmail = document.getElementById('login_email');
+        const loginPhone = document.getElementById('login_phone');
+        const emailFieldGroup = document.getElementById('emailFieldGroup');
+        const phoneFieldGroup = document.getElementById('phoneFieldGroup');
+        const emailInput = document.getElementById('id_email');
+        const phoneInput = document.getElementById('id_phone');
+        
+        if (loginEmail && loginPhone) {
+            loginEmail.addEventListener('change', function() {
+                if (this.checked) {
+                    emailFieldGroup.classList.remove('d-none');
+                    phoneFieldGroup.classList.add('d-none');
+                    emailInput.required = true;
+                    phoneInput.required = false;
+                    emailInput.focus();
+                }
+            });
+            
+            loginPhone.addEventListener('change', function() {
+                if (this.checked) {
+                    emailFieldGroup.classList.add('d-none');
+                    phoneFieldGroup.classList.remove('d-none');
+                    emailInput.required = false;
+                    phoneInput.required = true;
+                    phoneInput.focus();
+                }
+            });
+        }
+        
+        // Demo account filler function
+        window.fillDemo = function(email, password) {
+            // Switch to email login
+            loginEmail.checked = true;
+            loginEmail.dispatchEvent(new Event('change'));
+            
+            // Fill fields
+            if (emailInput) emailInput.value = email;
+            if (passwordInput) passwordInput.value = password;
+            
+            // Visual feedback
+            const demoAccount = event.currentTarget;
+            demoAccount.classList.add('border-primary', 'bg-primary-subtle');
+            setTimeout(() => {
+                demoAccount.classList.remove('border-primary', 'bg-primary-subtle');
+            }, 1000);
+        };
+        
+        // Auto-focus on email field
+        if (emailInput) {
+            emailInput.focus();
+            
+            // Convert email to lowercase
+            emailInput.addEventListener('blur', function() {
+                this.value = this.value.toLowerCase().trim();
+            });
+        }
+        
+        // Phone number formatting
+        if (phoneInput) {
+            phoneInput.addEventListener('blur', function() {
+                let phone = this.value.trim().replace(/\s+/g, '');
+                
+                // Format to Saudi standard
+                if (phone && !phone.startsWith('+966')) {
+                    if (phone.startsWith('966')) {
+                        phone = '+' + phone;
+                    } else if (phone.startsWith('05')) {
+                        phone = '+966' + phone.substring(1);
+                    } else if (phone.startsWith('5') && phone.length === 9) {
+                        phone = '+966' + phone;
+                    } else if (phone.length === 9 && /^5/.test(phone)) {
+                        phone = '+966' + phone;
+                    }
+                    
+                    // Ensure it matches the pattern
+                    if (!/^\+9665\d{8}$/.test(phone)) {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    }
+                    
+                    this.value = phone;
+                }
+            });
+            
+            phoneInput.addEventListener('input', function() {
+                this.classList.remove('is-invalid', 'is-valid');
+            });
+        }
+        
+        // Form validation
+        const form = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                // Prevent multiple submissions
+                if (submitBtn.disabled) {
+                    event.preventDefault();
+                    return;
+                }
+                
+                // Get selected login type
+                const isEmailLogin = loginEmail.checked;
+                let isValid = true;
+                
+                if (isEmailLogin) {
+                    // Validate email
+                    const email = emailInput.value.trim();
+                    if (!email || !isValidEmail(email)) {
+                        isValid = false;
+                        emailInput.classList.add('is-invalid');
+                    }
+                } else {
+                    // Validate phone
+                    const phone = phoneInput.value.trim();
+                    if (!phone || !/^\+9665\d{8}$/.test(phone)) {
+                        isValid = false;
+                        phoneInput.classList.add('is-invalid');
+                    }
+                }
+                
+                // Validate password
+                const password = passwordInput.value;
+                if (!password) {
+                    isValid = false;
+                    passwordInput.classList.add('is-invalid');
+                }
+                
+                if (!isValid) {
+                    event.preventDefault();
+                    showAlert('Please fill in all required fields correctly', 'danger');
+                    return;
+                }
+                
+                // Show loading state
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing In...';
+                    submitBtn.classList.add('btn-loading');
+                }
+                
+                // Form is valid, allow submission
+            });
+        }
+        
+        // Real-time email validation
+        if (emailInput) {
+            emailInput.addEventListener('input', function() {
+                validateEmailField(this);
+            });
+            
+            emailInput.addEventListener('blur', function() {
+                validateEmailField(this);
+            });
+        }
+        
+        function validateEmailField(field) {
+            const email = field.value.trim();
+            if (email && !isValidEmail(email)) {
+                field.classList.add('is-invalid');
+                showFieldError(field, 'Please enter a valid email address');
+            } else {
+                field.classList.remove('is-invalid');
+                hideFieldError(field);
+            }
+        }
+        
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function showFieldError(field, message) {
+            let errorDiv = field.nextElementSibling;
+            if (!errorDiv || !errorDiv.classList.contains('invalid-feedback')) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                field.parentNode.appendChild(errorDiv);
+            }
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${message}`;
+            errorDiv.style.display = 'block';
+        }
+        
+        function hideFieldError(field) {
+            const errorDiv = field.nextElementSibling;
+            if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                errorDiv.style.display = 'none';
+            }
+        }
+        
+        // Enter key submits form
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName !== 'TEXTAREA' && activeElement.tagName !== 'BUTTON') {
+                    event.preventDefault();
+                    if (form && form.checkValidity()) {
+                        form.dispatchEvent(new Event('submit'));
+                    }
+                }
+            }
+        });
+        
+        // Alert function
+        function showAlert(message, type = 'info') {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert-dismissible');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            // Insert at the beginning of the form
+            const form = document.getElementById('loginForm');
+            if (form) {
+                form.insertBefore(alertDiv, form.firstChild);
+            }
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Remember me functionality
+        const rememberMe = document.getElementById('rememberMe');
+        if (rememberMe) {
+            // Check if email is saved in localStorage
+            const savedEmail = localStorage.getItem('mushqila_remember_email');
+            if (savedEmail) {
+                emailInput.value = savedEmail;
+                rememberMe.checked = true;
+            }
+            
+            rememberMe.addEventListener('change', function() {
+                if (this.checked && emailInput.value) {
+                    localStorage.setItem('mushqila_remember_email', emailInput.value);
+                } else {
+                    localStorage.removeItem('mushqila_remember_email');
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Custom styles for login form */
+    .form-control {
+        border-radius: 0.375rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #006C35;
+        box-shadow: 0 0 0 0.25rem rgba(0, 108, 53, 0.25);
+        outline: none;
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        min-width: 45px;
+        justify-content: center;
+        color: #6c757d;
+    }
+    
+    .card {
+        border-radius: 1rem;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 108, 53, 0.1) !important;
+    }
+    
+    .card-header {
+        border-bottom: none;
+        background: linear-gradient(135deg, #006C35 0%, #005028 100%);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #006C35 0%, #005028 100%);
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #005028 0%, #00451c 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 108, 53, 0.3);
+    }
+    
+    .btn-outline-primary.active {
+        background-color: #006C35;
+        color: white;
+        border-color: #006C35;
+    }
+    
+    .btn-outline-success.active {
+        background-color: #198754;
+        color: white;
+        border-color: #198754;
+    }
+    
+    #togglePassword {
+        border-left: none;
+        min-width: 50px;
+        background-color: #f8f9fa;
+    }
+    
+    #togglePassword:hover {
+        background-color: #e9ecef;
+        color: #006C35;
+    }
+    
+    /* Demo accounts styling */
+    .demo-account {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 100%;
+        border: 1px solid #dee2e6 !important;
+    }
+    
+    .demo-account:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: #006C35 !important;
+    }
+    
+    .demo-account small {
+        font-size: 0.75rem;
+        line-height: 1.2;
+    }
+    
+    /* Loading button */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+    }
+    
+    .btn-loading .fa-spinner {
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Animation for form validation */
+    .is-invalid {
+        border-color: #dc3545 !important;
+        animation: shake 0.5s ease-in-out;
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    
+    /* Invalid feedback */
+    .invalid-feedback {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc3545;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1rem !important;
+            font-size: 1rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem !important;
+        }
+        
+        .row .col-md-6 {
+            margin-bottom: 1rem;
+        }
+        
+        .demo-account {
+            margin-bottom: 0.5rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .card {
+            margin: 0 -1rem;
+            border-radius: 0;
+        }
+        
+        .card-header {
+            padding: 1.5rem 1rem !important;
+        }
+        
+        .alert {
+            margin-left: -1rem;
+            margin-right: -1rem;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+        }
+    }
+</style>
+{% endblock %}

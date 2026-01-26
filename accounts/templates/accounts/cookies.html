@@ -1,0 +1,170 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold text-primary mb-3">
+                    <i class="fas fa-cookie-bite me-2"></i>Cookie Policy
+                </h1>
+                <p class="lead text-muted">
+                    Last updated: {{ current_year }}
+                </p>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <!-- Introduction -->
+                    <section class="mb-5">
+                        <h2 class="h4 text-primary mb-3">1. Introduction</h2>
+                        <p>
+                            Mushqila Travel Platform ("we", "us", "our") uses cookies and similar 
+                            technologies on our website and platform. This Cookie Policy explains 
+                            what cookies are, how we use them, and your choices regarding cookies.
+                        </p>
+                    </section>
+
+                    <!-- What are Cookies -->
+                    <section class="mb-5">
+                        <h2 class="h4 text-primary mb-3">2. What Are Cookies?</h2>
+                        <p>
+                            Cookies are small text files that are stored on your device (computer, 
+                            tablet, or mobile) when you visit our website. They help us provide you 
+                            with a better experience by:
+                        </p>
+                        <ul>
+                            <li>Remembering your preferences</li>
+                            <li>Understanding how you use our platform</li>
+                            <li>Improving security</li>
+                            <li>Personalizing content</li>
+                        </ul>
+                    </section>
+
+                    <!-- Types of Cookies -->
+                    <section class="mb-5">
+                        <h2 class="h4 text-primary mb-3">3. Types of Cookies We Use</h2>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Cookie Type</th>
+                                        <th>Purpose</th>
+                                        <th>Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Essential Cookies</strong></td>
+                                        <td>Required for basic functions like login and security</td>
+                                        <td>Session or persistent</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Functional Cookies</strong></td>
+                                        <td>Remember your preferences and settings</td>
+                                        <td>Persistent (up to 1 year)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Analytics Cookies</strong></td>
+                                        <td>Help us understand how users interact with our platform</td>
+                                        <td>Persistent (up to 2 years)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Marketing Cookies</strong></td>
+                                        <td>Used to deliver relevant advertisements</td>
+                                        <td>Persistent (up to 1 year)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Saudi Arabia Compliance -->
+                    <section class="mb-5">
+                        <h2 class="h4 text-primary mb-3">4. Saudi Arabia Compliance</h2>
+                        <p>
+                            We comply with the Saudi Arabia Personal Data Protection Law (PDPL) and 
+                            relevant regulations regarding cookies and user privacy. Our platform is 
+                            designed to respect the privacy preferences of users in Saudi Arabia.
+                        </p>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note for Saudi Users:</strong> By using our platform, you consent 
+                            to our use of cookies in accordance with Saudi Arabian regulations.
+                        </div>
+                    </section>
+
+                    <!-- Managing Cookies -->
+                    <section class="mb-5">
+                        <h2 class="h4 text-primary mb-3">5. Managing Your Cookie Preferences</h2>
+                        <p>You can control and/or delete cookies as you wish. You can:</p>
+                        <ul>
+                            <li>
+                                <strong>Browser Settings:</strong> Most browsers allow you to refuse 
+                                cookies or delete existing ones. Refer to your browser's help section 
+                                for instructions.
+                            </li>
+                            <li>
+                                <strong>Platform Settings:</strong> Log into your account and adjust 
+                                privacy settings in your profile.
+                            </li>
+                            <li>
+                                <strong>Opt-out Tools:</strong> Use third-party opt-out tools for 
+                                analytics and advertising cookies.
+                            </li>
+                        </ul>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Important:</strong> Disabling essential cookies may prevent certain 
+                            features of the platform from working correctly.
+                        </div>
+                    </section>
+
+                    <!-- Contact -->
+                    <section>
+                        <h2 class="h4 text-primary mb-3">6. Contact Us</h2>
+                        <p>
+                            If you have questions about our Cookie Policy, please contact us:
+                        </p>
+                        <ul>
+                            <li><strong>Email:</strong> privacy@mushqila.com</li>
+                            <li><strong>Phone (KSA):</strong> +966 50 099 3174</li>
+                            <li><strong>Address:</strong> Riyadh, Saudi Arabia</li>
+                        </ul>
+                    </section>
+
+                    <!-- Back to Links -->
+                    <div class="mt-5 pt-4 border-top text-center">
+                        <a href="{% url 'accounts:privacy' %}" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-shield-alt me-1"></i>Privacy Policy
+                        </a>
+                        <a href="{% url 'accounts:terms' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-contract me-1"></i>Terms of Service
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set current year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Initialize cookie consent if not already done
+        if (!localStorage.getItem('cookiesAccepted')) {
+            // Show cookie banner (you can implement this separately)
+            console.log('Cookie policy page loaded');
+        }
+    });
+</script>
+{% endblock %}

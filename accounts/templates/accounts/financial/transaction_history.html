@@ -1,0 +1,562 @@
+{% extends 'accounts/base.html' %}
+{% load i18n %}
+{% load humanize %}
+
+{% block title %}{% trans "Transaction History" %} | Mushqila Platform{% endblock %}
+
+{% block page_title %}{% trans "Transaction History" %}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="ms-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard_redirect' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'accounts:wallet' %}">{% trans "Wallet" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Transactions" %}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h1 class="h3 mb-1">{% trans "Transaction History" %}</h1>
+                    <p class="text-muted mb-0">
+                        {% trans "View all your deposits, withdrawals, and other transactions" %}
+                    </p>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <a href="{% url 'accounts:wallet' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Wallet" %}
+                    </a>
+                    <button type="button" class="btn btn-primary" id="exportTransactions">
+                        <i class="fas fa-download me-2"></i>{% trans "Export" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Deposits -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% trans "Total Deposits" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_deposits|floatformat:2|intcomma }} {% trans "SAR" %}
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-arrow-up me-1"></i>
+                                    {% trans "Credits" %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-download fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Withdrawals -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                {% trans "Total Withdrawals" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_withdrawals|floatformat:2|intcomma }} {% trans "SAR" %}
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge bg-success">
+                                    <i class="fas fa-arrow-down me-1"></i>
+                                    {% trans "Debits" %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-upload fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Bookings -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                {% trans "Total Bookings" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_bookings|floatformat:2|intcomma }} {% trans "SAR" %}
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge bg-info">
+                                    <i class="fas fa-plane me-1"></i>
+                                    {% trans "Travel" %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-plane fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Balance -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                {% trans "Current Balance" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ user.wallet_balance|floatformat:2|intcomma }} {% trans "SAR" %}
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-wallet me-1"></i>
+                                    {% trans "Available" %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-wallet fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter me-2"></i>{% trans "Filter Transactions" %}
+            </h6>
+            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                <i class="fas fa-sliders-h"></i>
+            </button>
+        </div>
+        <div class="collapse show" id="filterCollapse">
+            <div class="card-body">
+                <form method="GET" id="filterForm">
+                    <div class="row g-3">
+                        <!-- Transaction Type -->
+                        <div class="col-md-3">
+                            <label for="transaction_type" class="form-label">{% trans "Transaction Type" %}</label>
+                            <select class="form-select" id="transaction_type" name="transaction_type">
+                                <option value="">{% trans "All Types" %}</option>
+                                {% for value, label in transaction_type_choices %}
+                                <option value="{{ value }}" {% if request.GET.transaction_type == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">{% trans "Status" %}</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">{% trans "All Status" %}</option>
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="col-md-3">
+                            <label for="date_from" class="form-label">{% trans "From Date" %}</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" 
+                                   value="{{ request.GET.date_from }}">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="date_to" class="form-label">{% trans "To Date" %}</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" 
+                                   value="{{ request.GET.date_to }}">
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <button type="reset" class="btn btn-outline-secondary" id="resetFilters">
+                                    <i class="fas fa-redo me-2"></i>{% trans "Reset Filters" %}
+                                </button>
+                                <div>
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-filter me-2"></i>{% trans "Apply Filters" %}
+                                    </button>
+                                    <a href="{% url 'accounts:transactions' %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-list me-2"></i>{% trans "View All" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="card shadow">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-history me-2"></i>{% trans "Transaction History" %}
+                <span class="badge bg-primary ms-2">{{ transactions.paginator.count }}</span>
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if transactions %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="transactionsTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>{% trans "Date & Time" %}</th>
+                            <th>{% trans "Transaction ID" %}</th>
+                            <th>{% trans "Type" %}</th>
+                            <th>{% trans "Description" %}</th>
+                            <th>{% trans "Amount (SAR)" %}</th>
+                            <th>{% trans "Status" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr class="transaction-row">
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold">{{ transaction.created_at|date:"d M Y" }}</span>
+                                    <small class="text-muted">{{ transaction.created_at|time:"H:i" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <code class="text-primary">{{ transaction.transaction_id|truncatechars:12 }}</code>
+                            </td>
+                            <td>
+                                <span class="badge transaction-type-{{ transaction.transaction_type }}">
+                                    {% if transaction.transaction_type == 'deposit' %}
+                                    <i class="fas fa-plus-circle me-1"></i>
+                                    {% elif transaction.transaction_type == 'withdrawal' %}
+                                    <i class="fas fa-minus-circle me-1"></i>
+                                    {% elif transaction.transaction_type == 'booking' %}
+                                    <i class="fas fa-plane me-1"></i>
+                                    {% elif transaction.transaction_type == 'commission' %}
+                                    <i class="fas fa-hand-holding-usd me-1"></i>
+                                    {% else %}
+                                    <i class="fas fa-exchange-alt me-1"></i>
+                                    {% endif %}
+                                    {{ transaction.get_transaction_type_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="transaction-description">
+                                    <span class="d-block text-truncate" style="max-width: 200px;">
+                                        {{ transaction.description }}
+                                    </span>
+                                    {% if transaction.reference %}
+                                    <small class="text-muted">Ref: {{ transaction.reference }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if transaction.amount >= 0 %}
+                                    <i class="fas fa-arrow-up text-success me-2"></i>
+                                    <span class="text-success fw-bold">
+                                        +{{ transaction.amount|floatformat:2|intcomma }}
+                                    </span>
+                                    {% else %}
+                                    <i class="fas fa-arrow-down text-danger me-2"></i>
+                                    <span class="text-danger fw-bold">
+                                        {{ transaction.amount|floatformat:2|intcomma }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if transaction.status == 'completed' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>{% trans "Completed" %}
+                                </span>
+                                {% elif transaction.status == 'pending' %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-clock me-1"></i>{% trans "Pending" %}
+                                </span>
+                                {% elif transaction.status == 'failed' %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times-circle me-1"></i>{% trans "Failed" %}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ transaction.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if transactions.has_other_pages %}
+            <nav aria-label="Transaction pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if transactions.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ transactions.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                    </li>
+                    {% endif %}
+
+                    {% for i in transactions.paginator.page_range %}
+                        {% if transactions.number == i %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ i }}</span>
+                        </li>
+                        {% elif i > transactions.number|add:'-3' and i < transactions.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if transactions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ transactions.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <!-- No Transactions Found -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-exchange-alt fa-4x text-muted"></i>
+                </div>
+                <h5 class="text-muted mb-3">{% trans "No transactions found" %}</h5>
+                <p class="text-muted mb-4">
+                    {% trans "You haven't made any transactions yet. Start by making a deposit or booking." %}
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'accounts:deposit' %}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i>{% trans "Make Deposit" %}
+                    </a>
+                    <a href="{% url 'accounts:flight_bookings' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-plane me-2"></i>{% trans "Book Flight" %}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h6 class="mb-2 text-primary">
+                        <i class="fas fa-question-circle me-2"></i>{% trans "Need Help with Transactions?" %}
+                    </h6>
+                    <p class="text-muted mb-0 small">
+                        {% trans "If you notice any discrepancies in your transaction history or have questions about specific transactions, please contact our support team." %}
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="mailto:support@mushqila.com" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-envelope me-2"></i>{% trans "Email Support" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Transaction Type Badges */
+    .transaction-type-deposit {
+        background-color: rgba(25, 135, 84, 0.1) !important;
+        color: #198754 !important;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+    }
+    
+    .transaction-type-withdrawal {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+        color: #dc3545 !important;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+    
+    .transaction-type-booking {
+        background-color: rgba(13, 110, 253, 0.1) !important;
+        color: #0d6efd !important;
+        border: 1px solid rgba(13, 110, 253, 0.2);
+    }
+    
+    .transaction-type-commission {
+        background-color: rgba(255, 193, 7, 0.1) !important;
+        color: #ffc107 !important;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+    
+    /* Table Styles */
+    .transaction-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .transaction-description {
+        max-width: 250px;
+    }
+    
+    /* Cards */
+    .border-left-primary {
+        border-left: 4px solid #4e73df !important;
+    }
+    
+    .border-left-success {
+        border-left: 4px solid #1cc88a !important;
+    }
+    
+    .border-left-info {
+        border-left: 4px solid #36b9cc !important;
+    }
+    
+    .border-left-warning {
+        border-left: 4px solid #f6c23e !important;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .transaction-description {
+            max-width: 150px;
+        }
+        
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.3em 0.6em;
+        }
+        
+        .h3 {
+            font-size: 1.5rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Reset filters
+        document.getElementById('resetFilters').addEventListener('click', function() {
+            document.getElementById('filterForm').reset();
+            document.getElementById('filterForm').submit();
+        });
+        
+        // Export transactions
+        document.getElementById('exportTransactions').addEventListener('click', function() {
+            // Get current filter parameters
+            const params = new URLSearchParams(window.location.search);
+            
+            // Show loading
+            const exportBtn = this;
+            exportBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{% trans "Exporting..." %}';
+            exportBtn.disabled = true;
+            
+            // Create export URL
+            let exportUrl = '{% url "accounts:transactions" %}?export=csv';
+            params.forEach((value, key) => {
+                if (key !== 'export' && key !== 'page') {
+                    exportUrl += `&${key}=${encodeURIComponent(value)}`;
+                }
+            });
+            
+            // Trigger download
+            const link = document.createElement('a');
+            link.href = exportUrl;
+            link.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Reset button
+            setTimeout(() => {
+                exportBtn.innerHTML = '<i class="fas fa-download me-2"></i>{% trans "Export" %}';
+                exportBtn.disabled = false;
+            }, 1000);
+        });
+        
+        // Auto-submit date filters when dates are selected
+        document.getElementById('date_from').addEventListener('change', function() {
+            if (this.value && document.getElementById('date_to').value) {
+                document.getElementById('filterForm').submit();
+            }
+        });
+        
+        document.getElementById('date_to').addEventListener('change', function() {
+            if (this.value && document.getElementById('date_from').value) {
+                document.getElementById('filterForm').submit();
+            }
+        });
+        
+        // Initialize date pickers with today's date as max
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date_to').max = today;
+        
+        // Auto-fill date from if date to is selected
+        document.getElementById('date_to').addEventListener('change', function() {
+            const dateFrom = document.getElementById('date_from');
+            if (!dateFrom.value && this.value) {
+                // Set date from to 30 days before date to
+                const date = new Date(this.value);
+                date.setDate(date.getDate() - 30);
+                dateFrom.value = date.toISOString().split('T')[0];
+            }
+        });
+    });
+</script>
+{% endblock %}

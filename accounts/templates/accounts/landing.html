@@ -1,0 +1,1628 @@
+<!-- accounts/templates/accounts/landing.html -->
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"Mushqila - Book Flights, Hotels, Hajj & Umrah" }}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Datepicker CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --primary-color: #1a56db;
+            --secondary-color: #046c4e;
+            --accent-color: #f59e0b;
+            --light-bg: #f8fafc;
+            --dark-text: #1f2937;
+            --border-color: #e5e7eb;
+            --danger-color: #dc2626;
+            --success-color: #059669;
+        }
+        
+        body {
+            font-family: 'Open Sans', 'Segoe UI', sans-serif;
+            color: var(--dark-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .arabic-font {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        /* Navbar Styles */
+        .navbar-landing {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .navbar-landing.scrolled {
+            padding: 10px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Hero Section with Search */
+        .hero-section {
+            background: linear-gradient(rgba(26, 86, 219, 0.9), rgba(4, 108, 78, 0.9)), url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 150px 0 100px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+        
+        /* Search Widget */
+        .search-widget {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            margin-top: 40px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .search-tabs {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+        
+        .search-tab {
+            flex: 1;
+            padding: 12px 20px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .search-tab.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-form {
+            display: none;
+        }
+        
+        .search-form.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+        }
+        
+        .passenger-counter {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 15px;
+        }
+        
+        .counter-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            background: white;
+            color: var(--primary-color);
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .counter-btn:hover:not(:disabled) {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .counter-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .counter-value {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .swap-btn {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 5;
+        }
+        
+        .swap-btn:hover {
+            transform: translateY(-50%) rotate(180deg);
+            background: var(--secondary-color);
+        }
+        
+        .flight-class-select {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .class-option {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .class-option:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .class-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(26, 86, 219, 0.1);
+            font-weight: 600;
+        }
+        
+        .flight-type-select {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .flight-type-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .flight-type-btn:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .flight-type-btn.active {
+            border-color: var(--primary-color);
+            background: rgba(26, 86, 219, 0.1);
+            font-weight: 600;
+        }
+        
+        .flight-type-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+        
+        .multi-city-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .remove-city-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--danger-color);
+            background: white;
+            color: var(--danger-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .remove-city-btn:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .add-city-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--primary-color);
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .add-city-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(26, 86, 219, 0.05);
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(26, 86, 219, 0.3);
+        }
+        
+        /* Quick Links */
+        .quick-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--dark-text);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .quick-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .quick-link-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        /* Services Section */
+        .services-section {
+            padding: 80px 0;
+            background-color: var(--light-bg);
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            height: 100%;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+        
+        .service-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 28px;
+        }
+        
+        /* Offers Section */
+        .offers-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .offer-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .offer-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .offer-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: var(--danger-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .offer-image {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+        
+        .offer-content {
+            padding: 20px;
+        }
+        
+        .offer-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .offer-old-price {
+            text-decoration: line-through;
+            color: #94a3b8;
+            margin-left: 10px;
+        }
+        
+        /* Features Section */
+        .features-section {
+            padding: 80px 0;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+        
+        .feature-icon {
+            background: var(--light-bg);
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            flex-shrink: 0;
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--secondary-color), #059669);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        /* Stats Counter */
+        .stats-counter {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 120px 0 60px;
+                text-align: center;
+            }
+            
+            .search-widget {
+                padding: 20px;
+                margin-top: 20px;
+            }
+            
+            .quick-links {
+                justify-content: center;
+            }
+            
+            .quick-link {
+                flex: 1;
+                min-width: 150px;
+                justify-content: center;
+            }
+            
+            .services-section,
+            .features-section,
+            .cta-section,
+            .offers-section {
+                padding: 50px 0;
+            }
+            
+            .feature-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .feature-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+        
+        /* Footer */
+        .footer {
+            background: #111827;
+            color: #9ca3af;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-heading {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            border-top: 1px solid #374151;
+            padding-top: 20px;
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        /* Buttons */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+            color: white;
+        }
+        
+        .btn-outline-custom {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-custom:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-landing fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'accounts:home' %}">
+                <span class="logo-text">
+                    <i class="fas fa-plane me-2"></i>Mushqila
+                </span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#services"><i class="fas fa-concierge-bell me-1"></i> Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#offers"><i class="fas fa-percentage me-1"></i> Offers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features"><i class="fas fa-star me-1"></i> Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact"><i class="fas fa-phone me-1"></i> Contact</a>
+                    </li>
+                    <li class="nav-item ms-3">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-primary-custom">
+                            <i class="fas fa-sign-in-alt me-2"></i>Agent Login
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Search -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center animate-fade-in-up">
+                    <h1 class="hero-title">
+                        Book Flights, Hotels & Hajj Packages
+                    </h1>
+                    <p class="hero-subtitle">
+                        Best prices guaranteed for flights, hotels, Hajj, Umrah, and visa services
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Search Widget -->
+            <div class="row justify-content-center">
+                <div class="col-lg-12">
+                    <div class="search-widget">
+                        <!-- Search Tabs -->
+                        <div class="search-tabs">
+                            <button class="search-tab active" data-tab="flights">
+                                <i class="fas fa-plane me-2"></i> Flights
+                            </button>
+                            <button class="search-tab" data-tab="hotels">
+                                <i class="fas fa-hotel me-2"></i> Hotels
+                            </button>
+                            <button class="search-tab" data-tab="hajj">
+                                <i class="fas fa-kaaba me-2"></i> Hajj
+                            </button>
+                            <button class="search-tab" data-tab="umrah">
+                                <i class="fas fa-mosque me-2"></i> Umrah
+                            </button>
+                            <button class="search-tab" data-tab="visa">
+                                <i class="fas fa-passport me-2"></i> Visa
+                            </button>
+                        </div>
+                        
+                        <!-- Flights Search Form -->
+                        <div id="flights-form" class="search-form active">
+                            <!-- Flight Type Selection -->
+                            <div class="flight-type-select">
+                                <button class="flight-type-btn active" data-type="one-way">
+                                    <div class="flight-type-icon">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </div>
+                                    One Way
+                                </button>
+                                <button class="flight-type-btn" data-type="round-trip">
+                                    <div class="flight-type-icon">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </div>
+                                    Round Trip
+                                </button>
+                                <button class="flight-type-btn" data-type="multi-city">
+                                    <div class="flight-type-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    Multi City
+                                </button>
+                            </div>
+                            
+                            <!-- One Way / Round Trip Form -->
+                            <div id="single-flight-form">
+                                <div class="row">
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label class="form-label">From</label>
+                                            <div class="position-relative">
+                                                <select class="form-select" id="from-city">
+                                                    <option value="">Select City</option>
+                                                    <option value="JED">Jeddah (JED)</option>
+                                                    <option value="RUH">Riyadh (RUH)</option>
+                                                    <option value="MED">Madinah (MED)</option>
+                                                    <option value="DMM">Dammam (DMM)</option>
+                                                    <option value="DAC">Dhaka (DAC)</option>
+                                                    <option value="CAI">Cairo (CAI)</option>
+                                                    <option value="DXB">Dubai (DXB)</option>
+                                                    <option value="LHR">London (LHR)</option>
+                                                    <option value="JFK">New York (JFK)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label class="form-label">To</label>
+                                            <div class="position-relative">
+                                                <select class="form-select" id="to-city">
+                                                    <option value="">Select City</option>
+                                                    <option value="JED">Jeddah (JED)</option>
+                                                    <option value="RUH">Riyadh (RUH)</option>
+                                                    <option value="MED">Madinah (MED)</option>
+                                                    <option value="DMM">Dammam (DMM)</option>
+                                                    <option value="DAC">Dhaka (DAC)</option>
+                                                    <option value="CAI">Cairo (CAI)</option>
+                                                    <option value="DXB">Dubai (DXB)</option>
+                                                    <option value="LHR">London (LHR)</option>
+                                                    <option value="JFK">New York (JFK)</option>
+                                                </select>
+                                                <button class="swap-btn" id="swap-cities">
+                                                    <i class="fas fa-exchange-alt"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Departure</label>
+                                            <input type="text" class="form-control datepicker" id="departure-date" placeholder="Select Date">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Return</label>
+                                            <input type="text" class="form-control datepicker" id="return-date" placeholder="Select Date" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Passengers & Class</label>
+                                            <div class="passenger-counter">
+                                                <button class="counter-btn" id="decrease-passengers">-</button>
+                                                <div class="counter-value" id="passenger-count">1</div>
+                                                <button class="counter-btn" id="increase-passengers">+</button>
+                                                <select class="form-select ms-3" id="flight-class" style="border: none; width: auto;">
+                                                    <option value="economy">Economy</option>
+                                                    <option value="business">Business</option>
+                                                    <option value="first">First Class</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Preferred Airlines</label>
+                                            <select class="form-select" id="airline-preference" multiple>
+                                                <option value="SV">Saudia</option>
+                                                <option value="FZ">Flydubai</option>
+                                                <option value="EK">Emirates</option>
+                                                <option value="QR">Qatar Airways</option>
+                                                <option value="EY">Etihad</option>
+                                                <option value="BG">Biman Bangladesh</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Trip Type</label>
+                                            <div class="flight-class-select">
+                                                <div class="class-option selected" data-class="economy">Economy</div>
+                                                <div class="class-option" data-class="business">Business</div>
+                                                <div class="class-option" data-class="first">First</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Multi City Form (Hidden by default) -->
+                            <div id="multi-city-form" style="display: none;">
+                                <div id="multi-city-container">
+                                    <div class="multi-city-row">
+                                        <div class="col-md-5">
+                                            <select class="form-select" name="from[]">
+                                                <option value="">From City</option>
+                                                <option value="JED">Jeddah (JED)</option>
+                                                <option value="RUH">Riyadh (RUH)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <select class="form-select" name="to[]">
+                                                <option value="">To City</option>
+                                                <option value="DAC">Dhaka (DAC)</option>
+                                                <option value="CAI">Cairo (CAI)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control datepicker" name="date[]" placeholder="Date">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="add-city-btn" id="add-city">
+                                    <i class="fas fa-plus"></i> Add Another City
+                                </button>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <button class="search-btn" id="search-flights">
+                                        <i class="fas fa-search me-2"></i> Search Flights
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hotels Search Form -->
+                        <div id="hotels-form" class="search-form">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Destination</label>
+                                        <select class="form-select" id="hotel-destination">
+                                            <option value="">Select City</option>
+                                            <option value="makkah">Makkah</option>
+                                            <option value="madinah">Madinah</option>
+                                            <option value="riyadh">Riyadh</option>
+                                            <option value="jeddah">Jeddah</option>
+                                            <option value="dammam">Dammam</option>
+                                            <option value="dubai">Dubai</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label">Check-in</label>
+                                        <input type="text" class="form-control datepicker" id="checkin-date">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label">Check-out</label>
+                                        <input type="text" class="form-control datepicker" id="checkout-date">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Guests & Rooms</label>
+                                        <div class="passenger-counter">
+                                            <span id="hotel-guests">2 Guests</span>
+                                            <span id="hotel-rooms">1 Room</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Hotel Star Rating</label>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-outline-primary active">Any</button>
+                                            <button class="btn btn-outline-primary">5★</button>
+                                            <button class="btn btn-outline-primary">4★</button>
+                                            <button class="btn btn-outline-primary">3★</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Price Range</label>
+                                        <input type="range" class="form-range" id="price-range" min="100" max="5000" step="100">
+                                        <div class="d-flex justify-content-between">
+                                            <small>100 SAR</small>
+                                            <small id="price-range-value">2500 SAR</small>
+                                            <small>5000 SAR</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="search-btn mt-3">
+                                <i class="fas fa-search me-2"></i> Search Hotels
+                            </button>
+                        </div>
+                        
+                        <!-- Other forms would go here... -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="quick-links">
+                <a href="#offers" class="quick-link">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <span>Special Offers</span>
+                </a>
+                <a href="{% url 'accounts:flight_bookings' %}" class="quick-link">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-plane-departure"></i>
+                    </div>
+                    <span>Last Minute Deals</span>
+                </a>
+                <a href="{% url 'accounts:hajj_booking' %}" class="quick-link">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-kaaba"></i>
+                    </div>
+                    <span>Hajj 2025 Packages</span>
+                </a>
+                <a href="{% url 'accounts:umrah_booking' %}" class="quick-link">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-mosque"></i>
+                    </div>
+                    <span>Umrah Packages</span>
+                </a>
+                <a href="#contact" class="quick-link">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <span>24/7 Support</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Offers Section -->
+    <section id="offers" class="offers-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3">Special Offers & Deals</h2>
+                <p class="lead text-muted">Don't miss these exclusive travel deals</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="offer-card">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 alt="Dubai Offer" class="offer-image">
+                            <div class="offer-badge">30% OFF</div>
+                        </div>
+                        <div class="offer-content">
+                            <h5 class="fw-bold">Dubai Luxury Escape</h5>
+                            <p class="text-muted small">5 Days & 4 Nights</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span class="offer-price">2,499 SAR</span>
+                                    <span class="offer-old-price">3,499 SAR</span>
+                                </div>
+                                <button class="btn btn-sm btn-primary">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="offer-card">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 alt="Makkah Hotel" class="offer-image">
+                            <div class="offer-badge">Near Haram</div>
+                        </div>
+                        <div class="offer-content">
+                            <h5 class="fw-bold">Makkah Royal Hotel</h5>
+                            <p class="text-muted small">5★ Hotel with Haram View</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span class="offer-price">450 SAR</span>
+                                    <span class="offer-old-price">600 SAR</span>
+                                </div>
+                                <button class="btn btn-sm btn-primary">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="offer-card">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1539635278303-d4002c07eae3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 alt="Umrah Package" class="offer-image">
+                            <div class="offer-badge">Early Bird</div>
+                        </div>
+                        <div class="offer-content">
+                            <h5 class="fw-bold arabic-font">عُمْرَة Package</h5>
+                            <p class="text-muted small">7 Days All Inclusive</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span class="offer-price">3,999 SAR</span>
+                                    <span class="offer-old-price">4,999 SAR</span>
+                                </div>
+                                <button class="btn btn-sm btn-primary">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="offer-card">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1548013146-72479768bada?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 alt="Business Class" class="offer-image">
+                            <div class="offer-badge">Business Class</div>
+                        </div>
+                        <div class="offer-content">
+                            <h5 class="fw-bold">Jeddah to London</h5>
+                            <p class="text-muted small">Business Class Special</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <span class="offer-price">4,200 SAR</span>
+                                    <span class="offer-old-price">6,500 SAR</span>
+                                </div>
+                                <button class="btn btn-sm btn-primary">Book Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3">Our Premium Services</h2>
+                <p class="lead text-muted">Comprehensive travel solutions for all your needs</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-plane"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Flight Bookings</h4>
+                        <p class="text-muted">
+                            Book domestic & international flights with best prices. One way, round trip, and multi-city options available.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Instant Confirmation</span>
+                            <span class="badge bg-secondary ms-1">Flexible Dates</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-hotel"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Hotel Reservations</h4>
+                        <p class="text-muted">
+                            5-star hotels to budget accommodations. Special rates for Makkah, Madinah, and major cities worldwide.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Free Cancellation</span>
+                            <span class="badge bg-secondary ms-1">Breakfast Included</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-passport"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Visa Services</h4>
+                        <p class="text-muted">
+                            Saudi visa, Umrah visa, business visa, and tourist visa processing with guaranteed approval.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Fast Processing</span>
+                            <span class="badge bg-secondary ms-1">Document Assistance</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-kaaba"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3 arabic-font">حَجّ Packages</h4>
+                        <p class="text-muted">
+                            Complete Hajj packages with accommodation near Haram, transport, meals, and guidance services.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Certified Muassasa</span>
+                            <span class="badge bg-secondary ms-1">Medical Support</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-mosque"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3 arabic-font">عُمْرَة Packages</h4>
+                        <p class="text-muted">
+                            Year-round Umrah packages with visa processing, accommodation, and comprehensive support.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Flexible Dates</span>
+                            <span class="badge bg-secondary ms-1">Group Discounts</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Transport & Tours</h4>
+                        <p class="text-muted">
+                            Airport transfers, city tours, and intercity transport with professional drivers and guides.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">24/7 Service</span>
+                            <span class="badge bg-secondary ms-1">English Speaking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="display-5 fw-bold mb-4">Why Choose Mushqila?</h2>
+                    <p class="lead mb-5">
+                        We combine cutting-edge technology with traditional travel expertise to deliver exceptional service.
+                    </p>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">Instant Booking</h5>
+                            <p class="text-muted">Real-time booking confirmation with instant updates and e-tickets.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">Secure Platform</h5>
+                            <p class="text-muted">Bank-level security for all transactions with SSL encryption.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">Best Price Guarantee</h5>
+                            <p class="text-muted">We guarantee the lowest prices or we'll match the difference.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold">24/7 Multilingual Support</h5>
+                            <p class="text-muted">Arabic, English, Urdu, and Bengali support available round the clock.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="position-relative">
+                        <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                             alt="Dashboard Preview" 
+                             class="img-fluid rounded-3 shadow-lg">
+                        <div class="position-absolute top-0 end-0 bg-white p-3 rounded-3 shadow m-3">
+                            <i class="fas fa-chart-line fa-2x text-primary"></i>
+                        </div>
+                        <div class="position-absolute bottom-0 start-0 bg-white p-3 rounded-3 shadow m-3">
+                            <i class="fas fa-mobile-alt fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h2 class="display-5 fw-bold mb-4">Ready to Grow Your Travel Business?</h2>
+                    <p class="lead mb-5">
+                        Join hundreds of successful travel agents who trust Mushqila for their 
+                        bookings. Start earning higher commissions today!
+                    </p>
+                    <div class="d-flex flex-wrap gap-3 justify-content-center">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg px-5 py-3">
+                            <i class="fas fa-user-plus me-2"></i>Register as Agent
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg px-5 py-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Agent Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h4 class="footer-heading">
+                        <i class="fas fa-plane me-2"></i>Mushqila Travel
+                    </h4>
+                    <p class="mb-4">
+                        Your trusted partner for premium travel services. 
+                        Specializing in Hajj, Umrah, flights, hotels, and visa services.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white-50"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white-50"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-white-50"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-white-50"><i class="fab fa-linkedin fa-lg"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h5 class="footer-heading">Services</h5>
+                    <div class="footer-links">
+                        <a href="#"><i class="fas fa-plane me-1"></i> Flights</a>
+                        <a href="#"><i class="fas fa-hotel me-1"></i> Hotels</a>
+                        <a href="#"><i class="fas fa-kaaba me-1"></i> Hajj</a>
+                        <a href="#"><i class="fas fa-mosque me-1"></i> Umrah</a>
+                        <a href="#"><i class="fas fa-passport me-1"></i> Visa</a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h5 class="footer-heading">Company</h5>
+                    <div class="footer-links">
+                        <a href="#"><i class="fas fa-info-circle me-1"></i> About Us</a>
+                        <a href="#"><i class="fas fa-briefcase me-1"></i> Careers</a>
+                        <a href="#"><i class="fas fa-handshake me-1"></i> Partners</a>
+                        <a href="#"><i class="fas fa-newspaper me-1"></i> News</a>
+                        <a href="#"><i class="fas fa-phone me-1"></i> Contact</a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-4 mb-4">
+                    <h5 class="footer-heading">Contact Info</h5>
+                    <div class="footer-links">
+                        <p class="mb-2">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            Riyadh, Saudi Arabia
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-phone me-2"></i>
+                            +966 50 099 3174
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-envelope me-2"></i>
+                            info@mushqila.com
+                        </p>
+                        <p>
+                            <i class="fas fa-clock me-2"></i>
+                            Sun-Thu: 9AM - 6PM | Fri-Sat: 10AM - 4PM
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-md-start">
+                        &copy; 2025 Mushqila Travel. All rights reserved.
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <a href="#" class="text-white-50 me-3">Privacy Policy</a>
+                        <a href="#" class="text-white-50">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar-landing');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Search Tabs
+        document.querySelectorAll('.search-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.search-tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all forms
+                document.querySelectorAll('.search-form').forEach(form => {
+                    form.classList.remove('active');
+                });
+                
+                // Show corresponding form
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId + '-form').classList.add('active');
+            });
+        });
+        
+        // Flight Type Selection
+        document.querySelectorAll('.flight-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.flight-type-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const type = this.getAttribute('data-type');
+                
+                if (type === 'round-trip') {
+                    document.getElementById('return-date').removeAttribute('disabled');
+                } else {
+                    document.getElementById('return-date').setAttribute('disabled', 'disabled');
+                }
+                
+                if (type === 'multi-city') {
+                    document.getElementById('single-flight-form').style.display = 'none';
+                    document.getElementById('multi-city-form').style.display = 'block';
+                } else {
+                    document.getElementById('single-flight-form').style.display = 'block';
+                    document.getElementById('multi-city-form').style.display = 'none';
+                }
+            });
+        });
+        
+        // Swap Cities
+        document.getElementById('swap-cities').addEventListener('click', function() {
+            const fromCity = document.getElementById('from-city');
+            const toCity = document.getElementById('to-city');
+            const temp = fromCity.value;
+            fromCity.value = toCity.value;
+            toCity.value = temp;
+        });
+        
+        // Passenger Counter
+        let passengerCount = 1;
+        document.getElementById('increase-passengers').addEventListener('click', function() {
+            if (passengerCount < 9) {
+                passengerCount++;
+                document.getElementById('passenger-count').textContent = passengerCount;
+            }
+        });
+        
+        document.getElementById('decrease-passengers').addEventListener('click', function() {
+            if (passengerCount > 1) {
+                passengerCount--;
+                document.getElementById('passenger-count').textContent = passengerCount;
+            }
+        });
+        
+        // Flight Class Selection
+        document.querySelectorAll('.class-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.class-option').forEach(o => {
+                    o.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                document.getElementById('flight-class').value = this.getAttribute('data-class');
+            });
+        });
+        
+        // Add City for Multi-City
+        document.getElementById('add-city').addEventListener('click', function() {
+            const container = document.getElementById('multi-city-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'multi-city-row mt-3';
+            newRow.innerHTML = `
+                <div class="col-md-5">
+                    <select class="form-select" name="from[]">
+                        <option value="">From City</option>
+                        <option value="JED">Jeddah (JED)</option>
+                        <option value="RUH">Riyadh (RUH)</option>
+                        <option value="DAC">Dhaka (DAC)</option>
+                        <option value="CAI">Cairo (CAI)</option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <select class="form-select" name="to[]">
+                        <option value="">To City</option>
+                        <option value="DAC">Dhaka (DAC)</option>
+                        <option value="CAI">Cairo (CAI)</option>
+                        <option value="JED">Jeddah (JED)</option>
+                        <option value="RUH">Riyadh (RUH)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-flex gap-2">
+                        <input type="text" class="form-control datepicker" name="date[]" placeholder="Date">
+                        <button type="button" class="remove-city-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newRow);
+            
+            // Initialize datepicker for new row
+            flatpickr(newRow.querySelector('.datepicker'), {
+                minDate: 'today',
+                dateFormat: 'Y-m-d',
+            });
+            
+            // Add remove functionality
+            newRow.querySelector('.remove-city-btn').addEventListener('click', function() {
+                newRow.remove();
+            });
+        });
+        
+        // Price Range
+        document.getElementById('price-range').addEventListener('input', function() {
+            document.getElementById('price-range-value').textContent = this.value + ' SAR';
+        });
+        
+        // Initialize Datepickers
+        flatpickr('.datepicker', {
+            minDate: 'today',
+            dateFormat: 'Y-m-d',
+        });
+        
+        // Initialize Select2
+        $(document).ready(function() {
+            $('#airline-preference').select2({
+                placeholder: 'Select preferred airlines',
+                width: '100%'
+            });
+        });
+        
+        // Search Flights Button
+        document.getElementById('search-flights').addEventListener('click', function() {
+            const fromCity = document.getElementById('from-city').value;
+            const toCity = document.getElementById('to-city').value;
+            
+            if (!fromCity || !toCity) {
+                alert('Please select both departure and destination cities.');
+                return;
+            }
+            
+            // Redirect to flight search results (you can implement this)
+            alert('Searching flights from ' + fromCity + ' to ' + toCity);
+            // window.location.href = `/travel/flights/search/?from=${fromCity}&to=${toCity}`;
+        });
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Select2 for multiple airlines
+            $('#airline-preference').select2({
+                placeholder: 'Select preferred airlines',
+                width: '100%'
+            });
+            
+            // Set default dates
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            flatpickr('#departure-date', {
+                minDate: 'today',
+                defaultDate: today,
+                dateFormat: 'Y-m-d',
+            });
+            
+            flatpickr('#return-date', {
+                minDate: 'today',
+                defaultDate: tomorrow,
+                dateFormat: 'Y-m-d',
+            });
+            
+            flatpickr('#checkin-date', {
+                minDate: 'today',
+                defaultDate: today,
+                dateFormat: 'Y-m-d',
+            });
+            
+            flatpickr('#checkout-date', {
+                minDate: 'today',
+                defaultDate: tomorrow,
+                dateFormat: 'Y-m-d',
+            });
+        });
+    </script>
+</body>
+</html>

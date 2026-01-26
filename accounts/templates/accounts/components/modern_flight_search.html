@@ -1,0 +1,1036 @@
+<!-- Modern Flight Search Widget with Galileo GDS Integration Ready -->
+{% load static %}
+
+<style>
+    /* Modern Flight Search Styles */
+    .modern-search-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 60px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .modern-search-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+        background-size: cover;
+        opacity: 0.3;
+    }
+    
+    .search-card-modern {
+        background: white;
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 10;
+    }
+    
+    .trip-type-pills {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .trip-pill {
+        padding: 12px 24px;
+        border: 2px solid #e5e7eb;
+        border-radius: 50px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .trip-pill:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+    }
+    
+    .trip-pill.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    
+    .input-group-modern {
+        position: relative;
+        margin-bottom: 24px;
+    }
+    
+    .input-label-modern {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 8px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .input-field-modern {
+        width: 100%;
+        padding: 16px 20px 16px 50px;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        font-size: 16px;
+        transition: all 0.3s;
+        background: #f8fafc;
+    }
+    
+    .input-field-modern:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .input-icon-modern {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        font-size: 18px;
+        pointer-events: none;
+    }
+    
+    .swap-button-modern {
+        position: absolute;
+        right: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: 4px solid white;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        z-index: 5;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .swap-button-modern:hover {
+        transform: translateY(-50%) rotate(180deg) scale(1.1);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+    
+    .passenger-selector-modern {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .passenger-selector-modern:hover {
+        border-color: #667eea;
+        background: white;
+    }
+    
+    .passenger-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        padding: 24px;
+        margin-top: 8px;
+        z-index: 100;
+        display: none;
+    }
+    
+    .passenger-dropdown.active {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .passenger-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .passenger-row:last-child {
+        border-bottom: none;
+    }
+    
+    .passenger-controls {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .counter-btn-modern {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid #e5e7eb;
+        background: white;
+        color: #667eea;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .counter-btn-modern:hover:not(:disabled) {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: scale(1.1);
+    }
+    
+    .counter-btn-modern:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+    
+    .counter-value-modern {
+        min-width: 40px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 18px;
+        color: #1e293b;
+    }
+    
+    .class-selector-modern {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+    }
+    
+    .class-option-modern {
+        padding: 14px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+        color: #64748b;
+    }
+    
+    .class-option-modern:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+    }
+    
+    .class-option-modern.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+    }
+    
+    .search-button-modern {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 16px;
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 30px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .search-button-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    }
+    
+    .search-button-modern:active {
+        transform: translateY(-1px);
+    }
+    
+    .multi-city-segment {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 16px;
+        position: relative;
+        border: 2px dashed #e5e7eb;
+    }
+    
+    .segment-number {
+        position: absolute;
+        top: -12px;
+        left: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+    }
+    
+    .remove-segment-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .remove-segment-btn:hover {
+        background: #dc2626;
+        color: white;
+        transform: rotate(90deg);
+    }
+    
+    .add-segment-btn {
+        width: 100%;
+        padding: 16px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        background: transparent;
+        color: #667eea;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .add-segment-btn:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+    
+    .gds-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #10b981;
+        margin-bottom: 20px;
+    }
+    
+    .gds-indicator::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .search-card-modern {
+            padding: 24px;
+        }
+        
+        .trip-type-pills {
+            justify-content: center;
+        }
+        
+        .class-selector-modern {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Modern Flight Search Widget -->
+<div class="modern-search-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
+                <div class="search-card-modern">
+                    <!-- GDS Integration Indicator -->
+                    <div class="gds-indicator">
+                        <span>Powered by Galileo GDS</span>
+                    </div>
+                    
+                    <h2 class="mb-4" style="font-weight: 800; color: #1e293b;">
+                        <i class="fas fa-plane-departure me-2" style="color: #667eea;"></i>
+                        Search Flights
+                    </h2>
+                    
+                    <!-- Trip Type Selection -->
+                    <div class="trip-type-pills">
+                        <button class="trip-pill active" data-trip-type="one-way">
+                            <i class="fas fa-arrow-right"></i>
+                            <span>One Way</span>
+                        </button>
+                        <button class="trip-pill" data-trip-type="round-trip">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Round Trip</span>
+                        </button>
+                        <button class="trip-pill" data-trip-type="multi-city">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <span>Multi City</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Search Form -->
+                    <form id="flight-search-form" data-gds-endpoint="/flights/api/v1/api/search/">
+                        <!-- Single/Round Trip Form -->
+                        <div id="single-trip-form">
+                            <div class="row g-3">
+                                <!-- From City -->
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="input-group-modern">
+                                        <label class="input-label-modern">From</label>
+                                        <div class="position-relative">
+                                            <i class="fas fa-plane-departure input-icon-modern"></i>
+                                            <input type="text" 
+                                                   class="input-field-modern airport-autocomplete" 
+                                                   id="from-airport"
+                                                   name="origin"
+                                                   placeholder="City or Airport"
+                                                   data-gds-field="origin"
+                                                   required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- To City -->
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="input-group-modern position-relative">
+                                        <label class="input-label-modern">To</label>
+                                        <div class="position-relative">
+                                            <i class="fas fa-plane-arrival input-icon-modern"></i>
+                                            <input type="text" 
+                                                   class="input-field-modern airport-autocomplete" 
+                                                   id="to-airport"
+                                                   name="destination"
+                                                   placeholder="City or Airport"
+                                                   data-gds-field="destination"
+                                                   required>
+                                            <button type="button" class="swap-button-modern" id="swap-airports">
+                                                <i class="fas fa-exchange-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Departure Date -->
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="input-group-modern">
+                                        <label class="input-label-modern">Departure</label>
+                                        <div class="position-relative">
+                                            <i class="fas fa-calendar-alt input-icon-modern"></i>
+                                            <input type="text" 
+                                                   class="input-field-modern date-picker" 
+                                                   id="departure-date"
+                                                   name="departure_date"
+                                                   placeholder="Select Date"
+                                                   data-gds-field="departureDate"
+                                                   required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Return Date -->
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="input-group-modern">
+                                        <label class="input-label-modern">Return</label>
+                                        <div class="position-relative">
+                                            <i class="fas fa-calendar-check input-icon-modern"></i>
+                                            <input type="text" 
+                                                   class="input-field-modern date-picker" 
+                                                   id="return-date"
+                                                   name="return_date"
+                                                   placeholder="Select Date"
+                                                   data-gds-field="returnDate"
+                                                   disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3 mt-2">
+                                <!-- Passengers & Class -->
+                                <div class="col-md-6">
+                                    <div class="input-group-modern position-relative">
+                                        <label class="input-label-modern">Passengers & Class</label>
+                                        <div class="passenger-selector-modern" id="passenger-selector">
+                                            <div>
+                                                <i class="fas fa-users me-2" style="color: #667eea;"></i>
+                                                <span id="passenger-display">1 Adult, Economy</span>
+                                            </div>
+                                            <i class="fas fa-chevron-down" style="color: #94a3b8;"></i>
+                                        </div>
+                                        
+                                        <!-- Passenger Dropdown -->
+                                        <div class="passenger-dropdown" id="passenger-dropdown">
+                                            <div class="passenger-row">
+                                                <div>
+                                                    <div style="font-weight: 600; color: #1e293b;">Adults</div>
+                                                    <div style="font-size: 13px; color: #64748b;">12+ years</div>
+                                                </div>
+                                                <div class="passenger-controls">
+                                                    <button type="button" class="counter-btn-modern" data-action="decrease" data-type="adults">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <span class="counter-value-modern" id="adults-count">1</span>
+                                                    <button type="button" class="counter-btn-modern" data-action="increase" data-type="adults">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="passenger-row">
+                                                <div>
+                                                    <div style="font-weight: 600; color: #1e293b;">Children</div>
+                                                    <div style="font-size: 13px; color: #64748b;">2-11 years</div>
+                                                </div>
+                                                <div class="passenger-controls">
+                                                    <button type="button" class="counter-btn-modern" data-action="decrease" data-type="children">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <span class="counter-value-modern" id="children-count">0</span>
+                                                    <button type="button" class="counter-btn-modern" data-action="increase" data-type="children">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="passenger-row">
+                                                <div>
+                                                    <div style="font-weight: 600; color: #1e293b;">Infants</div>
+                                                    <div style="font-size: 13px; color: #64748b;">Under 2 years</div>
+                                                </div>
+                                                <div class="passenger-controls">
+                                                    <button type="button" class="counter-btn-modern" data-action="decrease" data-type="infants">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <span class="counter-value-modern" id="infants-count">0</span>
+                                                    <button type="button" class="counter-btn-modern" data-action="increase" data-type="infants">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+                                                <label class="input-label-modern mb-2">Cabin Class</label>
+                                                <div class="class-selector-modern">
+                                                    <div class="class-option-modern active" data-class="economy" data-gds-value="Y">
+                                                        <i class="fas fa-chair mb-1"></i>
+                                                        <div style="font-size: 13px;">Economy</div>
+                                                    </div>
+                                                    <div class="class-option-modern" data-class="premium" data-gds-value="W">
+                                                        <i class="fas fa-couch mb-1"></i>
+                                                        <div style="font-size: 13px;">Premium</div>
+                                                    </div>
+                                                    <div class="class-option-modern" data-class="business" data-gds-value="C">
+                                                        <i class="fas fa-briefcase mb-1"></i>
+                                                        <div style="font-size: 13px;">Business</div>
+                                                    </div>
+                                                    <div class="class-option-modern" data-class="first" data-gds-value="F">
+                                                        <i class="fas fa-crown mb-1"></i>
+                                                        <div style="font-size: 13px;">First</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Direct Flights Only -->
+                                <div class="col-md-6">
+                                    <div class="input-group-modern">
+                                        <label class="input-label-modern">Preferences</label>
+                                        <div style="display: flex; gap: 12px; flex-wrap: wrap; padding-top: 8px;">
+                                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 16px; border: 2px solid #e5e7eb; border-radius: 12px; transition: all 0.3s;">
+                                                <input type="checkbox" name="direct_only" value="true" data-gds-field="directFlightsOnly" style="width: 18px; height: 18px; accent-color: #667eea;">
+                                                <span style="font-weight: 600; color: #64748b;">Direct Flights Only</span>
+                                            </label>
+                                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 16px; border: 2px solid #e5e7eb; border-radius: 12px; transition: all 0.3s;">
+                                                <input type="checkbox" name="flexible_dates" value="true" data-gds-field="flexibleDates" style="width: 18px; height: 18px; accent-color: #667eea;">
+                                                <span style="font-weight: 600; color: #64748b;">Flexible Dates (±3 days)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Multi City Form (Hidden by default) -->
+                        <div id="multi-city-form" style="display: none;">
+                            <div id="segments-container">
+                                <!-- Segments will be added dynamically -->
+                            </div>
+                            <button type="button" class="add-segment-btn" id="add-segment">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Add Another Flight</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Search Button -->
+                        <button type="submit" class="search-button-modern">
+                            <i class="fas fa-search"></i>
+                            <span>Search Flights</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                        
+                        <!-- Hidden fields for GDS -->
+                        <input type="hidden" name="trip_type" id="trip-type-input" value="one-way">
+                        <input type="hidden" name="cabin_class" id="cabin-class-input" value="Y">
+                        <input type="hidden" name="adults" id="adults-input" value="1">
+                        <input type="hidden" name="children" id="children-input" value="0">
+                        <input type="hidden" name="infants" id="infants-input" value="0">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- JavaScript for Modern Flight Search -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Passenger counts
+    let passengers = {
+        adults: 1,
+        children: 0,
+        infants: 0
+    };
+    
+    let selectedClass = 'economy';
+    let selectedClassGDS = 'Y';
+    let currentTripType = 'one-way';
+    
+    // Trip Type Selection
+    document.querySelectorAll('.trip-pill').forEach(pill => {
+        pill.addEventListener('click', function() {
+            document.querySelectorAll('.trip-pill').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            
+            currentTripType = this.dataset.tripType;
+            document.getElementById('trip-type-input').value = currentTripType;
+            
+            // Show/hide appropriate forms
+            const singleForm = document.getElementById('single-trip-form');
+            const multiForm = document.getElementById('multi-city-form');
+            const returnDate = document.getElementById('return-date');
+            
+            if (currentTripType === 'multi-city') {
+                singleForm.style.display = 'none';
+                multiForm.style.display = 'block';
+                initializeMultiCityForm();
+            } else {
+                singleForm.style.display = 'block';
+                multiForm.style.display = 'none';
+                
+                if (currentTripType === 'round-trip') {
+                    returnDate.disabled = false;
+                    returnDate.required = true;
+                } else {
+                    returnDate.disabled = true;
+                    returnDate.required = false;
+                    returnDate.value = '';
+                }
+            }
+        });
+    });
+    
+    // Swap Airports
+    document.getElementById('swap-airports').addEventListener('click', function() {
+        const fromAirport = document.getElementById('from-airport');
+        const toAirport = document.getElementById('to-airport');
+        
+        const temp = fromAirport.value;
+        fromAirport.value = toAirport.value;
+        toAirport.value = temp;
+        
+        // Add animation
+        this.style.transform = 'translateY(-50%) rotate(180deg)';
+        setTimeout(() => {
+            this.style.transform = 'translateY(-50%) rotate(0deg)';
+        }, 300);
+    });
+    
+    // Date Pickers
+    const departureDate = flatpickr('#departure-date', {
+        minDate: 'today',
+        dateFormat: 'Y-m-d',
+        onChange: function(selectedDates, dateStr) {
+            if (currentTripType === 'round-trip') {
+                returnDatePicker.set('minDate', dateStr);
+            }
+        }
+    });
+    
+    const returnDatePicker = flatpickr('#return-date', {
+        minDate: 'today',
+        dateFormat: 'Y-m-d'
+    });
+    
+    // Passenger Selector
+    const passengerSelector = document.getElementById('passenger-selector');
+    const passengerDropdown = document.getElementById('passenger-dropdown');
+    
+    passengerSelector.addEventListener('click', function(e) {
+        e.stopPropagation();
+        passengerDropdown.classList.toggle('active');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!passengerDropdown.contains(e.target) && e.target !== passengerSelector) {
+            passengerDropdown.classList.remove('active');
+        }
+    });
+    
+    // Passenger Counter Buttons
+    document.querySelectorAll('.counter-btn-modern').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const action = this.dataset.action;
+            const type = this.dataset.type;
+            
+            if (action === 'increase') {
+                if (type === 'adults' && passengers.adults < 9) passengers.adults++;
+                if (type === 'children' && passengers.children < 9) passengers.children++;
+                if (type === 'infants' && passengers.infants < passengers.adults) passengers.infants++;
+            } else {
+                if (type === 'adults' && passengers.adults > 1) {
+                    passengers.adults--;
+                    // Ensure infants don't exceed adults
+                    if (passengers.infants > passengers.adults) {
+                        passengers.infants = passengers.adults;
+                    }
+                }
+                if (type === 'children' && passengers.children > 0) passengers.children--;
+                if (type === 'infants' && passengers.infants > 0) passengers.infants--;
+            }
+            
+            updatePassengerDisplay();
+        });
+    });
+    
+    function updatePassengerDisplay() {
+        // Update counter displays
+        document.getElementById('adults-count').textContent = passengers.adults;
+        document.getElementById('children-count').textContent = passengers.children;
+        document.getElementById('infants-count').textContent = passengers.infants;
+        
+        // Update hidden inputs
+        document.getElementById('adults-input').value = passengers.adults;
+        document.getElementById('children-input').value = passengers.children;
+        document.getElementById('infants-input').value = passengers.infants;
+        
+        // Update main display
+        const total = passengers.adults + passengers.children + passengers.infants;
+        let displayText = '';
+        
+        if (passengers.adults > 0) displayText += `${passengers.adults} Adult${passengers.adults > 1 ? 's' : ''}`;
+        if (passengers.children > 0) displayText += `, ${passengers.children} Child${passengers.children > 1 ? 'ren' : ''}`;
+        if (passengers.infants > 0) displayText += `, ${passengers.infants} Infant${passengers.infants > 1 ? 's' : ''}`;
+        
+        displayText += `, ${selectedClass.charAt(0).toUpperCase() + selectedClass.slice(1)}`;
+        
+        document.getElementById('passenger-display').textContent = displayText;
+        
+        // Update button states
+        document.querySelectorAll('.counter-btn-modern').forEach(btn => {
+            const action = btn.dataset.action;
+            const type = btn.dataset.type;
+            
+            if (action === 'decrease') {
+                if (type === 'adults') btn.disabled = passengers.adults <= 1;
+                if (type === 'children') btn.disabled = passengers.children <= 0;
+                if (type === 'infants') btn.disabled = passengers.infants <= 0;
+            } else {
+                if (type === 'adults') btn.disabled = passengers.adults >= 9;
+                if (type === 'children') btn.disabled = passengers.children >= 9;
+                if (type === 'infants') btn.disabled = passengers.infants >= passengers.adults;
+            }
+        });
+    }
+    
+    // Class Selection
+    document.querySelectorAll('.class-option-modern').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.class-option-modern').forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+            
+            selectedClass = this.dataset.class;
+            selectedClassGDS = this.dataset.gdsValue;
+            document.getElementById('cabin-class-input').value = selectedClassGDS;
+            
+            updatePassengerDisplay();
+        });
+    });
+    
+    // Multi-City Form
+    let segmentCount = 0;
+    
+    function initializeMultiCityForm() {
+        const container = document.getElementById('segments-container');
+        container.innerHTML = '';
+        segmentCount = 0;
+        addSegment();
+        addSegment();
+    }
+    
+    function addSegment() {
+        segmentCount++;
+        const container = document.getElementById('segments-container');
+        
+        const segment = document.createElement('div');
+        segment.className = 'multi-city-segment';
+        segment.dataset.segment = segmentCount;
+        
+        segment.innerHTML = `
+            <div class="segment-number">${segmentCount}</div>
+            ${segmentCount > 2 ? '<button type="button" class="remove-segment-btn" onclick="removeSegment(this)"><i class="fas fa-times"></i></button>' : ''}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group-modern">
+                        <label class="input-label-modern">From</label>
+                        <div class="position-relative">
+                            <i class="fas fa-plane-departure input-icon-modern"></i>
+                            <input type="text" class="input-field-modern" name="segment_${segmentCount}_origin" placeholder="City or Airport" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group-modern">
+                        <label class="input-label-modern">To</label>
+                        <div class="position-relative">
+                            <i class="fas fa-plane-arrival input-icon-modern"></i>
+                            <input type="text" class="input-field-modern" name="segment_${segmentCount}_destination" placeholder="City or Airport" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group-modern">
+                        <label class="input-label-modern">Departure</label>
+                        <div class="position-relative">
+                            <i class="fas fa-calendar-alt input-icon-modern"></i>
+                            <input type="text" class="input-field-modern segment-date-picker" name="segment_${segmentCount}_date" placeholder="Select Date" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(segment);
+        
+        // Initialize date picker for new segment
+        flatpickr(segment.querySelector('.segment-date-picker'), {
+            minDate: 'today',
+            dateFormat: 'Y-m-d'
+        });
+    }
+    
+    window.removeSegment = function(btn) {
+        const segment = btn.closest('.multi-city-segment');
+        segment.remove();
+        
+        // Renumber segments
+        document.querySelectorAll('.multi-city-segment').forEach((seg, index) => {
+            seg.querySelector('.segment-number').textContent = index + 1;
+        });
+    };
+    
+    document.getElementById('add-segment').addEventListener('click', function() {
+        if (segmentCount < 6) {
+            addSegment();
+        } else {
+            alert('Maximum 6 segments allowed');
+        }
+    });
+    
+    // Form Submission - Galileo GDS Integration
+    document.getElementById('flight-search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const searchData = {
+            tripType: currentTripType,
+            origin: formData.get('origin'),
+            destination: formData.get('destination'),
+            departureDate: formData.get('departure_date'),
+            returnDate: formData.get('return_date'),
+            adults: passengers.adults,
+            children: passengers.children,
+            infants: passengers.infants,
+            cabinClass: selectedClassGDS,
+            directFlightsOnly: formData.get('direct_only') === 'true',
+            flexibleDates: formData.get('flexible_dates') === 'true'
+        };
+        
+        // For multi-city
+        if (currentTripType === 'multi-city') {
+            searchData.segments = [];
+            document.querySelectorAll('.multi-city-segment').forEach((seg, index) => {
+                searchData.segments.push({
+                    origin: formData.get(`segment_${index + 1}_origin`),
+                    destination: formData.get(`segment_${index + 1}_destination`),
+                    date: formData.get(`segment_${index + 1}_date`)
+                });
+            });
+        }
+        
+        // Show loading state
+        const searchBtn = this.querySelector('.search-button-modern');
+        const originalHTML = searchBtn.innerHTML;
+        searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Searching Flights...</span>';
+        searchBtn.disabled = true;
+        
+        // Call Galileo GDS API
+        const gdsEndpoint = this.dataset.gdsEndpoint;
+        
+        fetch(gdsEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(searchData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to results page
+                window.location.href = `/flights/search/results/?search_id=${data.search_id}`;
+            } else {
+                alert('Error: ' + (data.error || 'Failed to search flights'));
+                searchBtn.innerHTML = originalHTML;
+                searchBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            alert('An error occurred while searching. Please try again.');
+            searchBtn.innerHTML = originalHTML;
+            searchBtn.disabled = false;
+        });
+    });
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Airport Autocomplete (can be enhanced with real API)
+    const airports = [
+        { code: 'JED', name: 'Jeddah', country: 'Saudi Arabia' },
+        { code: 'RUH', name: 'Riyadh', country: 'Saudi Arabia' },
+        { code: 'MED', name: 'Madinah', country: 'Saudi Arabia' },
+        { code: 'DMM', name: 'Dammam', country: 'Saudi Arabia' },
+        { code: 'DAC', name: 'Dhaka', country: 'Bangladesh' },
+        { code: 'CAI', name: 'Cairo', country: 'Egypt' },
+        { code: 'DXB', name: 'Dubai', country: 'UAE' },
+        { code: 'LHR', name: 'London Heathrow', country: 'UK' },
+        { code: 'JFK', name: 'New York JFK', country: 'USA' },
+        { code: 'IST', name: 'Istanbul', country: 'Turkey' },
+        { code: 'DOH', name: 'Doha', country: 'Qatar' },
+        { code: 'AUH', name: 'Abu Dhabi', country: 'UAE' },
+        { code: 'KWI', name: 'Kuwait', country: 'Kuwait' },
+        { code: 'BAH', name: 'Bahrain', country: 'Bahrain' },
+        { code: 'MCT', name: 'Muscat', country: 'Oman' }
+    ];
+    
+    // Simple autocomplete for airport inputs
+    document.querySelectorAll('.airport-autocomplete').forEach(input => {
+        input.addEventListener('input', function() {
+            const value = this.value.toLowerCase();
+            if (value.length < 2) return;
+            
+            const matches = airports.filter(airport => 
+                airport.code.toLowerCase().includes(value) ||
+                airport.name.toLowerCase().includes(value) ||
+                airport.country.toLowerCase().includes(value)
+            );
+            
+            // You can implement a dropdown here
+            console.log('Matches:', matches);
+        });
+    });
+    
+    // Initialize
+    updatePassengerDisplay();
+});
+</script>

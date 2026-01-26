@@ -1,0 +1,1192 @@
+<!------ accounts/templates/accounts/business/credit_request.html ------------>
+{% extends 'accounts/base.html' %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{% trans "Request Credit Increase" %} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">{% trans "Credit Limit Increase Request" %}</h1>
+                    <p class="text-muted mb-0">
+                        {% trans "Request to increase your credit limit for business operations" %}
+                    </p>
+                </div>
+                <a href="#" class="btn btn-outline-secondary">
+                    <i class="fas fa-history me-2"></i>{% trans "View History" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Credit Status Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% trans "Current Credit Limit" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ user.credit_limit|floatformat:2|intcomma }} SAR
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-credit-card fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                {% trans "Available Credit" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ user.available_credit|floatformat:2|intcomma }} SAR
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                {% trans "Current Balance" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ user.current_balance|floatformat:2|intcomma }} SAR
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-balance-scale fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                {% trans "Utilization Rate" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if user.credit_limit > 0 %}
+                                    {% widthratio user.current_balance user.credit_limit 100 as utilization %}
+                                    {{ utilization|floatformat:1 }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Credit Request Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-alt me-2"></i>{% trans "Credit Increase Request Form" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="creditRequestForm">
+                        {% csrf_token %}
+                        
+                        <!-- Step 1: Current Status -->
+                        <div class="step" id="step1">
+                            <h5 class="mb-4 text-primary">
+                                <i class="fas fa-1 fa-sm me-2"></i>{% trans "Current Credit Status" %}
+                            </h5>
+                            
+                            <div class="alert alert-info">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="fas fa-info-circle fa-2x"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="alert-heading">{% trans "Credit Limit Information" %}</h6>
+                                        <p class="mb-0">
+                                            {% trans "Your credit limit is based on your business profile, transaction history, and KYC verification status." %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-primary">
+                                                <i class="fas fa-credit-card me-2"></i>{% trans "Current Limit" %}
+                                            </h6>
+                                            <div class="h3 text-center my-3">
+                                                {{ user.credit_limit|floatformat:2|intcomma }} SAR
+                                            </div>
+                                            <p class="text-muted text-center mb-0">
+                                                {% trans "Your approved credit limit" %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-success">
+                                                <i class="fas fa-check-circle me-2"></i>{% trans "Available Credit" %}
+                                            </h6>
+                                            <div class="h3 text-center my-3">
+                                                {{ user.available_credit|floatformat:2|intcomma }} SAR
+                                            </div>
+                                            <p class="text-muted text-center mb-0">
+                                                {% trans "Credit available for use" %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar Section -->
+                            <div class="progress mb-4" style="height: 20px;" 
+                                 id="creditProgressBar"
+                                 data-balance="{{ user.current_balance }}"
+                                 data-limit="{{ user.credit_limit }}">
+                                <div class="progress-bar bg-success" 
+                                     role="progressbar" 
+                                     id="progressBar"
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    <span id="progressText">0%</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-4">
+                                <small class="text-muted">{% trans "Credit Utilization" %}</small>
+                                <small class="text-muted">
+                                    <span id="utilizationStatus">
+                                        {% trans "Calculating..." %}
+                                    </span>
+                                </small>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-primary" id="nextToStep2">
+                                    {% trans "Next: Request Amount" %} <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2: Request Amount -->
+                        <div class="step d-none" id="step2">
+                            <h5 class="mb-4 text-primary">
+                                <i class="fas fa-2 fa-sm me-2"></i>{% trans "Requested Amount" %}
+                            </h5>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">{% trans "Current Credit Limit" %}</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-credit-card"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               value="{{ user.credit_limit|floatformat:2|intcomma }} SAR" 
+                                               readonly>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">{% trans "Requested Credit Limit" %} *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </span>
+                                        {{ form.requested_limit }}
+                                        <span class="input-group-text">SAR</span>
+                                    </div>
+                                    {% if form.requested_limit.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.requested_limit.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        {% trans "Enter the total credit limit you are requesting" %}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="card border-primary mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-calculator me-2"></i>{% trans "Increase Calculation" %}
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4 text-center mb-3">
+                                            <div class="h4 text-primary" id="currentLimitDisplay">
+                                                {{ user.credit_limit|floatformat:2|intcomma }}
+                                            </div>
+                                            <small class="text-muted">{% trans "Current Limit" %}</small>
+                                        </div>
+                                        <div class="col-md-4 text-center mb-3">
+                                            <div class="h4 text-success" id="increaseAmountDisplay">
+                                                0.00
+                                            </div>
+                                            <small class="text-muted">{% trans "Increase Amount" %}</small>
+                                        </div>
+                                        <div class="col-md-4 text-center mb-3">
+                                            <div class="h4 text-info" id="requestedLimitDisplay">
+                                                0.00
+                                            </div>
+                                            <small class="text-muted">{% trans "Requested Limit" %}</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="progress mb-3" style="height: 30px;">
+                                        <div class="progress-bar bg-primary" 
+                                             role="progressbar" 
+                                             id="currentLimitBar"
+                                             style="width: 50%">
+                                            {% trans "Current" %}
+                                        </div>
+                                        <div class="progress-bar bg-success" 
+                                             role="progressbar" 
+                                             id="increaseBar"
+                                             style="width: 0%">
+                                            {% trans "Increase" %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>{% trans "Note:" %}</strong>
+                                        {% trans "Maximum credit limit increase per request is 500,000 SAR" %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Amount Suggestions -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <label class="form-label">{% trans "Suggested Increases" %}</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <button type="button" class="btn btn-outline-primary amount-btn" data-percentage="25">
+                                            +25%
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary amount-btn" data-percentage="50">
+                                            +50%
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary amount-btn" data-percentage="75">
+                                            +75%
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary amount-btn" data-percentage="100">
+                                            +100%
+                                        </button>
+                                    </div>
+                                    <div class="btn-group w-100 mt-2" role="group">
+                                        <button type="button" class="btn btn-outline-primary amount-btn" data-amount="50000">
+                                            +50,000 SAR
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary amount-btn" data-amount="100000">
+                                            +100,000 SAR
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary amount-btn" data-amount="250000">
+                                            +250,000 SAR
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" id="backToStep1">
+                                    <i class="fas fa-arrow-left me-2"></i>{% trans "Back" %}
+                                </button>
+                                <button type="button" class="btn btn-primary" id="nextToStep3">
+                                    {% trans "Next: Purpose & Details" %} <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3: Purpose & Details -->
+                        <div class="step d-none" id="step3">
+                            <h5 class="mb-4 text-primary">
+                                <i class="fas fa-3 fa-sm me-2"></i>{% trans "Purpose & Details" %}
+                            </h5>
+                            
+                            <div class="row mb-4">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">{% trans "Purpose of Credit Increase" %} *</label>
+                                    {{ form.purpose }}
+                                    {% if form.purpose.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.purpose.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        {% trans "Please explain why you need a credit limit increase. Include details about upcoming bookings, business expansion, etc." %}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Business Information -->
+                            <div class="card border-info mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-briefcase me-2"></i>{% trans "Business Information" %}
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted">{% trans "Company Name" %}</label>
+                                            <div class="form-control bg-light">
+                                                {{ user.get_company_name }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted">{% trans "CR Number" %}</label>
+                                            <div class="form-control bg-light">
+                                                {{ user.company_registration|default:"Not specified" }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted">{% trans "VAT Number" %}</label>
+                                            <div class="form-control bg-light">
+                                                {{ user.vat_number|default:"Not specified" }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted">{% trans "Business Type" %}</label>
+                                            <div class="form-control bg-light">
+                                                {{ user.profile.business_type|default:"Not specified" }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted">{% trans "Years in Business" %}</label>
+                                            <div class="form-control bg-light">
+                                                {{ user.profile.years_in_business|default:"0" }} {% trans "years" %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted">{% trans "Total Sales (YTD)" %}</label>
+                                            <div class="form-control bg-light">
+                                                {{ user.profile.total_sales|default:0|floatformat:2|intcomma }} SAR
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Information -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card border-secondary">
+                                        <div class="card-body">
+                                            <h6 class="mb-3">
+                                                <i class="fas fa-file-upload me-2"></i>{% trans "Supporting Documents (Optional)" %}
+                                            </h6>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">{% trans "Business Plan / Forecast" %}</label>
+                                                <input type="file" 
+                                                       class="form-control" 
+                                                       id="businessPlan"
+                                                       accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                                <small class="form-text text-muted">
+                                                    {% trans "Upload business plan or sales forecast (PDF, Word, Excel)" %}
+                                                </small>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">{% trans "Upcoming Contracts" %}</label>
+                                                <input type="file" 
+                                                       class="form-control" 
+                                                       id="contracts"
+                                                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                                <small class="form-text text-muted">
+                                                    {% trans "Upload copies of upcoming contracts or agreements" %}
+                                                </small>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label class="form-label">{% trans "Additional Notes" %}</label>
+                                                <textarea class="form-control" 
+                                                          id="additionalNotes" 
+                                                          rows="3"
+                                                          placeholder="{% trans 'Any additional information that might help with your credit request...' %}"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" id="backToStep2">
+                                    <i class="fas fa-arrow-left me-2"></i>{% trans "Back" %}
+                                </button>
+                                <button type="button" class="btn btn-primary" id="nextToStep4">
+                                    {% trans "Next: Review & Submit" %} <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 4: Review & Submit -->
+                        <div class="step d-none" id="step4">
+                            <h5 class="mb-4 text-primary">
+                                <i class="fas fa-4 fa-sm me-2"></i>{% trans "Review & Submit" %}
+                            </h5>
+                            
+                            <div class="card border-primary mb-4">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-clipboard-check me-2"></i>{% trans "Credit Request Summary" %}
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <table class="table table-sm">
+                                                <tr>
+                                                    <th>{% trans "Current Limit" %}:</th>
+                                                    <td><span id="summaryCurrent">{{ user.credit_limit|floatformat:2|intcomma }}</span> SAR</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>{% trans "Requested Limit" %}:</th>
+                                                    <td><span id="summaryRequested">0.00</span> SAR</td>
+                                                </tr>
+                                                <tr class="table-success">
+                                                    <th><strong>{% trans "Increase Amount" %}:</strong></th>
+                                                    <td><strong><span id="summaryIncrease">0.00</span> SAR</strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>{% trans "Increase Percentage" %}:</th>
+                                                    <td><span id="summaryPercentage">0.00</span>%</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <table class="table table-sm">
+                                                <tr>
+                                                    <th>{% trans "Request Date" %}:</th>
+                                                    <td id="summaryDate">{{ current_date|date:"d M Y" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>{% trans "Business Name" %}:</th>
+                                                    <td>{{ user.get_company_name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>{% trans "Requested By" %}:</th>
+                                                    <td>{{ user.get_full_name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>{% trans "KYC Status" %}:</th>
+                                                    <td>
+                                                        <span class="badge {% if user.kyc_verified %}bg-success{% else %}bg-warning{% endif %}">
+                                                            {% if user.kyc_verified %}
+                                                                {% trans "Verified" %}
+                                                            {% else %}
+                                                                {% trans "Pending" %}
+                                                            {% endif %}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Purpose Summary -->
+                                    <div class="card border-info mt-3">
+                                        <div class="card-header bg-info text-white py-2">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-bullseye me-2"></i>{% trans "Purpose Summary" %}
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p id="summaryPurpose" class="mb-0"></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mt-3">
+                                        <div class="d-flex">
+                                            <div class="me-3">
+                                                <i class="fas fa-clock"></i>
+                                            </div>
+                                            <div>
+                                                <small>
+                                                    {% trans "Credit increase requests are typically processed within 3-5 business days. You will be notified via email and in-app notifications once a decision is made." %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Terms and Conditions -->
+                            <div class="card border-warning mb-4">
+                                <div class="card-header bg-warning text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-gavel me-2"></i>{% trans "Terms & Conditions" %}
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div style="max-height: 200px; overflow-y: auto;" class="mb-3">
+                                        <h6>{% trans "Credit Agreement Terms" %}</h6>
+                                        <ol class="small">
+                                            <li>{% trans "Credit approval is subject to verification of business information and credit history" %}</li>
+                                            <li>{% trans "Interest may be charged on overdue amounts at 2% per month" %}</li>
+                                            <li>{% trans "Credit limit can be reduced or suspended at the discretion of Mushqila Travel" %}</li>
+                                            <li>{% trans "You are responsible for all charges made to your account" %}</li>
+                                            <li>{% trans "Credit terms are subject to change with 30 days notice" %}</li>
+                                            <li>{% trans "In case of default, Mushqila Travel reserves the right to take legal action" %}</li>
+                                        </ol>
+                                    </div>
+                                    
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                        <label class="form-check-label" for="agreeTerms">
+                                            {% trans "I agree to the Terms & Conditions and confirm that all information provided is accurate" %}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" id="backToStep3">
+                                    <i class="fas fa-arrow-left me-2"></i>{% trans "Back" %}
+                                </button>
+                                <button type="submit" class="btn btn-success" id="submitRequest">
+                                    <i class="fas fa-paper-plane me-2"></i>{% trans "Submit Request" %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Important Information -->
+            <div class="card shadow mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle me-2"></i>{% trans "Important Information" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="infoAccordion">
+                        <!-- FAQ 1 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#info1">
+                                    <i class="fas fa-question-circle me-2"></i>{% trans "How are credit limits determined?" %}
+                                </button>
+                            </h2>
+                            <div id="info1" class="accordion-collapse collapse" data-bs-parent="#infoAccordion">
+                                <div class="accordion-body">
+                                    <p>{% trans "Credit limits are based on:" %}</p>
+                                    <ul>
+                                        <li>{% trans "Business revenue and transaction history" %}</li>
+                                        <li>{% trans "KYC verification status" %}</li>
+                                        <li>{% trans "Payment history and credit utilization" %}</li>
+                                        <li>{% trans "Time in business with Mushqila" %}</li>
+                                        <li>{% trans "Industry risk assessment" %}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 2 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#info2">
+                                    <i class="fas fa-clock me-2"></i>{% trans "How long does approval take?" %}
+                                </button>
+                            </h2>
+                            <div id="info2" class="accordion-collapse collapse" data-bs-parent="#infoAccordion">
+                                <div class="accordion-body">
+                                    <p>{% trans "Approval timelines:" %}</p>
+                                    <ul>
+                                        <li>{% trans "Standard review: 3-5 business days" %}</li>
+                                        <li>{% trans "Express review (for urgent needs): 1-2 business days" %}</li>
+                                        <li>{% trans "Complex requests: up to 10 business days" %}</li>
+                                    </ul>
+                                    <p class="mb-0">{% trans "You will be notified via email and in-app notifications." %}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 3 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#info3">
+                                    <i class="fas fa-file-alt me-2"></i>{% trans "What documents are required?" %}
+                                </button>
+                            </h2>
+                            <div id="info3" class="accordion-collapse collapse" data-bs-parent="#infoAccordion">
+                                <div class="accordion-body">
+                                    <p>{% trans "Required documents for credit increase:" %}</p>
+                                    <ul>
+                                        <li>{% trans "Valid commercial registration" %}</li>
+                                        <li>{% trans "VAT certificate" %}</li>
+                                        <li>{% trans "Bank statements (last 6 months)" %}</li>
+                                        <li>{% trans "Business financial statements" %}</li>
+                                        <li>{% trans "Upcoming contracts or purchase orders" %}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- FAQ 4 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#info4">
+                                    <i class="fas fa-ban me-2"></i>{% trans "Why might my request be denied?" %}
+                                </button>
+                            </h2>
+                            <div id="info4" class="accordion-collapse collapse" data-bs-parent="#infoAccordion">
+                                <div class="accordion-body">
+                                    <p>{% trans "Common reasons for denial:" %}</p>
+                                    <ul>
+                                        <li>{% trans "Incomplete KYC verification" %}</li>
+                                        <li>{% trans "Poor payment history" %}</li>
+                                        <li>{% trans "High credit utilization" %}</li>
+                                        <li>{% trans "Insufficient business history" %}</li>
+                                        <li>{% trans "Incomplete documentation" %}</li>
+                                        <li>{% trans "High risk industry classification" %}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">{% trans "Loading..." %}</span>
+                </div>
+                <h5 class="mb-3">{% trans "Submitting Your Request" %}</h5>
+                <p class="text-muted mb-0">
+                    {% trans "Please wait while we submit your credit increase request..." %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle fa-4x text-success"></i>
+                </div>
+                <h4 class="mb-3">{% trans "Request Submitted Successfully!" %}</h4>
+                <p class="text-muted mb-4">
+                    {% trans "Your credit increase request has been submitted for review. You will be notified once a decision is made." %}
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-primary">
+                        {% trans "View Request Status" %}
+                    </a>
+                    <a href="#" class="btn btn-outline-primary">
+                        {% trans "Back to Dashboard" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Calculate credit utilization
+        const progressBar = document.getElementById('creditProgressBar');
+        const balance = parseFloat(progressBar.getAttribute('data-balance'));
+        const limit = parseFloat(progressBar.getAttribute('data-limit'));
+        
+        if (limit > 0) {
+            const utilization = (balance / limit) * 100;
+            const progressBarElement = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const statusElement = document.getElementById('utilizationStatus');
+            
+            // Set progress bar width
+            progressBarElement.style.width = `${Math.min(utilization, 100)}%`;
+            progressText.textContent = utilization.toFixed(1) + '%';
+            
+            // Set color and status text
+            if (utilization < 50) {
+                progressBarElement.className = 'progress-bar bg-success';
+                statusElement.textContent = '{% trans "Low" %}';
+                statusElement.className = 'text-success';
+            } else if (utilization < 80) {
+                progressBarElement.className = 'progress-bar bg-warning';
+                statusElement.textContent = '{% trans "Moderate" %}';
+                statusElement.className = 'text-warning';
+            } else {
+                progressBarElement.className = 'progress-bar bg-danger';
+                statusElement.textContent = '{% trans "High" %}';
+                statusElement.className = 'text-danger';
+            }
+        }
+
+        // Elements
+        const form = document.getElementById('creditRequestForm');
+        const requestedLimitInput = document.getElementById('id_requested_limit');
+        const purposeTextarea = document.getElementById('id_purpose');
+        const amountButtons = document.querySelectorAll('.amount-btn');
+        const steps = {
+            step1: document.getElementById('step1'),
+            step2: document.getElementById('step2'),
+            step3: document.getElementById('step3'),
+            step4: document.getElementById('step4')
+        };
+        const summaryCurrent = document.getElementById('summaryCurrent');
+        const summaryRequested = document.getElementById('summaryRequested');
+        const summaryIncrease = document.getElementById('summaryIncrease');
+        const summaryPercentage = document.getElementById('summaryPercentage');
+        const summaryPurpose = document.getElementById('summaryPurpose');
+        const currentLimitDisplay = document.getElementById('currentLimitDisplay');
+        const increaseAmountDisplay = document.getElementById('increaseAmountDisplay');
+        const requestedLimitDisplay = document.getElementById('requestedLimitDisplay');
+        const currentLimitBar = document.getElementById('currentLimitBar');
+        const increaseBar = document.getElementById('increaseBar');
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        
+        // Current credit limit
+        const currentLimit = parseFloat('{{ user.credit_limit|floatformat:2 }}'.replace(/,/g, ''));
+        
+        // Quick amount buttons
+        amountButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.hasAttribute('data-percentage')) {
+                    const percentage = parseFloat(this.getAttribute('data-percentage'));
+                    const increaseAmount = currentLimit * (percentage / 100);
+                    const requestedAmount = currentLimit + increaseAmount;
+                    requestedLimitInput.value = requestedAmount.toFixed(2);
+                } else if (this.hasAttribute('data-amount')) {
+                    const increaseAmount = parseFloat(this.getAttribute('data-amount'));
+                    const requestedAmount = currentLimit + increaseAmount;
+                    requestedLimitInput.value = requestedAmount.toFixed(2);
+                }
+                updateCalculations();
+            });
+        });
+        
+        // Real-time calculation
+        requestedLimitInput.addEventListener('input', updateCalculations);
+        
+        // Navigation
+        document.getElementById('nextToStep2').addEventListener('click', function() {
+            steps.step1.classList.add('d-none');
+            steps.step2.classList.remove('d-none');
+            updateCalculations();
+        });
+        
+        document.getElementById('nextToStep3').addEventListener('click', function() {
+            if (validateStep2()) {
+                steps.step2.classList.add('d-none');
+                steps.step3.classList.remove('d-none');
+            }
+        });
+        
+        document.getElementById('nextToStep4').addEventListener('click', function() {
+            if (validateStep3()) {
+                steps.step3.classList.add('d-none');
+                steps.step4.classList.remove('d-none');
+                updateSummary();
+            }
+        });
+        
+        document.getElementById('backToStep1').addEventListener('click', function() {
+            steps.step2.classList.add('d-none');
+            steps.step1.classList.remove('d-none');
+        });
+        
+        document.getElementById('backToStep2').addEventListener('click', function() {
+            steps.step3.classList.add('d-none');
+            steps.step2.classList.remove('d-none');
+        });
+        
+        document.getElementById('backToStep3').addEventListener('click', function() {
+            steps.step4.classList.add('d-none');
+            steps.step3.classList.remove('d-none');
+        });
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (validateForm()) {
+                loadingModal.show();
+                
+                // Simulate processing delay for UX
+                setTimeout(() => {
+                    // Submit the form
+                    this.submit();
+                    loadingModal.hide();
+                    successModal.show();
+                }, 2000);
+            }
+        });
+        
+        // Helper Functions
+        function validateStep2() {
+            const requestedAmount = parseFloat(requestedLimitInput.value);
+            
+            if (!requestedAmount || isNaN(requestedAmount)) {
+                showError(requestedLimitInput, '{% trans "Please enter a valid amount" %}');
+                return false;
+            }
+            
+            if (requestedAmount <= currentLimit) {
+                showError(requestedLimitInput, '{% trans "Requested limit must be greater than current limit" %}');
+                return false;
+            }
+            
+            const increaseAmount = requestedAmount - currentLimit;
+            
+            // Maximum increase check
+            if (increaseAmount > 500000) {
+                showError(requestedLimitInput, '{% trans "Maximum increase per request is 500,000 SAR" %}');
+                return false;
+            }
+            
+            // Maximum total limit check
+            if (requestedAmount > 1000000) {
+                showError(requestedLimitInput, '{% trans "Maximum credit limit is 1,000,000 SAR" %}');
+                return false;
+            }
+            
+            clearError(requestedLimitInput);
+            return true;
+        }
+        
+        function validateStep3() {
+            if (!purposeTextarea.value.trim()) {
+                showError(purposeTextarea, '{% trans "Please explain the purpose of the credit increase" %}');
+                return false;
+            }
+            
+            if (purposeTextarea.value.trim().length < 50) {
+                showError(purposeTextarea, '{% trans "Please provide more details (minimum 50 characters)" %}');
+                return false;
+            }
+            
+            clearError(purposeTextarea);
+            return true;
+        }
+        
+        function validateForm() {
+            if (!document.getElementById('agreeTerms').checked) {
+                showError(document.getElementById('agreeTerms'), '{% trans "You must agree to the terms and conditions" %}');
+                return false;
+            }
+            
+            return validateStep2() && validateStep3();
+        }
+        
+        function showError(element, message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback d-block';
+            errorDiv.textContent = message;
+            
+            // Remove existing error
+            const existingError = element.parentNode.querySelector('.invalid-feedback');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            element.parentNode.appendChild(errorDiv);
+            element.classList.add('is-invalid');
+            
+            // Scroll to error
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function clearError(element) {
+            element.classList.remove('is-invalid');
+            const errorDiv = element.parentNode.querySelector('.invalid-feedback');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
+        }
+        
+        function updateCalculations() {
+            const requestedAmount = parseFloat(requestedLimitInput.value) || currentLimit;
+            const increaseAmount = requestedAmount - currentLimit;
+            const increasePercentage = (increaseAmount / currentLimit) * 100;
+            
+            // Update displays
+            currentLimitDisplay.textContent = currentLimit.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            
+            increaseAmountDisplay.textContent = increaseAmount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            
+            requestedLimitDisplay.textContent = requestedAmount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            
+            // Update progress bars
+            const currentBarWidth = (currentLimit / requestedAmount) * 100;
+            const increaseBarWidth = (increaseAmount / requestedAmount) * 100;
+            
+            currentLimitBar.style.width = `${currentBarWidth}%`;
+            increaseBar.style.width = `${increaseBarWidth}%`;
+            
+            // Update bar labels
+            if (currentBarWidth < 20) {
+                currentLimitBar.textContent = '';
+                increaseBar.textContent = `${increasePercentage.toFixed(1)}% Increase`;
+            } else if (increaseBarWidth < 20) {
+                currentLimitBar.textContent = `${(100 - increasePercentage).toFixed(1)}% Current`;
+                increaseBar.textContent = '';
+            } else {
+                currentLimitBar.textContent = '{% trans "Current" %}';
+                increaseBar.textContent = '{% trans "Increase" %}';
+            }
+        }
+        
+        function updateSummary() {
+            const requestedAmount = parseFloat(requestedLimitInput.value) || currentLimit;
+            const increaseAmount = requestedAmount - currentLimit;
+            const increasePercentage = (increaseAmount / currentLimit) * 100;
+            
+            summaryCurrent.textContent = currentLimit.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            
+            summaryRequested.textContent = requestedAmount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            
+            summaryIncrease.textContent = increaseAmount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            
+            summaryPercentage.textContent = increasePercentage.toFixed(2);
+            summaryPurpose.textContent = purposeTextarea.value;
+        }
+        
+        // Initialize
+        updateCalculations();
+        
+        // Auto-format amount input
+        requestedLimitInput.addEventListener('blur', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value)) {
+                this.value = value.toFixed(2);
+                updateCalculations();
+            }
+        });
+    });
+</script>
+
+<style>
+    .step {
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .amount-btn {
+        transition: all 0.3s ease;
+    }
+    
+    .amount-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        font-weight: 600;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+    }
+    
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+        border: none;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+    }
+    
+    .alert {
+        border-radius: 8px;
+        border: none;
+    }
+    
+    .card {
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .accordion-button {
+        border-radius: 8px;
+        margin-bottom: 5px;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: #e7f1ff;
+        color: #0d6efd;
+    }
+    
+    .modal-content {
+        border-radius: 10px;
+    }
+    
+    .modal-header {
+        border-radius: 10px 10px 0 0;
+    }
+    
+    @media (max-width: 768px) {
+        .btn-group.w-100 {
+            flex-direction: column;
+        }
+        
+        .btn-group.w-100 .btn {
+            margin-bottom: 5px;
+            border-radius: 8px !important;
+        }
+        
+        .h3, .h4, .h5, .h6 {
+            font-size: 1rem;
+        }
+        
+        .h1, .h2 {
+            font-size: 1.5rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .progress-bar {
+            font-size: 10px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .row {
+            margin-left: -5px;
+            margin-right: -5px;
+        }
+        
+        .col-md-6, .col-md-4, .col-md-3 {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+        
+        .btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,1258 @@
+<!------------- accounts/templates/accounts/financial/withdraw.html -------->
+{% extends 'accounts/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Withdraw Funds" %} | Mushqila Platform{% endblock %}
+
+{% block page_title %}{% trans "Withdraw Funds" %}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="ms-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard_redirect' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'accounts:wallet' %}">{% trans "Wallet" %}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Withdraw" %}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header with Balance Info -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div>
+                            <h1 class="h3 mb-1">{% trans "Withdraw Funds" %}</h1>
+                            <p class="text-muted mb-0">
+                                {% trans "Transfer funds from your wallet to your bank account" %}
+                            </p>
+                        </div>
+                        <div class="mt-2 mt-sm-0">
+                            <a href="{% url 'accounts:wallet' %}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Wallet" %}
+                            </a>
+                            <span class="badge bg-success p-2">
+                                <i class="fas fa-wallet me-1"></i>
+                                {% trans "Available:" %} {{ user.wallet_balance|floatformat:2 }} SAR
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Withdrawal Process Steps -->
+            <div class="row">
+                <div class="col-12">
+                    <!-- Progress Steps -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body py-3">
+                            <div class="progress-steps">
+                                <div class="step active" data-step="1">
+                                    <div class="step-icon">1</div>
+                                    <div class="step-label">{% trans "Amount" %}</div>
+                                </div>
+                                <div class="step-line"></div>
+                                <div class="step" data-step="2">
+                                    <div class="step-icon">2</div>
+                                    <div class="step-label">{% trans "Bank Details" %}</div>
+                                </div>
+                                <div class="step-line"></div>
+                                <div class="step" data-step="3">
+                                    <div class="step-icon">3</div>
+                                    <div class="step-label">{% trans "Confirm" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Withdrawal Form -->
+                    <div class="card shadow">
+                        <div class="card-body p-4">
+                            <form method="POST" action="{% url 'accounts:withdraw' %}" id="withdrawalForm">
+                                {% csrf_token %}
+                                
+                                <!-- Step 1: Amount Selection -->
+                                <div class="step-content" id="step1Content">
+                                    <h5 class="mb-4 text-primary">
+                                        <i class="fas fa-money-bill-wave me-2"></i>{% trans "Select Withdrawal Amount" %}
+                                    </h5>
+                                    
+                                    <!-- Available Balance -->
+                                    <div class="alert alert-success mb-4">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-wallet fa-2x me-3"></i>
+                                                <div>
+                                                    <h6 class="mb-0">{% trans "Available Balance" %}</h6>
+                                                    <p class="h4 mb-0 text-success">
+                                                        {{ user.wallet_balance|floatformat:2 }} SAR
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <small class="text-muted d-block">{% trans "Min: 100 SAR" %}</small>
+                                                <small class="text-muted">{% trans "Max: 50,000 SAR" %}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-lg-8">
+                                            <!-- Amount Input -->
+                                            <div class="mb-4">
+                                                <label for="amount" class="form-label fw-bold">
+                                                    {% trans "Enter withdrawal amount" %}
+                                                </label>
+                                                <div class="input-group input-group-lg">
+                                                    <span class="input-group-text bg-light">
+                                                        <i class="fas fa-shekel-sign"></i>
+                                                    </span>
+                                                    <input type="number" 
+                                                           class="form-control" 
+                                                           id="amount" 
+                                                           name="amount"
+                                                           min="100" 
+                                                           max="50000" 
+                                                           step="100"
+                                                           placeholder="Enter amount in SAR"
+                                                           required>
+                                                    <span class="input-group-text bg-light">SAR</span>
+                                                </div>
+                                                <div class="form-text text-muted">
+                                                    {% trans "Amount must be between 100 and 50,000 SAR" %}
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Quick Amount Buttons -->
+                                            <div class="mb-4">
+                                                <label class="form-label fw-bold">{% trans "Quick Select" %}</label>
+                                                <div class="row g-2">
+                                                    <div class="col-6 col-sm-4 col-lg-3">
+                                                        <button type="button" class="btn btn-outline-primary w-100 amount-quick" data-amount="500">
+                                                            500 SAR
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-6 col-sm-4 col-lg-3">
+                                                        <button type="button" class="btn btn-outline-primary w-100 amount-quick" data-amount="1000">
+                                                            1,000 SAR
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-6 col-sm-4 col-lg-3">
+                                                        <button type="button" class="btn btn-outline-primary w-100 amount-quick" data-amount="5000">
+                                                            5,000 SAR
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-6 col-sm-4 col-lg-3">
+                                                        <button type="button" class="btn btn-outline-primary w-100 amount-quick" data-amount="10000">
+                                                            10,000 SAR
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-6 col-sm-4 col-lg-3">
+                                                        <button type="button" class="btn btn-outline-primary w-100 amount-quick" data-amount="25000">
+                                                            25,000 SAR
+                                                        </button>
+                                                    </div>
+                                                    <div class="col-6 col-sm-4 col-lg-3">
+                                                        <button type="button" class="btn btn-outline-primary w-100 amount-quick" data-amount="50000">
+                                                            50,000 SAR
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-lg-4">
+                                            <!-- Amount Preview -->
+                                            <div class="card border-primary">
+                                                <div class="card-header bg-primary text-white py-3">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-calculator me-2"></i>{% trans "Withdrawal Preview" %}
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="withdrawal-breakdown">
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span class="text-muted">{% trans "Withdrawal Amount:" %}</span>
+                                                            <span class="fw-bold" id="previewAmount">0.00 SAR</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span class="text-muted">{% trans "Processing Fee (2%):" %}</span>
+                                                            <span class="fw-bold text-danger" id="previewFee">0.00 SAR</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span class="text-muted">{% trans "Min Fee (10 SAR):" %}</span>
+                                                            <span class="fw-bold text-danger">10.00 SAR</span>
+                                                        </div>
+                                                        <hr class="my-2">
+                                                        <div class="d-flex justify-content-between mb-3">
+                                                            <span class="fw-bold">{% trans "Net Amount:" %}</span>
+                                                            <span class="fw-bold text-success" id="previewNet">0.00 SAR</span>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between">
+                                                            <span class="text-muted">{% trans "New Balance:" %}</span>
+                                                            <span class="fw-bold text-info" id="previewBalance">0.00 SAR</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Info Alert -->
+                                    <div class="alert alert-info mt-4">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas fa-info-circle fa-lg"></i>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="alert-heading">{% trans "Important Information" %}</h6>
+                                                <ul class="mb-0">
+                                                    <li>{% trans "2% processing fee applies (minimum 10 SAR)" %}</li>
+                                                    <li>{% trans "Withdrawals processed within 24-48 business hours" %}</li>
+                                                    <li>{% trans "Funds transferred to registered bank account only" %}</li>
+                                                    <li>{% trans "Large withdrawals may require additional verification" %}</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Navigation -->
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <button type="button" class="btn btn-primary btn-lg px-5" id="nextToStep2">
+                                            {% trans "Continue" %} <i class="fas fa-arrow-right ms-2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Step 2: Bank Details -->
+                                <div class="step-content d-none" id="step2Content">
+                                    <h5 class="mb-4 text-primary">
+                                        <i class="fas fa-university me-2"></i>{% trans "Bank Account Details" %}
+                                    </h5>
+                                    
+                                    <!-- Bank Account Selection -->
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <label class="form-label fw-bold mb-3">
+                                                <i class="fas fa-credit-card me-2"></i>{% trans "Select Withdrawal Method" %}
+                                            </label>
+                                            
+                                            <div class="withdrawal-methods">
+                                                <!-- Bank Transfer -->
+                                                <div class="form-check card mb-3" id="bankTransferOption">
+                                                    <input class="form-check-input" 
+                                                           type="radio" 
+                                                           name="withdrawal_method" 
+                                                           id="bank_transfer" 
+                                                           value="bank_transfer" 
+                                                           checked>
+                                                    <label class="form-check-label card-body" for="bank_transfer">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="payment-icon me-3">
+                                                                <i class="fas fa-university fa-2x text-primary"></i>
+                                                            </div>
+                                                            <div class="flex-grow-1">
+                                                                <h6 class="mb-1">{% trans "Bank Transfer" %}</h6>
+                                                                <p class="text-muted small mb-0">
+                                                                    {% trans "Direct transfer to your bank account (1-2 business days)" %}
+                                                                </p>
+                                                            </div>
+                                                            <div class="payment-check">
+                                                                <i class="fas fa-check-circle text-success"></i>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Bank Account Details -->
+                                    <div class="card border-primary mb-4">
+                                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-university me-2"></i>{% trans "Your Bank Details" %}
+                                            </h6>
+                                            <button type="button" class="btn btn-sm btn-light" onclick="toggleBankEdit()">
+                                                <i class="fas fa-edit me-1"></i>{% trans "Edit" %}
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Current Bank Details -->
+                                            <div id="currentBankDetails">
+                                                {% if user.profile.bank_name_en or user.profile.iban %}
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <div class="bank-detail-item">
+                                                            <label class="form-label text-muted">{% trans "Bank Name" %}</label>
+                                                            <div class="form-control-plaintext border-bottom pb-2">
+                                                                <i class="fas fa-building me-2 text-muted"></i>
+                                                                {{ user.profile.bank_name_en|default:"Not specified" }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <div class="bank-detail-item">
+                                                            <label class="form-label text-muted">{% trans "Account Holder" %}</label>
+                                                            <div class="form-control-plaintext border-bottom pb-2">
+                                                                <i class="fas fa-user me-2 text-muted"></i>
+                                                                {{ user.get_full_name }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <div class="bank-detail-item">
+                                                            <label class="form-label text-muted">{% trans "Account Number" %}</label>
+                                                            <div class="form-control-plaintext border-bottom pb-2">
+                                                                <i class="fas fa-hashtag me-2 text-muted"></i>
+                                                                {{ user.profile.account_number|default:"Not specified" }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <div class="bank-detail-item">
+                                                            <label class="form-label text-muted">{% trans "IBAN" %}</label>
+                                                            <div class="form-control-plaintext border-bottom pb-2">
+                                                                <i class="fas fa-barcode me-2 text-muted"></i>
+                                                                {{ user.profile.iban|default:"Not specified" }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% else %}
+                                                <div class="alert alert-warning">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                                                        <div>
+                                                            <strong>{% trans "Bank details not found!" %}</strong>
+                                                            <p class="mb-0">
+                                                                {% trans "Please add your bank account details to withdraw funds. Click 'Edit' to add your details." %}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <!-- Editable Bank Details -->
+                                            <div id="editableBankDetails" class="d-none">
+                                                <div class="alert alert-info">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-info-circle me-3"></i>
+                                                        <div>
+                                                            {% trans "Update your bank details. These will be saved to your profile." %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="row">
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label">{% trans "Bank Name" %} *</label>
+                                                        <input type="text" 
+                                                               class="form-control" 
+                                                               id="bank_name" 
+                                                               name="bank_name"
+                                                               value="{{ user.profile.bank_name_en|default:'' }}"
+                                                               placeholder="e.g., Al Rajhi Bank"
+                                                               required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label">{% trans "Account Holder Name" %} *</label>
+                                                        <input type="text" 
+                                                               class="form-control" 
+                                                               id="account_holder" 
+                                                               name="account_holder"
+                                                               value="{{ user.get_full_name }}"
+                                                               required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label">{% trans "Account Number" %} *</label>
+                                                        <input type="text" 
+                                                               class="form-control" 
+                                                               id="account_number" 
+                                                               name="account_number"
+                                                               value="{{ user.profile.account_number|default:'' }}"
+                                                               placeholder="e.g., 1234567890"
+                                                               required>
+                                                    </div>
+                                                    <div class="col-md-6 mb-3">
+                                                        <label class="form-label">{% trans "IBAN" %} *</label>
+                                                        <input type="text" 
+                                                               class="form-control" 
+                                                               id="iban" 
+                                                               name="iban"
+                                                               value="{{ user.profile.iban|default:'' }}"
+                                                               placeholder="SA4420000001234567890123"
+                                                               pattern="^SA[0-9]{22}$"
+                                                               title="{% trans 'Saudi IBAN format: SA followed by 22 digits' %}"
+                                                               required>
+                                                        <div class="form-text">
+                                                            {% trans "Format: SA followed by 22 digits" %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="d-flex justify-content-end">
+                                                    <button type="button" class="btn btn-outline-secondary me-2" onclick="cancelBankEdit()">
+                                                        {% trans "Cancel" %}
+                                                    </button>
+                                                    <button type="button" class="btn btn-primary" onclick="saveBankDetails()">
+                                                        <i class="fas fa-save me-2"></i>{% trans "Save Details" %}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Important Notice -->
+                                            <div class="alert alert-warning mt-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-exclamation-triangle me-3"></i>
+                                                    <div>
+                                                        <small>
+                                                            {% trans "By proceeding, you confirm that the bank account belongs to you. Incorrect details may cause delays or rejection of your withdrawal." %}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Additional Information -->
+                                    <div class="card border-secondary mb-4">
+                                        <div class="card-body">
+                                            <h6 class="mb-3">
+                                                <i class="fas fa-comment-dots me-2"></i>{% trans "Additional Information" %}
+                                            </h6>
+                                            
+                                            <div class="mb-3">
+                                                <label for="bank_account" class="form-label">{% trans "Complete Bank Details" %}</label>
+                                                <textarea class="form-control" 
+                                                          id="bank_account" 
+                                                          name="bank_account" 
+                                                          rows="3"
+                                                          placeholder="{% trans 'Bank name, branch, account number, IBAN, and any other relevant details...' %}"
+                                                          required></textarea>
+                                                <div class="form-text text-muted">
+                                                    {% trans "Provide complete bank details for verification" %}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="purpose" class="form-label">{% trans "Purpose of Withdrawal (Optional)" %}</label>
+                                                <textarea class="form-control" 
+                                                          id="purpose" 
+                                                          name="purpose" 
+                                                          rows="2"
+                                                          placeholder="{% trans 'e.g., Business expenses, personal use, etc.' %}"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Navigation -->
+                                    <div class="d-flex justify-content-between mt-4">
+                                        <button type="button" class="btn btn-outline-secondary" id="backToStep1">
+                                            <i class="fas fa-arrow-left me-2"></i>{% trans "Back" %}
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id="nextToStep3">
+                                            {% trans "Continue to Review" %} <i class="fas fa-arrow-right ms-2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Step 3: Review & Confirm -->
+                                <div class="step-content d-none" id="step3Content">
+                                    <h5 class="mb-4 text-primary">
+                                        <i class="fas fa-clipboard-check me-2"></i>{% trans "Review & Confirm Withdrawal" %}
+                                    </h5>
+                                    
+                                    <!-- Withdrawal Summary -->
+                                    <div class="card border-primary mb-4">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0">{% trans "Withdrawal Summary" %}</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="withdrawal-summary">
+                                                        <h6 class="text-muted mb-3">{% trans "Financial Details" %}</h6>
+                                                        <table class="table table-sm">
+                                                            <tr>
+                                                                <th>{% trans "Withdrawal Amount:" %}</th>
+                                                                <td class="text-end"><span id="summaryAmount">0.00</span> SAR</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>{% trans "Processing Fee:" %}</th>
+                                                                <td class="text-end"><span id="summaryFee">0.00</span> SAR</td>
+                                                            </tr>
+                                                            <tr class="table-success">
+                                                                <th><strong>{% trans "Net Amount:" %}</strong></th>
+                                                                <td class="text-end"><strong><span id="summaryNet">0.00</span> SAR</strong></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="withdrawal-summary">
+                                                        <h6 class="text-muted mb-3">{% trans "Account Details" %}</h6>
+                                                        <table class="table table-sm">
+                                                            <tr>
+                                                                <th>{% trans "Current Balance:" %}</th>
+                                                                <td class="text-end">{{ user.wallet_balance|floatformat:2 }} SAR</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>{% trans "New Balance:" %}</th>
+                                                                <td class="text-end"><span id="summaryBalance">0.00</span> SAR</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>{% trans "Processing Time:" %}</th>
+                                                                <td class="text-end">24-48 {% trans "hours" %}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <th>{% trans "Status:" %}</th>
+                                                                <td class="text-end"><span class="badge bg-warning">{% trans "Pending Approval" %}</span></td>
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Bank Details Summary -->
+                                            <div class="card border-info mt-4">
+                                                <div class="card-header bg-info text-white py-2">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-university me-2"></i>{% trans "Bank Details" %}
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="bankDetailsSummary">
+                                                        <!-- Will be populated by JavaScript -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Terms & Conditions -->
+                                            <div class="alert alert-info mt-3">
+                                                <div class="d-flex">
+                                                    <div class="flex-shrink-0">
+                                                        <i class="fas fa-clock"></i>
+                                                    </div>
+                                                    <div class="flex-grow-1 ms-3">
+                                                        <h6 class="alert-heading">{% trans "Important Notice" %}</h6>
+                                                        <p class="mb-0 small">
+                                                            {% trans "Withdrawals are processed during business hours (Sunday - Thursday, 9:00 AM - 5:00 PM KSA Time). Large withdrawals may require additional verification. You will receive email notifications at each step of the process." %}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Terms Agreement -->
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="termsAgreement" required>
+                                                <label class="form-check-label" for="termsAgreement">
+                                                    {% trans "I confirm that all information provided is accurate and I authorize Mushqila to process this withdrawal to my bank account. I understand that processing fees apply and the withdrawal will be processed within 24-48 business hours." %}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Navigation -->
+                                    <div class="d-flex justify-content-between">
+                                        <button type="button" class="btn btn-outline-secondary" id="backToStep2">
+                                            <i class="fas fa-arrow-left me-2"></i>{% trans "Back" %}
+                                        </button>
+                                        <button type="submit" class="btn btn-success btn-lg px-5" id="submitWithdrawal">
+                                            <i class="fas fa-check-circle me-2"></i>{% trans "Confirm Withdrawal" %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Section -->
+                    <div class="card shadow-sm mt-4">
+                        <div class="card-body">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-question-circle me-2"></i>{% trans "Frequently Asked Questions" %}
+                            </h6>
+                            <div class="accordion" id="withdrawalFAQ">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                            {% trans "How long does withdrawal take?" %}
+                                        </button>
+                                    </h2>
+                                    <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#withdrawalFAQ">
+                                        <div class="accordion-body">
+                                            <p>{% trans "Standard processing time is 24-48 business hours. Large withdrawals may take longer due to verification requirements." %}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                            {% trans "What are the fees?" %}
+                                        </button>
+                                    </h2>
+                                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#withdrawalFAQ">
+                                        <div class="accordion-body">
+                                            <p>{% trans "2% processing fee (minimum 10 SAR). No hidden charges." %}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                            {% trans "Can I cancel a withdrawal?" %}
+                                        </button>
+                                    </h2>
+                                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#withdrawalFAQ">
+                                        <div class="accordion-body">
+                                            <p>{% trans "Yes, you can cancel pending withdrawals from your wallet history before they are processed." %}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Support Section -->
+                    <div class="card shadow-sm mt-4 bg-light">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="mb-2">
+                                        <i class="fas fa-headset me-2 text-primary"></i>{% trans "Need Help with Withdrawal?" %}
+                                    </h6>
+                                    <p class="text-muted mb-0 small">
+                                        {% trans "Contact our support team for assistance with withdrawals or any banking issues." %}
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                    <a href="mailto:support@mushqila.com" class="btn btn-outline-primary me-2">
+                                        <i class="fas fa-envelope me-2"></i>{% trans "Email" %}
+                                    </a>
+                                    <a href="tel:+966500993174" class="btn btn-primary">
+                                        <i class="fas fa-phone me-2"></i>{% trans "Call" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="processingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary mb-4" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">{% trans "Processing..." %}</span>
+                </div>
+                <h5 class="mb-3">{% trans "Processing Your Withdrawal" %}</h5>
+                <p class="text-muted mb-0">
+                    {% trans "Please wait while we process your request. Do not close this window." %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Progress Steps */
+    .progress-steps {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .step.active .step-icon {
+        background-color: #0d6efd;
+        color: white;
+        box-shadow: 0 0 0 5px rgba(13, 110, 253, 0.2);
+    }
+    
+    .step-label {
+        font-size: 12px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .step.active .step-label {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    
+    .step-line {
+        flex: 1;
+        height: 2px;
+        background-color: #e9ecef;
+        margin: 0 10px;
+        position: relative;
+        top: -12px;
+    }
+    
+    .step.active ~ .step-line {
+        background-color: #0d6efd;
+    }
+    
+    /* Withdrawal Methods */
+    .withdrawal-methods .form-check-input {
+        display: none;
+    }
+    
+    .withdrawal-methods .card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #dee2e6;
+    }
+    
+    .withdrawal-methods .form-check-input:checked + .card {
+        border-color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+    
+    .withdrawal-methods .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .payment-check {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .withdrawal-methods .form-check-input:checked + .card .payment-check {
+        opacity: 1;
+    }
+    
+    /* Quick Amount Buttons */
+    .amount-quick {
+        padding: 10px 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .amount-quick:hover {
+        transform: translateY(-2px);
+        background-color: #0d6efd !important;
+        color: white !important;
+        border-color: #0d6efd !important;
+    }
+    
+    /* Bank Details */
+    .bank-detail-item .form-control-plaintext {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    /* Form Controls */
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Buttons */
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+        border: none;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%);
+        border: none;
+    }
+    
+    /* Tables */
+    .table th {
+        font-weight: 600;
+        color: #495057;
+        background-color: transparent;
+    }
+    
+    .table-sm td, .table-sm th {
+        padding: 0.5rem;
+    }
+    
+    /* Alerts */
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+    
+    /* Accordion */
+    .accordion-button {
+        border-radius: 8px;
+        margin-bottom: 5px;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: #e7f1ff;
+        color: #0d6efd;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .progress-steps {
+            max-width: 300px;
+        }
+        
+        .step-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 14px;
+        }
+        
+        .step-label {
+            font-size: 10px;
+        }
+        
+        .step-line {
+            margin: 0 5px;
+        }
+        
+        .withdrawal-methods .card-body {
+            padding: 1rem;
+        }
+        
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .progress-steps {
+            max-width: 250px;
+        }
+        
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+        
+        .payment-icon {
+            display: none;
+        }
+        
+        .amount-quick {
+            padding: 8px 3px;
+            font-size: 0.85rem;
+        }
+        
+        .bank-detail-item label {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const form = document.getElementById('withdrawalForm');
+        const amountInput = document.getElementById('amount');
+        const quickAmountButtons = document.querySelectorAll('.amount-quick');
+        const bankAccountTextarea = document.getElementById('bank_account');
+        const purposeTextarea = document.getElementById('purpose');
+        
+        // Step contents
+        const step1Content = document.getElementById('step1Content');
+        const step2Content = document.getElementById('step2Content');
+        const step3Content = document.getElementById('step3Content');
+        
+        // Preview elements
+        const previewAmount = document.getElementById('previewAmount');
+        const previewFee = document.getElementById('previewFee');
+        const previewNet = document.getElementById('previewNet');
+        const previewBalance = document.getElementById('previewBalance');
+        
+        // Summary elements
+        const summaryAmount = document.getElementById('summaryAmount');
+        const summaryFee = document.getElementById('summaryFee');
+        const summaryNet = document.getElementById('summaryNet');
+        const summaryBalance = document.getElementById('summaryBalance');
+        const bankDetailsSummary = document.getElementById('bankDetailsSummary');
+        
+        // Progress steps
+        const progressSteps = document.querySelectorAll('.step');
+        
+        // Current user balance
+        const currentBalance = parseFloat('{{ user.wallet_balance }}') || 0;
+        
+        // Modal
+        const processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+        
+        // Initialize
+        updatePreview();
+        updateBankDetailsSummary();
+        
+        // Quick amount buttons
+        quickAmountButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const amount = this.getAttribute('data-amount');
+                amountInput.value = amount;
+                updatePreview();
+            });
+        });
+        
+        // Amount input real-time update
+        amountInput.addEventListener('input', updatePreview);
+        
+        // Step navigation
+        document.getElementById('nextToStep2').addEventListener('click', function() {
+            if (validateStep1()) {
+                step1Content.classList.add('d-none');
+                step2Content.classList.remove('d-none');
+                updateProgress(2);
+                updateBankDetailsSummary();
+            }
+        });
+        
+        document.getElementById('nextToStep3').addEventListener('click', function() {
+            if (validateStep2()) {
+                step2Content.classList.add('d-none');
+                step3Content.classList.remove('d-none');
+                updateSummary();
+                updateProgress(3);
+            }
+        });
+        
+        document.getElementById('backToStep1').addEventListener('click', function() {
+            step2Content.classList.add('d-none');
+            step1Content.classList.remove('d-none');
+            updateProgress(1);
+        });
+        
+        document.getElementById('backToStep2').addEventListener('click', function() {
+            step3Content.classList.add('d-none');
+            step2Content.classList.remove('d-none');
+            updateProgress(2);
+        });
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (validateAll()) {
+                processingModal.show();
+                
+                // Add loading state to submit button
+                const submitBtn = document.getElementById('submitWithdrawal');
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+                submitBtn.disabled = true;
+                
+                // Submit form after short delay for UX
+                setTimeout(() => {
+                    this.submit();
+                }, 2000);
+            }
+        });
+        
+        // Bank details editing
+        window.toggleBankEdit = function() {
+            const currentDetails = document.getElementById('currentBankDetails');
+            const editableDetails = document.getElementById('editableBankDetails');
+            
+            if (currentDetails.classList.contains('d-none')) {
+                // Cancel edit
+                currentDetails.classList.remove('d-none');
+                editableDetails.classList.add('d-none');
+            } else {
+                // Start edit
+                currentDetails.classList.add('d-none');
+                editableDetails.classList.remove('d-none');
+            }
+        };
+        
+        window.cancelBankEdit = function() {
+            document.getElementById('currentBankDetails').classList.remove('d-none');
+            document.getElementById('editableBankDetails').classList.add('d-none');
+        };
+        
+        window.saveBankDetails = function() {
+            const bankName = document.getElementById('bank_name').value;
+            const accountHolder = document.getElementById('account_holder').value;
+            const accountNumber = document.getElementById('account_number').value;
+            const iban = document.getElementById('iban').value;
+            
+            // Validate inputs
+            if (!bankName || !accountHolder || !accountNumber || !iban) {
+                showToast('{% trans "Please fill all required fields" %}', 'danger');
+                return;
+            }
+            
+            // Validate IBAN format
+            const ibanRegex = /^SA[0-9]{22}$/;
+            if (!ibanRegex.test(iban)) {
+                showToast('{% trans "Invalid IBAN format. Saudi IBAN must start with SA followed by 22 digits." %}', 'danger');
+                return;
+            }
+            
+            // Here you would typically make an AJAX call to save the bank details
+            // For now, we'll just update the UI and show a success message
+            
+            // Update current bank details display
+            document.querySelectorAll('#currentBankDetails .form-control-plaintext')[0].innerHTML = 
+                `<i class="fas fa-building me-2 text-muted"></i>${bankName}`;
+            document.querySelectorAll('#currentBankDetails .form-control-plaintext')[2].innerHTML = 
+                `<i class="fas fa-hashtag me-2 text-muted"></i>${accountNumber}`;
+            document.querySelectorAll('#currentBankDetails .form-control-plaintext')[3].innerHTML = 
+                `<i class="fas fa-barcode me-2 text-muted"></i>${iban}`;
+            
+            // Auto-fill bank account textarea
+            if (bankAccountTextarea && !bankAccountTextarea.value.trim()) {
+                bankAccountTextarea.value = `Bank: ${bankName}\nAccount Holder: ${accountHolder}\nAccount Number: ${accountNumber}\nIBAN: ${iban}`;
+            }
+            
+            // Hide edit form
+            cancelBankEdit();
+            
+            // Show success message
+            showToast('{% trans "Bank details saved successfully" %}', 'success');
+            
+            // Update bank details summary
+            updateBankDetailsSummary();
+        };
+        
+        // Helper Functions
+        function updatePreview() {
+            const amount = parseFloat(amountInput.value) || 0;
+            
+            // Calculate fee (2% with minimum 10 SAR)
+            let fee = amount * 0.02;
+            if (fee < 10) fee = 10;
+            
+            const net = amount - fee;
+            const newBalance = currentBalance - amount;
+            
+            previewAmount.textContent = amount.toFixed(2) + ' SAR';
+            previewFee.textContent = fee.toFixed(2) + ' SAR';
+            previewNet.textContent = net.toFixed(2) + ' SAR';
+            previewBalance.textContent = newBalance.toFixed(2) + ' SAR';
+        }
+        
+        function updateSummary() {
+            const amount = parseFloat(amountInput.value) || 0;
+            
+            // Calculate fee (2% with minimum 10 SAR)
+            let fee = amount * 0.02;
+            if (fee < 10) fee = 10;
+            
+            const net = amount - fee;
+            const newBalance = currentBalance - amount;
+            
+            summaryAmount.textContent = amount.toFixed(2);
+            summaryFee.textContent = fee.toFixed(2);
+            summaryNet.textContent = net.toFixed(2);
+            summaryBalance.textContent = newBalance.toFixed(2);
+            
+            updateBankDetailsSummary();
+        }
+        
+        function updateBankDetailsSummary() {
+            const bankDetails = bankAccountTextarea.value;
+            bankDetailsSummary.innerHTML = '';
+            
+            if (bankDetails) {
+                const detailsArray = bankDetails.split('\n');
+                detailsArray.forEach(detail => {
+                    if (detail.trim()) {
+                        const div = document.createElement('div');
+                        div.className = 'mb-2';
+                        div.innerHTML = `<small class="text-muted">${detail.trim()}</small>`;
+                        bankDetailsSummary.appendChild(div);
+                    }
+                });
+            }
+        }
+        
+        function updateProgress(step) {
+            progressSteps.forEach((stepElement, index) => {
+                if (index + 1 <= step) {
+                    stepElement.classList.add('active');
+                } else {
+                    stepElement.classList.remove('active');
+                }
+            });
+        }
+        
+        function validateStep1() {
+            const amount = parseFloat(amountInput.value);
+            
+            if (!amount || isNaN(amount)) {
+                showError(amountInput, '{% trans "Please enter a valid amount" %}');
+                return false;
+            }
+            
+            if (amount < 100) {
+                showError(amountInput, '{% trans "Minimum withdrawal amount is 100 SAR" %}');
+                return false;
+            }
+            
+            if (amount > 50000) {
+                showError(amountInput, '{% trans "Maximum withdrawal amount is 50,000 SAR per transaction" %}');
+                return false;
+            }
+            
+            if (amount > currentBalance) {
+                showError(amountInput, '{% trans "Insufficient balance for this withdrawal" %}');
+                return false;
+            }
+            
+            clearError(amountInput);
+            return true;
+        }
+        
+        function validateStep2() {
+            // Check if bank details are provided
+            if (!bankAccountTextarea.value.trim()) {
+                showError(bankAccountTextarea, '{% trans "Please provide bank account details" %}');
+                return false;
+            }
+            
+            clearError(bankAccountTextarea);
+            return true;
+        }
+        
+        function validateAll() {
+            // Check terms agreement
+            const termsCheckbox = document.getElementById('termsAgreement');
+            if (!termsCheckbox.checked) {
+                showError(termsCheckbox, '{% trans "You must agree to the terms and conditions" %}');
+                termsCheckbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+            
+            return validateStep1() && validateStep2();
+        }
+        
+        function showError(element, message) {
+            // Remove existing error
+            clearError(element);
+            
+            // Add error styling
+            element.classList.add('is-invalid');
+            
+            // Create error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'invalid-feedback d-block';
+            errorDiv.textContent = message;
+            
+            element.parentNode.appendChild(errorDiv);
+            
+            // Scroll to error
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function clearError(element) {
+            element.classList.remove('is-invalid');
+            const errorDiv = element.parentNode.querySelector('.invalid-feedback');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
+        }
+        
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            // Remove toast after hide
+            toast.addEventListener('hidden.bs.toast', function () {
+                document.body.removeChild(toast);
+            });
+        }
+        
+        // Format amount input on blur
+        amountInput.addEventListener('blur', function() {
+            const value = parseFloat(this.value);
+            if (!isNaN(value)) {
+                this.value = value.toFixed(2);
+                updatePreview();
+            }
+        });
+        
+        // Auto-fill bank details if available
+        function autoFillBankDetails() {
+            const bankName = document.querySelector('#currentBankDetails .form-control-plaintext:nth-child(1)').textContent.trim();
+            const accountNumber = document.querySelector('#currentBankDetails .form-control-plaintext:nth-child(3)').textContent.trim();
+            const iban = document.querySelector('#currentBankDetails .form-control-plaintext:nth-child(4)').textContent.trim();
+            
+            if (bankName !== 'Not specified' && !bankAccountTextarea.value.trim()) {
+                bankAccountTextarea.value = `Bank: ${bankName}\nAccount Number: ${accountNumber}\nIBAN: ${iban}`;
+            }
+        }
+        
+        // Call auto-fill on page load
+        autoFillBankDetails();
+        
+        // Update bank details when textarea changes
+        bankAccountTextarea.addEventListener('input', updateBankDetailsSummary);
+    });
+</script>
+{% endblock %}
