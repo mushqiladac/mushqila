@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - master
   workflow_dispatch:
 
 jobs:
@@ -18,42 +17,21 @@ jobs:
     - name: Deploy to EC2
       uses: appleboy/ssh-action@master
       with:
-        host: 16.170.104.186
+        host: 13.60.112.227
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Check if repository exists, if not clone it
-          if [ ! -d "/home/ubuntu/mushqila" ]; then
-            echo "Repository not found, cloning..."
-            cd /home/ubuntu
-            git clone https://github.com/mushqiladac/mushqila.git
-            cd mushqila
-            
-            # Create .env.production if not exists
-            if [ ! -f ".env.production" ]; then
-              echo "Creating .env.production..."
-              cat > .env.production << 'EOF'
-          DEBUG=False
-          SECRET_KEY=django-insecure-temporary-key-change-this-immediately
-          ALLOWED_HOSTS=16.170.104.186,mushqila.com
-          DB_ENGINE=django.db.backends.postgresql
-          DB_NAME=mushqila
-          DB_USER=postgres
-          DB_PASSWORD=change_this_password
-          DB_HOST=database-1.c3mceceowav8.eu-north-1.rds.amazonaws.com
-          DB_PORT=5432
-          EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-          REDIS_URL=redis://redis:6379/0
-          CELERY_BROKER_URL=redis://redis:6379/0
-          EOF
-            fi
-          fi
+          cd /home/ubuntu/mushqila || exit 1
           
-          # Deploy
-          cd /home/ubuntu/mushqila
+          # Pull latest changes
           git pull origin main
-          docker-compose -f docker-compose.prod.yml down
+          
+          # Rebuild and restart containers
           docker-compose -f docker-compose.prod.yml build
           docker-compose -f docker-compose.prod.yml up -d
+          
+          # Run migrations
           docker-compose -f docker-compose.prod.yml exec -T web python manage.py migrate
           docker-compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
+          
+          echo "✅ Deployment completed successfully!"
