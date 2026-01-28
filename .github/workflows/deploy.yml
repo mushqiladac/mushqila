@@ -1,37 +1,82 @@
-name: Deploy to AWS EC2
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - main
+      - dwd
   workflow_dispatch:
 
 jobs:
   deploy:
+    name: Deploy to EC2 Server
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@master
-      with:
-        host: 13.60.112.227
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /home/ubuntu/mushqila || exit 1
-          
-          # Pull latest changes
-          git pull origin main
-          
-          # Rebuild and restart containers
-          docker-compose -f docker-compose.prod.yml build
-          docker-compose -f docker-compose.prod.yml up -d
-          
-          # Run migrations
-          docker-compose -f docker-compose.prod.yml exec -T web python manage.py migrate
-          docker-compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
-          
-          echo "✅ Deployment completed successfully!"
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: dwd
+      
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            echo "=========================================="
+            echo "Starting Deployment"
+            echo "=========================================="
+            
+            # Navigate to project directory
+            cd ~/mushqila
+            
+            # Stop containers
+            echo "Stopping containers..."
+            docker-compose -f docker-compose.prod.yml down
+            
+            # Backup current code
+            echo "Creating backup..."
+            timestamp=$(date +%Y%m%d_%H%M%S)
+            cp -r ~/mushqila ~/mushqila_backup_$timestamp 2>/dev/null || true
+            
+            # Fetch latest code
+            echo "Fetching latest code..."
+            git fetch origin
+            
+            # Switch to dwd branch
+            echo "Switching to dwd branch..."
+            git checkout dwd
+            
+            # Pull latest changes
+            echo "Pulling latest changes..."
+            git pull origin dwd
+            
+            # Build Docker images
+            echo "Building Docker images..."
+            docker-compose -f docker-compose.prod.yml build
+            
+            # Start containers
+            echo "Starting containers..."
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            # Wait for containers to be ready
+            echo "Waiting for containers to start..."
+            sleep 10
+            
+            # Run migrations
+            echo "Running migrations..."
+            docker-compose -f docker-compose.prod.yml exec -T web python manage.py migrate
+            
+            # Collect static files
+            echo "Collecting static files..."
+            docker-compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
+            
+            # Check container status
+            echo "Container status:"
+            docker-compose -f docker-compose.prod.yml ps
+            
+            echo "=========================================="
+            echo "Deployment Complete!"
+            echo "=========================================="
