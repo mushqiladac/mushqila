@@ -1,0 +1,22 @@
+# GitHub Push Commands
+# Replace YOUR_TOKEN with your actual Personal Access Token
+
+# Step 1: Update remote URL with token
+git remote set-url origin https://YOUR_TOKEN@github.com/mushqiladac/mushqila.git
+
+# Step 2: Verify remote URL (token will be hidden)
+git remote -v
+
+# Step 3: Push to GitHub
+git push -u origin main
+
+# Step 4: Check GitHub repository
+# Go to: https://github.com/mushqiladac/mushqila
+
+# If successful, you should see:
+# - All 191 files uploaded
+# - GitHub Actions workflow triggered
+# - Deployment started automatically
+
+# Monitor deployment:
+# https://github.com/mushqiladac/mushqila/actions

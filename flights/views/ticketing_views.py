@@ -26,130 +26,49 @@ from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 import re
 import csv
+import xlwt
 from io import BytesIO, StringIO
-
-# Optional imports for Excel export
-try:
-    import xlwt
-    XLWT_AVAILABLE = True
-except ImportError:
-    XLWT_AVAILABLE = False
-
-# Optional imports for PDF generation
-try:
-    from reportlab.lib import colors
-    from reportlab.lib.pagesizes import letter, A4, landscape
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import inch, cm
-    from reportlab.pdfgen import canvas
-    from reportlab.lib.utils import ImageReader
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
-    REPORTLAB_AVAILABLE = True
-except ImportError:
-    REPORTLAB_AVAILABLE = False
-
-# Optional QR code generation
-try:
-    import qrcode
-    QRCODE_AVAILABLE = True
-except ImportError:
-    QRCODE_AVAILABLE = False
-
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, A4, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch, cm
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+import qrcode
 import base64
 from io import BytesIO as IO
 import hashlib
 
-# Optional imports for models
-try:
-    from flights.models import (
-        Ticket, PNR, Booking, Passenger, BookingPassenger, 
-        FlightSegment, FlightItinerary, Airline, Airport, Payment, Refund
-    )
-    MODELS_AVAILABLE = True
-except ImportError:
-    MODELS_AVAILABLE = False
-
-# Optional imports for forms - these don't exist yet
-try:
-    from flights.forms import (
-        TicketSearchForm, TicketFilterForm, TicketIssueForm, TicketVoidForm,
-        TicketReissueForm, TicketRefundForm, TicketDocumentForm, TicketQueueForm,
-        TicketingRuleForm, BulkTicketingForm, TicketVerificationForm,
-        EMDCreateForm, TicketRevalidationForm
-    )
-    TICKETING_FORMS_AVAILABLE = True
-except ImportError:
-    TICKETING_FORMS_AVAILABLE = False
-
-# Optional imports for services
-try:
-    from flights.services.ticketing_service import TicketingService
-    TICKETING_SERVICE_AVAILABLE = True
-except ImportError:
-    TICKETING_SERVICE_AVAILABLE = False
-
-# Optional imports for other services and utilities
-try:
-    from flights.services.gds_service import GDSTicketingService
-except ImportError:
-    GDSTicketingService = None
-
-try:
-    from flights.services.payment_service import PaymentService
-except ImportError:
-    PaymentService = None
-
-try:
-    from flights.services.refund_service import RefundService
-except ImportError:
-    RefundService = None
-
-try:
-    from flights.services.pnr_service import PNRService
-except ImportError:
-    PNRService = None
-
-try:
-    from flights.services.reporting_service import TicketingReportingService
-except ImportError:
-    TicketingReportingService = None
-
-try:
-    from flights.services.notification_service import TicketNotificationService
-except ImportError:
-    TicketNotificationService = None
-
-try:
-    from flights.utils.export import TicketExport
-except ImportError:
-    TicketExport = None
-
-try:
-    from flights.utils.permissions import TicketingPermission
-except ImportError:
-    TicketingPermission = None
-
-try:
-    from flights.utils.validators import TicketValidator
-except ImportError:
-    TicketValidator = None
-
-try:
-    from flights.utils.cache import TicketingCache
-except ImportError:
-    TicketingCache = None
-
-try:
-    from flights.utils.ticket_generator import TicketGenerator
-except ImportError:
-    TicketGenerator = None
-
-try:
-    from flights.utils.bsp_reports import BSPReportGenerator
-except ImportError:
-    BSPReportGenerator = None
+from flights.models import (
+    Ticket, PNR,  # EMD, TicketCoupon, TicketHistory, TicketDocument,
+    Booking, Passenger, BookingPassenger, FlightSegment, FlightItinerary,
+    Airline, Airport, Payment, Refund,  # CommissionTransaction,
+    # TicketQueue, TicketingRule, FareCalculation, TaxBreakdown
+)
+# Temporarily commented out - these forms need to be created
+# from flights.forms import (
+#     TicketSearchForm, TicketFilterForm, TicketIssueForm, TicketVoidForm,
+#     TicketReissueForm, TicketRefundForm, TicketDocumentForm, TicketQueueForm,
+#     TicketingRuleForm, BulkTicketingForm, TicketVerificationForm,
+#     EMDCreateForm, TicketRevalidationForm
+# )
+# Temporarily commented out - these services need to be created
+# from flights.services.ticketing_service import TicketingService
+# from flights.services.gds_service import GDSTicketingService
+# from flights.services.payment_service import PaymentService
+# from flights.services.refund_service import RefundService
+# from flights.services.pnr_service import PNRService
+# from flights.services.reporting_service import TicketingReportingService
+# from flights.services.notification_service import TicketNotificationService
+# from flights.utils.export import TicketExport
+# from flights.utils.permissions import TicketingPermission
+# from flights.utils.validators import TicketValidator
+# from flights.utils.cache import TicketingCache
+# from flights.utils.ticket_generator import TicketGenerator
+from flights.utils.bsp_reports import BSPReportGenerator
 
 logger = logging.getLogger(__name__)
 

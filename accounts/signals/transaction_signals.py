@@ -11,6 +11,9 @@ from django.utils import timezone
 from decimal import Decimal
 import logging
 
+# Import models directly to avoid lazy reference issues
+from accounts.models.transaction_tracking import TransactionLog
+
 logger = logging.getLogger(__name__)
 
 
@@ -332,7 +335,7 @@ def handle_commission_transaction(sender, instance, created, **kwargs):
             logger.error(f"Error handling commission: {str(e)}", exc_info=True)
 
 
-@receiver(post_save, sender='accounts.TransactionLog')
+@receiver(post_save, sender=TransactionLog)
 def update_agent_ledger(sender, instance, created, **kwargs):
     """
     Automatically update agent ledger when transaction is created
@@ -375,7 +378,7 @@ def update_agent_ledger(sender, instance, created, **kwargs):
             logger.error(f"Error updating agent ledger: {str(e)}", exc_info=True)
 
 
-@receiver(post_save, sender='accounts.TransactionLog')
+@receiver(post_save, sender=TransactionLog)
 def update_daily_summary(sender, instance, created, **kwargs):
     """
     Automatically update daily transaction summary
@@ -429,7 +432,7 @@ def update_daily_summary(sender, instance, created, **kwargs):
             logger.error(f"Error updating daily summary: {str(e)}", exc_info=True)
 
 
-@receiver(post_save, sender='accounts.TransactionLog')
+@receiver(post_save, sender=TransactionLog)
 def create_audit_log(sender, instance, created, **kwargs):
     """
     Create audit log entry for every transaction change

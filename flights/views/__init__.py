@@ -40,26 +40,26 @@ from .booking_views import (
 )
 
 # ==============================================
-# TICKETING VIEWS
+# TICKETING VIEWS - Temporarily disabled due to missing dependencies
 # ==============================================
 
-from .ticketing_views import (
-    # Ticket Management
-    TicketListView,
-    TicketDetailView,
-    TicketIssueView,
-    TicketVoidView,
-    TicketReissueView,
-    TicketRevalidationView,
-    TicketRefundView,
-    
-    # EMD Management
-    EMDManagementView,
-    
-    # Ticketing Queue
-    TicketingQueueView,
-    TicketingDashboardView,
-)
+# from .ticketing_views import (
+#     # Ticket Management
+#     TicketListView,
+#     TicketDetailView,
+#     TicketIssueView,
+#     TicketVoidView,
+#     TicketReissueView,
+#     TicketRevalidationView,
+#     TicketRefundView,
+#     
+#     # EMD Management
+#     EMDManagementView,
+#     
+#     # Ticketing Queue
+#     TicketingQueueView,
+#     TicketingDashboardView,
+# )
 
 # ==============================================
 # FARE RULES VIEWS
@@ -75,13 +75,13 @@ from .fare_rules_views import (
     
     # Baggage Rules
     BaggageRulesView,
-    # BaggageCalculatorView,  # Not implemented yet
-    # ExcessBaggageView,  # Not implemented yet
+    BaggageCalculatorView,
+    ExcessBaggageView,
     
-    # Fare Conditions - Not implemented yet
-    # FareConditionsView,
-    # PenaltyCalculatorView,
-    # ChangeFeeCalculatorView,
+    # Fare Conditions
+    FareConditionsView,
+    PenaltyCalculatorView,
+    ChangeFeeCalculatorView,
     
     # GDS Fare Rules
     GDSFareRulesView,
@@ -109,31 +109,31 @@ from .ancillary_views import (
 # ==============================================
 # INVENTORY MANAGEMENT VIEWS
 # ==============================================
-# Note: inventory_views.py doesn't exist yet - these views are not implemented
-# from .inventory_views import (
-#     # Flight Inventory
-#     FlightInventoryView,
-#     InventoryUpdateView,
-#     AvailabilityCheckView,
-#     SeatMapInventoryView,
-#     
-#     # Fare Management
-#     FareManagementView,
-#     FareUpdateView,
-#     FareOverrideView,
-#     CorporateFareView,
-#     
-#     # Booking Control
-#     BookingLimitView,
-#     OverrideRuleView,
-#     BlackoutDateView,
-#     SpecialOfferView,
-#     
-#     # GDS Sync
-#     GDSInventorySyncView,
-#     InventoryReconciliationView,
-#     CacheManagementView,
-# )
+
+from .inventory_views import (
+    # Flight Inventory
+    FlightInventoryView,
+    InventoryUpdateView,
+    AvailabilityCheckView,
+    SeatMapInventoryView,
+    
+    # Fare Management
+    FareManagementView,
+    FareUpdateView,
+    FareOverrideView,
+    CorporateFareView,
+    
+    # Booking Control
+    BookingLimitView,
+    OverrideRuleView,
+    BlackoutDateView,
+    SpecialOfferView,
+    
+    # GDS Sync
+    GDSInventorySyncView,
+    InventoryReconciliationView,
+    CacheManagementView,
+)
 
 # ==============================================
 # REPORTS & ANALYTICS VIEWS
@@ -145,31 +145,30 @@ from .reporting_views import (
     SalesReportView,
     RevenueReportView,
     CommissionReportView,
-    # DailySalesView,  # Not implemented yet
-    # MonthlySalesView,  # Not implemented yet
+    DailySalesView,
+    MonthlySalesView,
     
     # Performance Reports
     AgentPerformanceView,
     TeamPerformanceView,
     AirlinePerformanceView,
-    RouteAnalysisView,  # Note: This is RouteAnalysisView, not RoutePerformanceView
-    # RoutePerformanceView,  # Not implemented yet
+    RoutePerformanceView,
     
     # Operational Reports
     BookingAnalysisView,
-    # TicketingReportView,  # Not implemented yet
-    # RefundReportView,  # Not implemented yet
-    # CancellationReportView,  # Not implemented yet
+    TicketingReportView,
+    RefundReportView,
+    CancellationReportView,
     
-    # Analytical Reports - Not implemented yet
-    # MarketAnalysisView,
-    # CustomerAnalysisView,
-    # ProfitabilityAnalysisView,
-    # TrendAnalysisView,
+    # Analytical Reports
+    MarketAnalysisView,
+    CustomerAnalysisView,
+    ProfitabilityAnalysisView,
+    TrendAnalysisView,
     
     # Custom Reports
     CustomReportBuilderView,
-    # SavedReportsView,  # Not implemented yet
+    SavedReportsView,
     ReportSchedulerView,
     
     # Export Views
@@ -187,7 +186,7 @@ from .api_views import (
     APILoginView,
     APILogoutView,
     APIStatusView,
-    # APIKeyManagementView,  # Not implemented yet
+    APIKeyManagementView,
     
     # Flight Search API
     FlightSearchAPI,
@@ -199,16 +198,16 @@ from .api_views import (
     # Booking API
     BookingListAPI,
     BookingDetailAPI,
-    # BookingCreateAPI,  # Not implemented yet
+    BookingCreateAPI,
     BookingConfirmAPI,
-    # BookingCancelAPI,  # Not implemented yet
+    BookingCancelAPI,
     BookingRetrieveAPI,
     BookingPriceAPI,
     
     # Ticketing API
     TicketListAPI,
     TicketDetailAPI,
-    # TicketIssueAPI,  # Not implemented yet
+    TicketIssueAPI,
     TicketVoidAPI,
     TicketReissueAPI,
     EMDIssueAPI,
@@ -233,161 +232,159 @@ from .api_views import (
     # Reports API
     SalesReportAPI,
     PerformanceReportAPI,
-    # BookingReportAPI,  # Not implemented yet
+    BookingReportAPI,
     
     # Webhooks
     GDSWebhookView,
     PaymentWebhookView,
-    # NotificationWebhookView,  # Not implemented yet
+    NotificationWebhookView,
     
     # Bulk Operations
     BulkBookingAPI,
-    # BulkTicketingAPI,  # Not implemented yet
-    # BulkPaymentAPI,  # Not implemented yet
+    BulkTicketingAPI,
+    BulkPaymentAPI,
     
     # Utility API
-    # CurrencyConverterAPI,  # Not implemented yet
-    # DocumentValidatorAPI,  # Not implemented yet
-    # PNRDecoderAPI,  # Not implemented yet
+    CurrencyConverterAPI,
+    DocumentValidatorAPI,
+    PNRDecoderAPI,
     
     # Monitoring API
     APIUsageAPI,
     APIPerformanceAPI,
-    # SystemHealthAPI,  # Not implemented yet
+    SystemHealthAPI,
 )
 
 # ==============================================
 # ADMIN VIEWS
 # ==============================================
-# ADMIN VIEWS
-# ==============================================
-# Note: admin_views.py doesn't exist yet - these views are not implemented
-# from .admin_views import (
-#     # User Management
-#     AgentManagementView,
-#     SubAgentManagementView,
-#     UserProfileView,
-#     CommissionManagementView,
-#     
-#     # Configuration
-#     AirlineManagementView,
-#     AirportManagementView,
-#     FareRuleManagementView,
-#     ServiceConfigurationView,
-#     
-#     # System Management
-#     GDSConfigurationView,
-#     PaymentGatewayView,
-#     SMTPConfigurationView,
-#     SystemLogsView,
-#     
-#     # Audit & Compliance
-#     AuditTrailView,
-#     ComplianceCheckView,
-#     TransactionAuditView,
-#     ReportAuditView,
-# )
+
+from .admin_views import (
+    # User Management
+    AgentManagementView,
+    SubAgentManagementView,
+    UserProfileView,
+    CommissionManagementView,
+    
+    # Configuration
+    AirlineManagementView,
+    AirportManagementView,
+    FareRuleManagementView,
+    ServiceConfigurationView,
+    
+    # System Management
+    GDSConfigurationView,
+    PaymentGatewayView,
+    SMTPConfigurationView,
+    SystemLogsView,
+    
+    # Audit & Compliance
+    AuditTrailView,
+    ComplianceCheckView,
+    TransactionAuditView,
+    ReportAuditView,
+)
 
 # ==============================================
 # UTILITY VIEWS
 # ==============================================
-# Note: utility_views.py doesn't exist yet - these views are not implemented
-# from .utility_views import (
-#     # Calculators
-#     FareCalculatorView,
-#     BaggageCalculatorView,
-#     CurrencyConverterView,
-#     DistanceCalculatorView,
-#     
-#     # Validators
-#     PNRValidatorView,
-#     TicketValidatorView,
-#     PassengerValidatorView,
-#     DocumentValidatorView,
-#     
-#     # Tools
-#     PNRDecoderView,
-#     TicketDecoderView,
-#     AirlineCodeView,
-#     AirportCodeView,
-#     
-#     # Downloads
-#     DocumentDownloadView,
-#     ReportDownloadView,
-#     TemplateDownloadView,
-#     ExportDataView,
-# )
+
+from .utility_views import (
+    # Calculators
+    FareCalculatorView,
+    BaggageCalculatorView,
+    CurrencyConverterView,
+    DistanceCalculatorView,
+    
+    # Validators
+    PNRValidatorView,
+    TicketValidatorView,
+    PassengerValidatorView,
+    DocumentValidatorView,
+    
+    # Tools
+    PNRDecoderView,
+    TicketDecoderView,
+    AirlineCodeView,
+    AirportCodeView,
+    
+    # Downloads
+    DocumentDownloadView,
+    ReportDownloadView,
+    TemplateDownloadView,
+    ExportDataView,
+)
 
 # ==============================================
 # CUSTOMER VIEWS
 # ==============================================
-# Note: customer_views.py doesn't exist yet - these views are not implemented
-# from .customer_views import (
-#     # Customer Management
-#     CustomerListView,
-#     CustomerDetailView,
-#     CustomerCreateView,
-#     CustomerUpdateView,
-#     
-#     # Corporate Management
-#     CorporateAccountView,
-#     CorporateUserView,
-#     TravelPolicyView,
-#     ApprovalWorkflowView,
-#     
-#     # Customer Portal
-#     CustomerPortalView,
-#     BookingHistoryView,
-#     TravelDocumentView,
-#     PreferenceManagementView,
-#     
-#     # Communication
-#     NotificationView,
-#     MessageCenterView,
-#     AnnouncementView,
-#     AlertView,
-# )
+
+from .customer_views import (
+    # Customer Management
+    CustomerListView,
+    CustomerDetailView,
+    CustomerCreateView,
+    CustomerUpdateView,
+    
+    # Corporate Management
+    CorporateAccountView,
+    CorporateUserView,
+    TravelPolicyView,
+    ApprovalWorkflowView,
+    
+    # Customer Portal
+    CustomerPortalView,
+    BookingHistoryView,
+    TravelDocumentView,
+    PreferenceManagementView,
+    
+    # Communication
+    NotificationView,
+    MessageCenterView,
+    AnnouncementView,
+    AlertView,
+)
 
 # ==============================================
 # TRAVELPORT GDS INTEGRATION VIEWS
 # ==============================================
-# Note: gds_views.py doesn't exist yet - these views are not implemented
-# from .gds_views import (
-#     # GDS Connection
-#     GDSConnectionView,
-#     GDSSessionView,
-#     GDSStatusView,
-#     GDSReconnectView,
-#     
-#     # GDS Search
-#     GDSLowFareSearchView,
-#     GDSAvailabilityView,
-#     GDSScheduleView,
-#     GDSFareRulesView,
-#     
-#     # GDS Booking
-#     GDSCreateBookingView,
-#     GDSRetrieveBookingView,
-#     GDSModifyBookingView,
-#     GDSCancelBookingView,
-#     
-#     # GDS Ticketing
-#     GDSIssueTicketView,
-#     GDSVoidTicketView,
-#     GDSReissueTicketView,
-#     GDSEMDView,
-#     
-#     # GDS Queue
-#     GDSQueueView,
-#     GDSQueueItemView,
-#     GDSQueueProcessingView,
-#     
-#     # GDS Utilities
-#     GDSPNRDecoderView,
-#     GDSTicketValidatorView,
-#     GDSReferenceDataView,
-#     GDSTestConnectionView,
-# )
+
+from .gds_views import (
+    # GDS Connection
+    GDSConnectionView,
+    GDSSessionView,
+    GDSStatusView,
+    GDSReconnectView,
+    
+    # GDS Search
+    GDSLowFareSearchView,
+    GDSAvailabilityView,
+    GDSScheduleView,
+    GDSFareRulesView,
+    
+    # GDS Booking
+    GDSCreateBookingView,
+    GDSRetrieveBookingView,
+    GDSModifyBookingView,
+    GDSCancelBookingView,
+    
+    # GDS Ticketing
+    GDSIssueTicketView,
+    GDSVoidTicketView,
+    GDSReissueTicketView,
+    GDSEMDView,
+    
+    # GDS Queue
+    GDSQueueView,
+    GDSQueueItemView,
+    GDSQueueProcessingView,
+    
+    # GDS Utilities
+    GDSPNRDecoderView,
+    GDSTicketValidatorView,
+    GDSReferenceDataView,
+    GDSTestConnectionView,
+)
 
 # ==============================================
 # EXPORT ALL VIEWS
@@ -510,23 +507,22 @@ __all__ = [
     'SalesReportView',
     'RevenueReportView',
     'CommissionReportView',
-    # 'DailySalesView',  # Not implemented yet
-    # 'MonthlySalesView',  # Not implemented yet
+    'DailySalesView',
+    'MonthlySalesView',
     'AgentPerformanceView',
     'TeamPerformanceView',
     'AirlinePerformanceView',
-    'RouteAnalysisView',  # Note: This is RouteAnalysisView, not RoutePerformanceView
-    # 'RoutePerformanceView',  # Not implemented yet
+    'RoutePerformanceView',
     'BookingAnalysisView',
-    # 'TicketingReportView',  # Not implemented yet
-    # 'RefundReportView',  # Not implemented yet
-    # 'CancellationReportView',  # Not implemented yet
-    # 'MarketAnalysisView',  # Not implemented yet
-    # 'CustomerAnalysisView',  # Not implemented yet
-    # 'ProfitabilityAnalysisView',  # Not implemented yet
-    # 'TrendAnalysisView',  # Not implemented yet
+    'TicketingReportView',
+    'RefundReportView',
+    'CancellationReportView',
+    'MarketAnalysisView',
+    'CustomerAnalysisView',
+    'ProfitabilityAnalysisView',
+    'TrendAnalysisView',
     'CustomReportBuilderView',
-    # 'SavedReportsView',  # Not implemented yet
+    'SavedReportsView',
     'ReportSchedulerView',
     'ReportExportView',
     'ReportDownloadView',
@@ -722,13 +718,9 @@ REPORTING_VIEWS = [
     'AgentPerformanceView',
     'TeamPerformanceView',
     'AirlinePerformanceView',
-    'RouteAnalysisView',  # Note: This is RouteAnalysisView, not RoutePerformanceView
+    'RoutePerformanceView',
     'BookingAnalysisView',
     'CustomReportBuilderView',
-    'ReportSchedulerView',
-    'ReportExportView',
-    'ReportDownloadView',
-    'ReportChartView',
 ]
 
 # API Category
@@ -978,4 +970,4 @@ def initialize_views():
 
 
 # Auto-initialize on module import
-# initialize_views()  # Commented out - causing logger issues
+initialize_views()

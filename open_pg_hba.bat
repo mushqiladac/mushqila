@@ -1,0 +1,3 @@
+@echo off
+echo Opening pg_hba.conf...
+notepad "C:\Program Files\PostgreSQL\18\data\pg_hba.conf"
