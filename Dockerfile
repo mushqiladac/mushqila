@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     postgresql-client \
     netcat-openbsd \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
@@ -23,8 +24,8 @@ RUN pip install -r requirements.txt
 # Copy project
 COPY . .
 
-# Make entrypoint executable
-RUN chmod +x entrypoint.sh
+# Fix line endings and make entrypoint executable
+RUN dos2unix entrypoint.sh && chmod +x entrypoint.sh
 
 # Create directories for static and media files
 RUN mkdir -p /app/staticfiles /app/media
@@ -33,4 +34,4 @@ RUN mkdir -p /app/staticfiles /app/media
 EXPOSE 8000
 
 # Run the application
-CMD ["./entrypoint.sh"]
+CMD ["bash", "entrypoint.sh"]

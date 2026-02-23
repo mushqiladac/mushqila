@@ -1,0 +1,375 @@
+<!-- Modern Search Widget -->
+<style>
+    .modern-search-widget {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-top: 500px;
+    }
+    
+    .service-tabs {
+        display: flex;
+        gap: 10px;
+        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 30px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    
+    .service-tab {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .service-tab:hover {
+        color: #1a56db;
+    }
+    
+    .service-tab.active {
+        color: #1a56db;
+        border-bottom-color: #1a56db;
+    }
+    
+    .service-tab i {
+        font-size: 1.1rem;
+    }
+    
+    .trip-type-buttons {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .trip-type-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border: 2px solid #e2e8f0;
+        background: white;
+        border-radius: 25px;
+        color: #64748b;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .trip-type-btn:hover {
+        border-color: #1a56db;
+        color: #1a56db;
+    }
+    
+    .trip-type-btn.active {
+        background: #1a56db;
+        border-color: #1a56db;
+        color: white;
+    }
+    
+    .trip-type-btn input[type="radio"] {
+        margin: 0;
+    }
+    
+    .search-row {
+        display: flex;
+        gap: 15px;
+        align-items: end;
+        margin-bottom: 20px;
+    }
+    
+    .search-field {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .search-field label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #1a56db;
+        box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+    }
+    
+    .search-input::placeholder {
+        color: #94a3b8;
+    }
+    
+    .location-input {
+        position: relative;
+    }
+    
+    .location-input .search-input {
+        padding-left: 16px;
+    }
+    
+    .location-details {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: 4px;
+    }
+    
+    .swap-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 5px;
+    }
+    
+    .swap-button:hover {
+        background: #1a56db;
+        color: white;
+        border-color: #1a56db;
+        transform: rotate(180deg);
+    }
+    
+    .fare-type-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .fare-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+    
+    .fare-option input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .fare-option label {
+        font-size: 0.9rem;
+        color: #475569;
+        cursor: pointer;
+        margin: 0;
+    }
+    
+    .search-button {
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        border: none;
+        color: white;
+        padding: 14px 40px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+    }
+    
+    .search-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+    }
+    
+    .search-button i {
+        font-size: 1.1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .search-row {
+            flex-direction: column;
+        }
+        
+        .swap-button {
+            transform: rotate(90deg);
+            margin: 0 auto;
+        }
+        
+        .service-tabs {
+            justify-content: flex-start;
+        }
+        
+        .trip-type-buttons {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<div class="modern-search-widget">
+    <!-- Service Tabs -->
+    <div class="service-tabs">
+        <button class="service-tab active" data-service="flight">
+            <i class="fas fa-plane"></i>
+            <span>Flight</span>
+        </button>
+        <button class="service-tab" data-service="hotel">
+            <i class="fas fa-hotel"></i>
+            <span>Hotel</span>
+        </button>
+        <button class="service-tab" data-service="shop">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Shop</span>
+        </button>
+        <button class="service-tab" data-service="holiday">
+            <i class="fas fa-umbrella-beach"></i>
+            <span>Holiday</span>
+        </button>
+        <button class="service-tab" data-service="visa">
+            <i class="fas fa-passport"></i>
+            <span>Visa</span>
+        </button>
+        <button class="service-tab" data-service="medical">
+            <i class="fas fa-heartbeat"></i>
+            <span>Medical</span>
+        </button>
+        <button class="service-tab" data-service="cars">
+            <i class="fas fa-car"></i>
+            <span>Cars</span>
+        </button>
+        <button class="service-tab" data-service="esim">
+            <i class="fas fa-sim-card"></i>
+            <span>eSIM</span>
+        </button>
+        <button class="service-tab" data-service="recharge">
+            <i class="fas fa-mobile-alt"></i>
+            <span>Recharge</span>
+        </button>
+        <button class="service-tab" data-service="paybill">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Pay Bill</span>
+        </button>
+    </div>
+    
+    <!-- Flight Search Form -->
+    <div id="flight-search-form">
+        <!-- Trip Type Selection -->
+        <div class="trip-type-buttons">
+            <label class="trip-type-btn active">
+                <input type="radio" name="trip-type" value="one-way" checked>
+                <i class="fas fa-circle"></i>
+                <span>One Way</span>
+            </label>
+            <label class="trip-type-btn">
+                <input type="radio" name="trip-type" value="round-trip">
+                <i class="fas fa-circle"></i>
+                <span>Round Trip</span>
+            </label>
+            <label class="trip-type-btn">
+                <input type="radio" name="trip-type" value="multi-city">
+                <i class="fas fa-circle"></i>
+                <span>Multi City</span>
+            </label>
+        </div>
+        
+        <!-- Search Fields -->
+        <div class="search-row">
+            <div class="search-field location-input">
+                <label>DAC</label>
+                <input type="text" class="search-input" value="Dhaka" placeholder="From">
+                <div class="location-details">Bangladesh, Hazrat Shahjalal International...</div>
+            </div>
+            
+            <button class="swap-button" type="button">
+                <i class="fas fa-exchange-alt"></i>
+            </button>
+            
+            <div class="search-field location-input">
+                <label>CXB</label>
+                <input type="text" class="search-input" value="Cox's Bazar" placeholder="To">
+                <div class="location-details">Bangladesh, Cox's Bazar Airport (CXB)</div>
+            </div>
+            
+            <div class="search-field">
+                <label>22</label>
+                <input type="text" class="search-input" value="February" placeholder="Journey Date">
+                <div class="location-details">Sunday, 2026</div>
+            </div>
+            
+            <div class="search-field">
+                <label>1 Traveller</label>
+                <input type="text" class="search-input" value="Economy" placeholder="Class" readonly>
+            </div>
+            
+            <button class="search-button" type="button">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </button>
+        </div>
+        
+        <!-- Fare Type Selection -->
+        <div class="fare-type-row">
+            <label class="fare-option">
+                <input type="radio" name="fare-type" value="regular" checked>
+                <label>Regular Fare</label>
+            </label>
+            <label class="fare-option">
+                <input type="radio" name="fare-type" value="student">
+                <label>Student Fare</label>
+            </label>
+            <label class="fare-option">
+                <input type="radio" name="fare-type" value="umrah">
+                <label>Umrah Fare</label>
+            </label>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Service Tab Switching
+    document.querySelectorAll('.service-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.service-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            // Add logic to show different forms based on service
+        });
+    });
+    
+    // Trip Type Selection
+    document.querySelectorAll('.trip-type-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.trip-type-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // Swap Button
+    document.querySelector('.swap-button').addEventListener('click', function() {
+        const fromInput = document.querySelectorAll('.location-input')[0].querySelector('.search-input');
+        const toInput = document.querySelectorAll('.location-input')[1].querySelector('.search-input');
+        const temp = fromInput.value;
+        fromInput.value = toInput.value;
+        toInput.value = temp;
+    });
+</script>

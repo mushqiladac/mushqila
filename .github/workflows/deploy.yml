@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dwd
+      - main
   workflow_dispatch:
 
 jobs:
@@ -14,8 +15,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: dwd
       
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
@@ -30,28 +29,23 @@ jobs:
             echo "=========================================="
             
             # Navigate to project directory
-            cd ~/mushqila
+            cd ~/mushqila || { echo "Directory not found, cloning..."; git clone https://github.com/mushqiladac/mushqila.git ~/mushqila; cd ~/mushqila; }
             
             # Stop containers
             echo "Stopping containers..."
-            docker-compose -f docker-compose.prod.yml down
-            
-            # Backup current code
-            echo "Creating backup..."
-            timestamp=$(date +%Y%m%d_%H%M%S)
-            cp -r ~/mushqila ~/mushqila_backup_$timestamp 2>/dev/null || true
+            docker-compose -f docker-compose.prod.yml down || true
             
             # Fetch latest code
             echo "Fetching latest code..."
             git fetch origin
             
-            # Switch to dwd branch
-            echo "Switching to dwd branch..."
-            git checkout dwd
+            # Switch to correct branch
+            echo "Switching to branch..."
+            git checkout ${GITHUB_REF##*/}
             
             # Pull latest changes
             echo "Pulling latest changes..."
-            git pull origin dwd
+            git pull origin ${GITHUB_REF##*/}
             
             # Build Docker images
             echo "Building Docker images..."

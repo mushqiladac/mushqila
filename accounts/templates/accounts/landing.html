@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page_title|default:"Mushqila - Book Flights, Hotels, Hajj & Umrah" }}</title>
     
+    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -73,13 +74,15 @@
         
         /* Hero Section with Search */
         .hero-section {
-            background: linear-gradient(rgba(26, 86, 219, 0.9), rgba(4, 108, 78, 0.9)), url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background: url('{% static "accounts/images/hero-bg.jpg.jpeg" %}');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
             color: white;
-            padding: 150px 0 100px;
+            padding: 100px 0 120px;
             position: relative;
             overflow: hidden;
+            min-height: 650px;
         }
         
         .hero-title {
@@ -105,13 +108,15 @@
         
         /* Search Widget */
         .search-widget {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-            margin-top: 40px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            margin-top: 50px;
             position: relative;
             z-index: 10;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .search-tabs {
@@ -410,6 +415,68 @@
             font-size: 1.2rem;
         }
         
+        /* Top Airlines Services Section */
+
+
+
+        .top-airlines-section {
+            background-color: #f8f9fa;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: #1a1a1a;
+        }
+
+        .airline-card {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .airline-card:hover {
+            text-decoration: none;
+        }
+
+        .hover-lift {
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            border-color: #d1d5db;
+        }
+
+        .airline-logo {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .airline-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        @media (max-width: 768px) {
+            .airline-name {
+                font-size: 0.8rem;
+            }
+            
+            .airline-logo {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        /* Top Airlines Services Section */
+
+
+
         /* Services Section */
         .services-section {
             padding: 80px 0;
@@ -662,6 +729,72 @@
         .animate-fade-in-up {
             animation: fadeInUp 0.8s ease-out;
         }
+        
+        /* Contact Bar Styles */
+        .contact-bar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 0;
+            position: fixed;
+            top: 74px;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            max-height: 50px;
+        }
+        
+        .contact-bar.hidden {
+            max-height: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .contact-bar-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgb(119, 185, 239);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .contact-item:hover {
+            color: rgba(160, 211, 244, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .contact-item i {
+            font-size: 1.2rem;
+            color: #3b82f6;
+        }
+        
+        @media (max-width: 768px) {
+            .contact-bar {
+                top: 62px;
+            }
+            
+            .contact-bar-content {
+                gap: 15px;
+                padding: 8px 0;
+            }
+            
+            .contact-item {
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -669,9 +802,7 @@
     <nav class="navbar navbar-expand-lg navbar-landing fixed-top">
         <div class="container">
             <a class="navbar-brand" href="{% url 'accounts:home' %}">
-                <span class="logo-text">
-                    <i class="fas fa-plane me-2"></i>Mushqila
-                </span>
+                <img src="{% static 'accounts/images/sinan-logo.png' %}" alt="Sinan Travel" style="height: 50px; width: auto;">
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -681,17 +812,27 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="#services"><i class="fas fa-concierge-bell me-1"></i> Services</a>
+                        <a class="nav-link" href="#contact"><i class="fas fa-phone me-1"></i> Manage My Trip</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#offers"><i class="fas fa-percentage me-1"></i> Offers</a>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link" href="#features"><i class="fas fa-star me-1"></i> Features</a>
+                        <a href="https://wa.me/" class="contact-item" target="_blank">
+                            <i class="fab fa-whatsapp"></i>
+                            <span>WhatsApp</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#support"><i class="fas fa-concierge-bell me-1"></i> Support</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#contact"><i class="fas fa-phone me-1"></i> Contact</a>
                     </li>
+
+
                     <li class="nav-item ms-3">
                         <a href="{% url 'accounts:login' %}" class="btn btn-primary-custom">
                             <i class="fas fa-sign-in-alt me-2"></i>Agent Login
@@ -701,6 +842,9 @@
             </div>
         </div>
     </nav>
+    
+    <!-- Contact Bar -->
+
 
     <!-- Hero Section with Search -->
     <section class="hero-section">
@@ -711,270 +855,33 @@
                         Book Flights, Hotels & Hajj Packages
                     </h1>
                     <p class="hero-subtitle">
-                        Best prices guaranteed for flights, hotels, Hajj, Umrah, and visa services
+                       
                     </p>
                 </div>
             </div>
-            
-            <!-- Search Widget -->
-            <div class="row justify-content-center">
-                <div class="col-lg-12">
-                    <div class="search-widget">
-                        <!-- Search Tabs -->
-                        <div class="search-tabs">
-                            <button class="search-tab active" data-tab="flights">
-                                <i class="fas fa-plane me-2"></i> Flights
-                            </button>
-                            <button class="search-tab" data-tab="hotels">
-                                <i class="fas fa-hotel me-2"></i> Hotels
-                            </button>
-                            <button class="search-tab" data-tab="hajj">
-                                <i class="fas fa-kaaba me-2"></i> Hajj
-                            </button>
-                            <button class="search-tab" data-tab="umrah">
-                                <i class="fas fa-mosque me-2"></i> Umrah
-                            </button>
-                            <button class="search-tab" data-tab="visa">
-                                <i class="fas fa-passport me-2"></i> Visa
-                            </button>
-                        </div>
-                        
-                        <!-- Flights Search Form -->
-                        <div id="flights-form" class="search-form active">
-                            <!-- Flight Type Selection -->
-                            <div class="flight-type-select">
-                                <button class="flight-type-btn active" data-type="one-way">
-                                    <div class="flight-type-icon">
-                                        <i class="fas fa-arrow-right"></i>
-                                    </div>
-                                    One Way
-                                </button>
-                                <button class="flight-type-btn" data-type="round-trip">
-                                    <div class="flight-type-icon">
-                                        <i class="fas fa-exchange-alt"></i>
-                                    </div>
-                                    Round Trip
-                                </button>
-                                <button class="flight-type-btn" data-type="multi-city">
-                                    <div class="flight-type-icon">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                    </div>
-                                    Multi City
-                                </button>
-                            </div>
-                            
-                            <!-- One Way / Round Trip Form -->
-                            <div id="single-flight-form">
-                                <div class="row">
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="form-group">
-                                            <label class="form-label">From</label>
-                                            <div class="position-relative">
-                                                <select class="form-select" id="from-city">
-                                                    <option value="">Select City</option>
-                                                    <option value="JED">Jeddah (JED)</option>
-                                                    <option value="RUH">Riyadh (RUH)</option>
-                                                    <option value="MED">Madinah (MED)</option>
-                                                    <option value="DMM">Dammam (DMM)</option>
-                                                    <option value="DAC">Dhaka (DAC)</option>
-                                                    <option value="CAI">Cairo (CAI)</option>
-                                                    <option value="DXB">Dubai (DXB)</option>
-                                                    <option value="LHR">London (LHR)</option>
-                                                    <option value="JFK">New York (JFK)</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="form-group">
-                                            <label class="form-label">To</label>
-                                            <div class="position-relative">
-                                                <select class="form-select" id="to-city">
-                                                    <option value="">Select City</option>
-                                                    <option value="JED">Jeddah (JED)</option>
-                                                    <option value="RUH">Riyadh (RUH)</option>
-                                                    <option value="MED">Madinah (MED)</option>
-                                                    <option value="DMM">Dammam (DMM)</option>
-                                                    <option value="DAC">Dhaka (DAC)</option>
-                                                    <option value="CAI">Cairo (CAI)</option>
-                                                    <option value="DXB">Dubai (DXB)</option>
-                                                    <option value="LHR">London (LHR)</option>
-                                                    <option value="JFK">New York (JFK)</option>
-                                                </select>
-                                                <button class="swap-btn" id="swap-cities">
-                                                    <i class="fas fa-exchange-alt"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="form-group">
-                                            <label class="form-label">Departure</label>
-                                            <input type="text" class="form-control datepicker" id="departure-date" placeholder="Select Date">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="form-group">
-                                            <label class="form-label">Return</label>
-                                            <input type="text" class="form-control datepicker" id="return-date" placeholder="Select Date" disabled>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="form-label">Passengers & Class</label>
-                                            <div class="passenger-counter">
-                                                <button class="counter-btn" id="decrease-passengers">-</button>
-                                                <div class="counter-value" id="passenger-count">1</div>
-                                                <button class="counter-btn" id="increase-passengers">+</button>
-                                                <select class="form-select ms-3" id="flight-class" style="border: none; width: auto;">
-                                                    <option value="economy">Economy</option>
-                                                    <option value="business">Business</option>
-                                                    <option value="first">First Class</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="form-label">Preferred Airlines</label>
-                                            <select class="form-select" id="airline-preference" multiple>
-                                                <option value="SV">Saudia</option>
-                                                <option value="FZ">Flydubai</option>
-                                                <option value="EK">Emirates</option>
-                                                <option value="QR">Qatar Airways</option>
-                                                <option value="EY">Etihad</option>
-                                                <option value="BG">Biman Bangladesh</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="form-label">Trip Type</label>
-                                            <div class="flight-class-select">
-                                                <div class="class-option selected" data-class="economy">Economy</div>
-                                                <div class="class-option" data-class="business">Business</div>
-                                                <div class="class-option" data-class="first">First</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Multi City Form (Hidden by default) -->
-                            <div id="multi-city-form" style="display: none;">
-                                <div id="multi-city-container">
-                                    <div class="multi-city-row">
-                                        <div class="col-md-5">
-                                            <select class="form-select" name="from[]">
-                                                <option value="">From City</option>
-                                                <option value="JED">Jeddah (JED)</option>
-                                                <option value="RUH">Riyadh (RUH)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-5">
-                                            <select class="form-select" name="to[]">
-                                                <option value="">To City</option>
-                                                <option value="DAC">Dhaka (DAC)</option>
-                                                <option value="CAI">Cairo (CAI)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="text" class="form-control datepicker" name="date[]" placeholder="Date">
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="button" class="add-city-btn" id="add-city">
-                                    <i class="fas fa-plus"></i> Add Another City
-                                </button>
-                            </div>
-                            
-                            <div class="row mt-4">
-                                <div class="col-12">
-                                    <button class="search-btn" id="search-flights">
-                                        <i class="fas fa-search me-2"></i> Search Flights
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Hotels Search Form -->
-                        <div id="hotels-form" class="search-form">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label class="form-label">Destination</label>
-                                        <select class="form-select" id="hotel-destination">
-                                            <option value="">Select City</option>
-                                            <option value="makkah">Makkah</option>
-                                            <option value="madinah">Madinah</option>
-                                            <option value="riyadh">Riyadh</option>
-                                            <option value="jeddah">Jeddah</option>
-                                            <option value="dammam">Dammam</option>
-                                            <option value="dubai">Dubai</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label class="form-label">Check-in</label>
-                                        <input type="text" class="form-control datepicker" id="checkin-date">
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label class="form-label">Check-out</label>
-                                        <input type="text" class="form-control datepicker" id="checkout-date">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Guests & Rooms</label>
-                                        <div class="passenger-counter">
-                                            <span id="hotel-guests">2 Guests</span>
-                                            <span id="hotel-rooms">1 Room</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Hotel Star Rating</label>
-                                        <div class="d-flex gap-2">
-                                            <button class="btn btn-outline-primary active">Any</button>
-                                            <button class="btn btn-outline-primary">5★</button>
-                                            <button class="btn btn-outline-primary">4★</button>
-                                            <button class="btn btn-outline-primary">3★</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Price Range</label>
-                                        <input type="range" class="form-range" id="price-range" min="100" max="5000" step="100">
-                                        <div class="d-flex justify-content-between">
-                                            <small>100 SAR</small>
-                                            <small id="price-range-value">2500 SAR</small>
-                                            <small>5000 SAR</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="search-btn mt-3">
-                                <i class="fas fa-search me-2"></i> Search Hotels
-                            </button>
-                        </div>
-                        
-                        <!-- Other forms would go here... -->
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Quick Links -->
+ <!-------------------------------------Quick Search---------------------------------> 
+             <!-- Quick Links -->
             <div class="quick-links">
+                <a href="#contact" class="quick-link">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-umbrella-beach"></i>
+                    </div>
+                    <span>Tourism</span>
+                </a>
+
+                <a href="#contact" class="quick-link">
+                    <div class="quick-link-icon">
+                        
+                        <i class="fas fa-mosque"></i>
+                    </div>
+                    <span>Umrah Packages</span>
+                </a>
+                <a href="{% url 'accounts:hajj_booking' %}" class="quick-link">
+                    <div class="quick-link-icon">
+                        <i class="fas fa-kaaba"></i>
+                    </div>
+                    <span>Hajj Packages</span>
+                </a>
                 <a href="#offers" class="quick-link">
                     <div class="quick-link-icon">
                         <i class="fas fa-percentage"></i>
@@ -987,123 +894,396 @@
                     </div>
                     <span>Last Minute Deals</span>
                 </a>
-                <a href="{% url 'accounts:hajj_booking' %}" class="quick-link">
-                    <div class="quick-link-icon">
-                        <i class="fas fa-kaaba"></i>
-                    </div>
-                    <span>Hajj 2025 Packages</span>
-                </a>
-                <a href="{% url 'accounts:umrah_booking' %}" class="quick-link">
-                    <div class="quick-link-icon">
-                        <i class="fas fa-mosque"></i>
-                    </div>
-                    <span>Umrah Packages</span>
-                </a>
-                <a href="#contact" class="quick-link">
-                    <div class="quick-link-icon">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <span>24/7 Support</span>
-                </a>
+
+
             </div>
+<!--------------------------------Quick Search------------------------------------------------->          
+
+
+
+
+
+
+            <!-- Modern Search Widget -->
+            {% include 'accounts/components/modern_search_widget.html' %}
+            
+
         </div>
     </section>
+<!------------------------------------------------------------------------------------------------------->
 
-    <!-- Offers Section -->
-    <section id="offers" class="offers-section">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold mb-3">Special Offers & Deals</h2>
-                <p class="lead text-muted">Don't miss these exclusive travel deals</p>
+<!-- Exclusive Offers Slider -->
+{% include 'accounts/components/exclusive_offers_slider.html' %}
+
+<!------------------------------------------------------------------------------------------------------->
+
+<!-- Top Airlines Section -->
+
+<section id="top-airlines" class="services-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title fw-bold mb-3">Search Top Airlines</h2>
+            <p class="text-muted">ShareTrip's user-friendly platform connects you to top airlines instantly. Enjoy a comfortable and hassle-free journey on any destination and get tickets of top airlines easily</p>
+        </div>
+
+        <div class="row g-3">
+            <!-------------------------------------------- Row 1 ---------------------------------------->
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/BG.png" alt="Biman Bangladesh Airlines" class="airline-logo">
+                            <span class="airline-name">Biman Bangladesh Airlines</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/BS.png" alt="US-Bangla Airlines" class="airline-logo">
+                            <span class="airline-name">US-Bangla Airlines</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/VQ.png" alt="NOVOAIR" class="airline-logo">
+                            <span class="airline-name">NOVOAIR</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/OD.png" alt="Air Astra" class="airline-logo">
+                            <span class="airline-name">Air Astra</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+<!----------------------------------------------- 2nd Row----------------------------------------------->
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/AI.png" alt="Air India" class="airline-logo">
+                            <span class="airline-name">Air India</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
             </div>
             
-            <div class="row g-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="offer-card">
-                        <div class="position-relative">
-                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                                 alt="Dubai Offer" class="offer-image">
-                            <div class="offer-badge">30% OFF</div>
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/6E.png" alt="IndiGo" class="airline-logo">
+                            <span class="airline-name">IndiGo</span>
                         </div>
-                        <div class="offer-content">
-                            <h5 class="fw-bold">Dubai Luxury Escape</h5>
-                            <p class="text-muted small">5 Days & 4 Nights</p>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div>
-                                    <span class="offer-price">2,499 SAR</span>
-                                    <span class="offer-old-price">3,499 SAR</span>
-                                </div>
-                                <button class="btn btn-sm btn-primary">Book Now</button>
-                            </div>
-                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
                     </div>
-                </div>
-                
-                <div class="col-lg-3 col-md-6">
-                    <div class="offer-card">
-                        <div class="position-relative">
-                            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                                 alt="Makkah Hotel" class="offer-image">
-                            <div class="offer-badge">Near Haram</div>
-                        </div>
-                        <div class="offer-content">
-                            <h5 class="fw-bold">Makkah Royal Hotel</h5>
-                            <p class="text-muted small">5★ Hotel with Haram View</p>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div>
-                                    <span class="offer-price">450 SAR</span>
-                                    <span class="offer-old-price">600 SAR</span>
-                                </div>
-                                <button class="btn btn-sm btn-primary">Book Now</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-3 col-md-6">
-                    <div class="offer-card">
-                        <div class="position-relative">
-                            <img src="https://images.unsplash.com/photo-1539635278303-d4002c07eae3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                                 alt="Umrah Package" class="offer-image">
-                            <div class="offer-badge">Early Bird</div>
-                        </div>
-                        <div class="offer-content">
-                            <h5 class="fw-bold arabic-font">عُمْرَة Package</h5>
-                            <p class="text-muted small">7 Days All Inclusive</p>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div>
-                                    <span class="offer-price">3,999 SAR</span>
-                                    <span class="offer-old-price">4,999 SAR</span>
-                                </div>
-                                <button class="btn btn-sm btn-primary">Book Now</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-3 col-md-6">
-                    <div class="offer-card">
-                        <div class="position-relative">
-                            <img src="https://images.unsplash.com/photo-1548013146-72479768bada?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                                 alt="Business Class" class="offer-image">
-                            <div class="offer-badge">Business Class</div>
-                        </div>
-                        <div class="offer-content">
-                            <h5 class="fw-bold">Jeddah to London</h5>
-                            <p class="text-muted small">Business Class Special</p>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div>
-                                    <span class="offer-price">4,200 SAR</span>
-                                    <span class="offer-old-price">6,500 SAR</span>
-                                </div>
-                                <button class="btn btn-sm btn-primary">Book Now</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </a>
             </div>
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/AK.png" alt="AirAsia" class="airline-logo">
+                            <span class="airline-name">AirAsia</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/UL.png" alt="SriLankan Airlines" class="airline-logo">
+                            <span class="airline-name">SriLankan Airlines</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+
+<!----------------------------------------------- Row 3 ----------------------------------------------->
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/SV.png" alt="Saudia Airlines" class="airline-logo">
+                            <span class="airline-name">Saudia Airlines</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="{% static 'accounts/images/logo_air/RA.png' %}" alt="Riyadh Air" class="airline-logo">
+                            <span class="airline-name">Riyadh Air</span>
+                        </div><i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/XY.png" alt="Flynas" class="airline-logo">
+                            <span class="airline-name">Flynas</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/F3.png" alt="Flydeal" class="airline-logo">
+                            <span class="airline-name">Flydeal</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+<!---------------------------------------------- Row 04-------------------------------------------------->
+
+
+
+
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/EK.png" alt="Emirates" class="airline-logo">
+                            <span class="airline-name">Emirates</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/QR.png" alt="Qatar Airways" class="airline-logo">
+                            <span class="airline-name">Qatar Airways</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/WY.png" alt="Oman Air" class="airline-logo">
+                            <span class="airline-name">Oman Air</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="{% static 'accounts/images/logo_air/GA.png' %}" alt="Gulf Air" class="airline-logo">
+                            <span class="airline-name">Gulf Air</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+<!---------------------------------------------- Row 05-------------------------------------------------->
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="{% static 'accounts/images/logo_air/FA.png' %}" alt="Flydubai" class="airline-logo">
+                            <span class="airline-name">Flydubai</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/G9.png" alt="Air Arabia" class="airline-logo">
+                            <span class="airline-name">Air Arabia</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/J9.png" alt="Jazeera Airways" class="airline-logo">
+                            <span class="airline-name">Jazeera Airways</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/OV.png" alt="Salam Air" class="airline-logo">
+                            <span class="airline-name">Salam Air</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+
+<!------------------------------------- Row 6 ----------------------------------------------------->
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/SQ.png" alt="Singapore Airlines" class="airline-logo">
+                            <span class="airline-name">Singapore Airlines</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/MH.png" alt="Malaysia Airlines" class="airline-logo">
+                            <span class="airline-name">Malaysia Airlines</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/TG.png" alt="Thai Airways" class="airline-logo">
+                            <span class="airline-name">Thai Airways International</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/CZ.png" alt="China Southern" class="airline-logo">
+                            <span class="airline-name">China Southern Airlines</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+
+            <!---------------------------------------- Row 7----------------------------------------->           
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/MS.png" alt="EgyptAir" class="airline-logo">
+                            <span class="airline-name">EgyptAir</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/ET.png" alt="Ethiopian Airlines" class="airline-logo">
+                            <span class="airline-name">Ethiopian Airlines</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/RJ.png" alt="Royal Jordanian" class="airline-logo">
+                            <span class="airline-name">Royal Jordanian</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+
+
+
+            <div class="col-6 col-md-3">
+                <a href="#" class="airline-card">
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="https://images.kiwi.com/airlines/64/TK.png" alt="Turkish Airlines" class="airline-logo">
+                            <span class="airline-name">Turkish Airlines</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+                </a>
+            </div>
+
+
         </div>
-    </section>
+    </div>
+</section>
+
+
+
+
+
+
 
     <!-- Services Section -->
     <section id="services" class="services-section">
@@ -1309,9 +1489,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h4 class="footer-heading">
-                        <i class="fas fa-plane me-2"></i>Mushqila Travel
-                    </h4>
+
+                    <h4 class="footer-heading"><h5 class="footer-heading">Int Travel & Tourism</h5>
+                    <a class="navbar-brand" href="{% url 'accounts:home' %}">
+                         <img src="{% static 'accounts/images/sinan-logos.png' %}" alt="Sinan Travel" style="height: 50px; width: auto;">
+
                     <p class="mb-4">
                         Your trusted partner for premium travel services. 
                         Specializing in Hajj, Umrah, flights, hotels, and visa services.
@@ -1372,7 +1554,7 @@
             <div class="copyright">
                 <div class="row">
                     <div class="col-md-6 text-md-start">
-                        &copy; 2025 Mushqila Travel. All rights reserved.
+                        &copy; 2026 Mushqila Holding Co. All rights reserved.
                     </div>
                     <div class="col-md-6 text-md-end">
                         <a href="#" class="text-white-50 me-3">Privacy Policy</a>
@@ -1623,6 +1805,27 @@
                 dateFormat: 'Y-m-d',
             });
         });
+        
+        // Contact Bar Scroll Detection
+        const contactBar = document.getElementById('contactBar');
+        let lastScrollTop = 0;
+        
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop) {
+                // Scrolling Down
+                contactBar.classList.add('hidden');
+            } else {
+                // Scrolling Up
+                contactBar.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        });
     </script>
 </body>
 </html>
+
+
+

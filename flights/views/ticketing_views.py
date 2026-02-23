@@ -48,26 +48,24 @@ from flights.models import (
     Airline, Airport, Payment, Refund,  # CommissionTransaction,
     # TicketQueue, TicketingRule, FareCalculation, TaxBreakdown
 )
-# Temporarily commented out - these forms need to be created
-# from flights.forms import (
-#     TicketSearchForm, TicketFilterForm, TicketIssueForm, TicketVoidForm,
-#     TicketReissueForm, TicketRefundForm, TicketDocumentForm, TicketQueueForm,
-#     TicketingRuleForm, BulkTicketingForm, TicketVerificationForm,
-#     EMDCreateForm, TicketRevalidationForm
-# )
-# Temporarily commented out - these services need to be created
-# from flights.services.ticketing_service import TicketingService
-# from flights.services.gds_service import GDSTicketingService
-# from flights.services.payment_service import PaymentService
-# from flights.services.refund_service import RefundService
-# from flights.services.pnr_service import PNRService
-# from flights.services.reporting_service import TicketingReportingService
-# from flights.services.notification_service import TicketNotificationService
-# from flights.utils.export import TicketExport
-# from flights.utils.permissions import TicketingPermission
-# from flights.utils.validators import TicketValidator
-# from flights.utils.cache import TicketingCache
-# from flights.utils.ticket_generator import TicketGenerator
+from flights.forms import (
+    TicketSearchForm, TicketFilterForm, TicketIssueForm, TicketVoidForm,
+    TicketReissueForm, TicketRefundForm, TicketDocumentForm, TicketQueueForm,
+    TicketingRuleForm, BulkTicketingForm, TicketVerificationForm,
+    EMDCreateForm, TicketRevalidationForm
+)
+from flights.services.ticketing_service import TicketingService
+from flights.services.gds_service import GDSTicketingService
+from flights.services.payment_service import PaymentService
+from flights.services.refund_service import RefundService
+from flights.services.pnr_service import PNRService
+from flights.services.reporting_service import TicketingReportingService
+from flights.services.notification_service import TicketNotificationService
+from flights.utils.export import TicketExport
+from flights.utils.permissions import TicketingPermission
+from flights.utils.validators import TicketValidator
+from flights.utils.cache import TicketingCache
+from flights.utils.ticket_generator import TicketGenerator
 from flights.utils.bsp_reports import BSPReportGenerator
 
 logger = logging.getLogger(__name__)
