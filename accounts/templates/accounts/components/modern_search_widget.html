@@ -3,77 +3,80 @@
     .modern-search-widget {
         background: white;
         border-radius: 12px;
-        padding: 30px;
+        padding: 20px 25px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         margin-top: 500px;
     }
     
     .service-tabs {
         display: flex;
-        gap: 10px;
-        border-bottom: 2px solid #f1f5f9;
-        margin-bottom: 30px;
+        gap: 8px;
+        background: linear-gradient(135deg, #ffd93d, #ffed4e);
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-bottom: 20px;
         overflow-x: auto;
-        padding-bottom: 10px;
     }
     
     .service-tab {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 12px 20px;
+        gap: 6px;
+        padding: 8px 16px;
         border: none;
         background: transparent;
-        color: #64748b;
+        color: #2d3748;
         font-weight: 500;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: all 0.3s;
         white-space: nowrap;
-        border-bottom: 3px solid transparent;
+        border-radius: 6px;
     }
     
     .service-tab:hover {
-        color: #1a56db;
+        background: rgba(255, 255, 255, 0.5);
     }
     
     .service-tab.active {
+        background: white;
         color: #1a56db;
-        border-bottom-color: #1a56db;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
     .service-tab i {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
     
     .trip-type-buttons {
         display: flex;
-        gap: 15px;
-        margin-bottom: 25px;
+        gap: 12px;
+        margin-bottom: 18px;
     }
     
     .trip-type-btn {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 10px 20px;
-        border: 2px solid #e2e8f0;
+        gap: 6px;
+        padding: 8px 18px;
+        border: 2px solid #ff8c42;
         background: white;
-        border-radius: 25px;
-        color: #64748b;
+        border-radius: 20px;
+        color: #ff6b35;
         font-weight: 500;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: all 0.3s;
     }
     
     .trip-type-btn:hover {
-        border-color: #1a56db;
-        color: #1a56db;
+        border-color: #ff6b35;
+        background: #fff5f0;
     }
     
     .trip-type-btn.active {
-        background: #1a56db;
-        border-color: #1a56db;
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        border-color: #ff6b35;
         color: white;
     }
     
@@ -83,9 +86,9 @@
     
     .search-row {
         display: flex;
-        gap: 15px;
+        gap: 12px;
         align-items: end;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
     
     .search-field {
@@ -95,18 +98,18 @@
     
     .search-field label {
         display: block;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         font-weight: 600;
         color: #475569;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     
     .search-input {
         width: 100%;
-        padding: 14px 16px;
+        padding: 11px 14px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         transition: all 0.3s;
     }
     
@@ -129,14 +132,14 @@
     }
     
     .location-details {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: #94a3b8;
-        margin-top: 4px;
+        margin-top: 3px;
     }
     
     .swap-button {
-        width: 40px;
-        height: 40px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         border: 1px solid #e2e8f0;
         background: white;
@@ -146,7 +149,7 @@
         justify-content: center;
         cursor: pointer;
         transition: all 0.3s;
-        margin-bottom: 5px;
+        margin-bottom: 3px;
     }
     
     .swap-button:hover {
@@ -158,25 +161,25 @@
     
     .fare-type-row {
         display: flex;
-        gap: 20px;
-        margin-bottom: 20px;
+        gap: 18px;
+        margin-bottom: 15px;
     }
     
     .fare-option {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         cursor: pointer;
     }
     
     .fare-option input[type="radio"] {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         cursor: pointer;
     }
     
     .fare-option label {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         color: #475569;
         cursor: pointer;
         margin: 0;
@@ -186,16 +189,16 @@
         background: linear-gradient(135deg, #ff6b35, #ff8c42);
         border: none;
         color: white;
-        padding: 14px 40px;
+        padding: 12px 35px;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 1rem;
+        font-size: 0.95rem;
         cursor: pointer;
         transition: all 0.3s;
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 5px;
+        gap: 8px;
+        margin-bottom: 3px;
     }
     
     .search-button:hover {
@@ -204,10 +207,18 @@
     }
     
     .search-button i {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
     
     @media (max-width: 768px) {
+        .modern-search-widget {
+            padding: 15px 20px;
+        }
+        
+        .service-tabs {
+            padding: 10px 12px;
+        }
+        
         .search-row {
             flex-direction: column;
         }
@@ -228,7 +239,7 @@
 </style>
 
 <div class="modern-search-widget">
-    <!-- Service Tabs -->
+    <!-- Service Tabs with Trip Type Buttons Inside -->
     <div class="service-tabs">
         <button class="service-tab active" data-service="flight">
             <i class="fas fa-plane"></i>
@@ -238,7 +249,6 @@
             <i class="fas fa-hotel"></i>
             <span>Hotel</span>
         </button>
-
         <button class="service-tab" data-service="holiday">
             <i class="fas fa-umbrella-beach"></i>
             <span>Holiday</span>
@@ -247,22 +257,19 @@
             <i class="fas fa-passport"></i>
             <span>Visa</span>
         </button>
-
         <button class="service-tab" data-service="cars">
             <i class="fas fa-car"></i>
             <span>Cars</span>
         </button>
-
         <button class="service-tab" data-service="recharge">
             <i class="fas fa-mobile-alt"></i>
             <span>Top-Up</span>
         </button>
-
     </div>
     
     <!-- Flight Search Form -->
     <div id="flight-search-form">
-        <!-- Trip Type Selection -->
+        <!-- Trip Type Selection (Orange Buttons) -->
         <div class="trip-type-buttons">
             <label class="trip-type-btn active">
                 <input type="radio" name="trip-type" value="one-way" checked>
