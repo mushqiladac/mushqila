@@ -8,13 +8,21 @@
         margin-top: 500px;
     }
     
-    .service-tabs {
+    .tabs-and-buttons-row {
         display: flex;
-        gap: 15px;
+        justify-content: space-between;
+        align-items: center;
         border-bottom: 2px solid #f1f5f9;
         padding-bottom: 12px;
         margin-bottom: 20px;
+        gap: 20px;
+    }
+    
+    .service-tabs {
+        display: flex;
+        gap: 15px;
         overflow-x: auto;
+        flex: 1;
     }
     
     .service-tab {
@@ -50,7 +58,7 @@
     .trip-type-buttons {
         display: flex;
         gap: 12px;
-        margin-bottom: 18px;
+        flex-shrink: 0;
     }
     
     .trip-type-btn {
@@ -219,8 +227,19 @@
             padding: 15px 20px;
         }
         
+        .tabs-and-buttons-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
         .service-tabs {
-            padding: 10px 12px;
+            width: 100%;
+        }
+        
+        .trip-type-buttons {
+            width: 100%;
+            justify-content: flex-start;
         }
         
         .search-row {
@@ -231,49 +250,41 @@
             transform: rotate(90deg);
             margin: 0 auto;
         }
-        
-        .service-tabs {
-            justify-content: flex-start;
-        }
-        
-        .trip-type-buttons {
-            flex-wrap: wrap;
-        }
     }
 </style>
 
 <div class="modern-search-widget">
-    <!-- Service Tabs with Trip Type Buttons Inside -->
-    <div class="service-tabs">
-        <button class="service-tab active" data-service="flight">
-            <i class="fas fa-plane"></i>
-            <span>Flight</span>
-        </button>
-        <button class="service-tab" data-service="hotel">
-            <i class="fas fa-hotel"></i>
-            <span>Hotel</span>
-        </button>
-        <button class="service-tab" data-service="holiday">
-            <i class="fas fa-umbrella-beach"></i>
-            <span>Holiday</span>
-        </button>
-        <button class="service-tab" data-service="visa">
-            <i class="fas fa-passport"></i>
-            <span>Visa</span>
-        </button>
-        <button class="service-tab" data-service="cars">
-            <i class="fas fa-car"></i>
-            <span>Cars</span>
-        </button>
-        <button class="service-tab" data-service="recharge">
-            <i class="fas fa-mobile-alt"></i>
-            <span>Top-Up</span>
-        </button>
-    </div>
-    
-    <!-- Flight Search Form -->
-    <div id="flight-search-form">
-        <!-- Trip Type Selection (Orange Buttons) -->
+    <!-- Service Tabs and Trip Type Buttons in Same Row -->
+    <div class="tabs-and-buttons-row">
+        <!-- Service Tabs (Left Side) -->
+        <div class="service-tabs">
+            <button class="service-tab active" data-service="flight">
+                <i class="fas fa-plane"></i>
+                <span>Flight</span>
+            </button>
+            <button class="service-tab" data-service="hotel">
+                <i class="fas fa-hotel"></i>
+                <span>Hotel</span>
+            </button>
+            <button class="service-tab" data-service="holiday">
+                <i class="fas fa-umbrella-beach"></i>
+                <span>Holiday</span>
+            </button>
+            <button class="service-tab" data-service="visa">
+                <i class="fas fa-passport"></i>
+                <span>Visa</span>
+            </button>
+            <button class="service-tab" data-service="cars">
+                <i class="fas fa-car"></i>
+                <span>Cars</span>
+            </button>
+            <button class="service-tab" data-service="recharge">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Top-Up</span>
+            </button>
+        </div>
+        
+        <!-- Trip Type Buttons (Right Side) -->
         <div class="trip-type-buttons">
             <label class="trip-type-btn active">
                 <input type="radio" name="trip-type" value="one-way" checked>
@@ -291,6 +302,10 @@
                 <span>Multi City</span>
             </label>
         </div>
+    </div>
+    
+    <!-- Flight Search Form -->
+    <div id="flight-search-form">
         
         <!-- Search Fields -->
         <div class="search-row">
