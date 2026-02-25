@@ -63,6 +63,24 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
         
+        .navbar-landing .nav-link {
+            color: #334155;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 8px 15px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .navbar-landing .nav-link:hover {
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .navbar-landing .nav-link i {
+            color: var(--primary-color);
+        }
+        
         .logo-text {
             font-weight: 700;
             font-size: 1.8rem;
@@ -799,49 +817,7 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-landing fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'accounts:home' %}">
-                <img src="{% static 'accounts/images/sinan-logo.png' %}" alt="Sinan Travel" style="height: 50px; width: auto;">
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact"><i class="fas fa-phone me-1"></i> Manage My Trip</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#offers"><i class="fas fa-percentage me-1"></i> Offers</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="https://wa.me/" class="contact-item" target="_blank">
-                            <i class="fab fa-whatsapp"></i>
-                            <span>WhatsApp</span>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="#support"><i class="fas fa-concierge-bell me-1"></i> Support</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact"><i class="fas fa-phone me-1"></i> Contact</a>
-                    </li>
-
-
-                    <li class="nav-item ms-3">
-                        <a href="{% url 'accounts:login' %}" class="btn btn-primary-custom">
-                            <i class="fas fa-sign-in-alt me-2"></i>Agent Login
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    {% include 'accounts/components/navbar.html' %}
     
     <!-- Contact Bar -->
 
@@ -860,43 +836,7 @@
                 </div>
             </div>
  <!-------------------------------------Quick Search---------------------------------> 
-             <!-- Quick Links -->
-            <div class="quick-links">
-                <a href="#contact" class="quick-link">
-                    <div class="quick-link-icon">
-                        <i class="fas fa-umbrella-beach"></i>
-                    </div>
-                    <span>Tourism</span>
-                </a>
 
-                <a href="#contact" class="quick-link">
-                    <div class="quick-link-icon">
-                        
-                        <i class="fas fa-mosque"></i>
-                    </div>
-                    <span>Umrah Packages</span>
-                </a>
-                <a href="{% url 'accounts:hajj_booking' %}" class="quick-link">
-                    <div class="quick-link-icon">
-                        <i class="fas fa-kaaba"></i>
-                    </div>
-                    <span>Hajj Packages</span>
-                </a>
-                <a href="#offers" class="quick-link">
-                    <div class="quick-link-icon">
-                        <i class="fas fa-percentage"></i>
-                    </div>
-                    <span>Special Offers</span>
-                </a>
-                <a href="{% url 'accounts:flight_bookings' %}" class="quick-link">
-                    <div class="quick-link-icon">
-                        <i class="fas fa-plane-departure"></i>
-                    </div>
-                    <span>Last Minute Deals</span>
-                </a>
-
-
-            </div>
 <!--------------------------------Quick Search------------------------------------------------->          
 
 

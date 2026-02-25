@@ -1,0 +1,265 @@
+{% load static %}
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-landing fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'accounts:home' %}">
+            <img src="{% static 'accounts/images/sinan-logo.png' %}" alt="Sinan Travel" style="height: 50px; width: auto;">
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-2">
+                <li class="nav-item">
+                    <a class="nav-link nav-btn" href="#contact">
+                        <i class="fas fa-umbrella-beach"></i>
+                        <span>Tourism</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-btn" href="#contact">
+                        <i class="fas fa-mosque"></i>
+                        <span>Umrah</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-btn" href="{% url 'accounts:hajj_booking' %}">
+                        <i class="fas fa-kaaba"></i>
+                        <span>Hajj</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-btn" href="#offers">
+                        <i class="fas fa-percentage"></i>
+                        <span>Offers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-btn" href="{% url 'accounts:flight_bookings' %}">
+                        <i class="fas fa-plane-departure"></i>
+                        <span>Deals</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-btn" href="#manage_my_trip">
+                        <i class="fas fa-suitcase"></i>
+                        <span>My Trip</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-btn" href="https://wa.me/" target="_blank">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-btn" href="#support">
+                        <i class="fas fa-concierge-bell"></i>
+                        <span>Support</span>
+                    </a>
+                </li>
+                <li class="nav-item ms-2">
+                    <a href="{% url 'accounts:login' %}" class="btn btn-login">
+                        <i class="fas fa-sign-in-alt me-2"></i>Agent Login
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<style>
+    /* Navbar Styles */
+    .navbar-landing {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        padding: 12px 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .navbar-landing.scrolled {
+        padding: 8px 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .navbar-landing .container {
+        max-width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .navbar-nav {
+        gap: 8px;
+    }
+    
+    .nav-btn {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 15px !important;
+        border-radius: 10px;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        gap: 8px;
+    }
+    
+    .nav-btn:hover {
+        background: linear-gradient(135deg, #1a56db, #3b82f6);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(26, 86, 219, 0.3);
+    }
+    
+    .nav-btn i {
+        font-size: 1.1rem;
+        color: #1a56db;
+        transition: all 0.3s;
+    }
+    
+    .nav-btn:hover i {
+        color: white;
+    }
+    
+    .nav-btn span {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #334155;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+    
+    .nav-btn:hover span {
+        color: white;
+    }
+    
+    .btn-login {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+        color: white;
+    }
+    
+    .navbar-toggler {
+        border: none;
+        padding: 8px;
+    }
+    
+    .navbar-toggler:focus {
+        box-shadow: none;
+    }
+    
+    .navbar-toggler-icon {
+        width: 25px;
+        height: 25px;
+    }
+    
+    @media (max-width: 1400px) {
+        .nav-btn {
+            padding: 8px 12px !important;
+        }
+        
+        .nav-btn i {
+            font-size: 1rem;
+        }
+        
+        .nav-btn span {
+            font-size: 0.85rem;
+        }
+    }
+    
+    @media (max-width: 1200px) {
+        .nav-btn {
+            padding: 8px 10px !important;
+        }
+        
+        .nav-btn i {
+            font-size: 0.95rem;
+        }
+        
+        .nav-btn span {
+            font-size: 0.8rem;
+        }
+        
+        .btn-login {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .navbar-collapse {
+            background: white;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-nav {
+            align-items: stretch !important;
+            gap: 10px;
+        }
+        
+        .nav-item {
+            width: 100%;
+        }
+        
+        .nav-btn {
+            flex-direction: row;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 12px 15px !important;
+        }
+        
+        .nav-btn i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .nav-btn span {
+            font-size: 0.9rem;
+        }
+        
+        .nav-item.ms-2 {
+            margin-left: 0 !important;
+            margin-top: 10px;
+        }
+        
+        .btn-login {
+            width: 100%;
+            justify-content: center;
+            padding: 15px;
+        }
+    }
+</style>
+
+<script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar-landing');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+</script>
