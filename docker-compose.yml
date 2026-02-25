@@ -5,15 +5,8 @@ services:
     build: .
     ports:
       - "8000:8000"
-    environment:
-      - DEBUG=True
-      - SECRET_KEY=django-insecure-test-key
-      - ALLOWED_HOSTS=localhost,127.0.0.1
-      - DB_NAME=mushqila
-      - DB_USER=postgres
-      - DB_PASSWORD=password
-      - DB_HOST=db
-      - DB_PORT=5432
+    env_file:
+      - .env
     depends_on:
       - db
     volumes:
