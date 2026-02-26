@@ -546,7 +546,7 @@
 
         /* Services Section */
         .services-section {
-            padding: 80px 0;
+            padding: 0;
             background-color: var(--light-bg);
         }
         
@@ -581,9 +581,15 @@
             font-size: 28px;
         }
         
+        /* Services Section */
+        .services-section {
+            padding: 0;
+            background-color: var(--light-bg);
+        }
+        
         /* Offers Section */
         .offers-section {
-            padding: 80px 0;
+            padding: 0;
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         }
         
@@ -637,7 +643,7 @@
         
         /* Features Section */
         .features-section {
-            padding: 80px 0;
+            padding: 0;
         }
         
         .feature-item {
@@ -664,7 +670,7 @@
         .cta-section {
             background: linear-gradient(135deg, var(--secondary-color), #059669);
             color: white;
-            padding: 80px 0;
+            padding: 0;
             text-align: center;
         }
         
@@ -702,7 +708,7 @@
             .features-section,
             .cta-section,
             .offers-section {
-                padding: 50px 0;
+                padding: 0;
             }
             
             .feature-item {
@@ -720,7 +726,7 @@
         .footer {
             background: #111827;
             color: #9ca3af;
-            padding: 60px 0 30px;
+            padding: 0;
         }
         
         .footer-heading {
@@ -935,7 +941,7 @@
     <div class="container">
         <div class="text-center mb-5">
             <h2 class="section-title fw-bold mb-3">Search Top Airlines</h2>
-            <p class="text-muted">ShareTrip's user-friendly platform connects you to top airlines instantly. Enjoy a comfortable and hassle-free journey on any destination and get tickets of top airlines easily</p>
+            <p class="text-muted">Our Partner Airlines.</p>
         </div>
 
         <div class="row g-3">
@@ -1015,8 +1021,8 @@
                 <a href="#" class="airline-card">
                     <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded shadow-sm hover-lift">
                         <div class="d-flex align-items-center gap-3">
-                            <img src="https://images.kiwi.com/airlines/64/AK.png" alt="AirAsia" class="airline-logo">
-                            <span class="airline-name">AirAsia</span>
+                            <img src="https://images.kiwi.com/airlines/64/PA.png" alt="AirAsia" class="airline-logo">
+                            <span class="airline-name">Pakistan Airlines</span>
                         </div>
                         <i class="fas fa-chevron-right text-muted"></i>
                     </div>
@@ -1406,15 +1412,21 @@
     </section>
 
     <!-- Features Section -->
+
+
+    <!------------------------------------------------------------------------------------------- Features Section -->
     <section id="features" class="features-section">
         <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">Why Choose Mushqila?</h2>
+                <p class="lead text-muted">
+                    We combine cutting-edge technology with traditional travel expertise to deliver exceptional service.
+                </p>
+            </div>
+            
             <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h2 class="display-5 fw-bold mb-4">Why Choose Mushqila?</h2>
-                    <p class="lead mb-5">
-                        We combine cutting-edge technology with traditional travel expertise to deliver exceptional service.
-                    </p>
-                    
+                <!-- Left Column: First 2 Features -->
+                <div class="col-lg-4">
                     <div class="feature-item">
                         <div class="feature-icon">
                             <i class="fas fa-bolt"></i>
@@ -1434,7 +1446,25 @@
                             <p class="text-muted">Bank-level security for all transactions with SSL encryption.</p>
                         </div>
                     </div>
-                    
+                </div>
+                
+                <!-- Middle Column: Image -->
+                <div class="col-lg-4">
+                    <div class="position-relative text-center">
+                        <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                            alt="Dashboard Preview" 
+                            class="img-fluid rounded-3 shadow-lg">
+                        <div class="position-absolute top-0 end-0 bg-white p-3 rounded-3 shadow m-3">
+                            <i class="fas fa-chart-line fa-2x text-primary"></i>
+                        </div>
+                        <div class="position-absolute bottom-0 start-0 bg-white p-3 rounded-3 shadow m-3">
+                            <i class="fas fa-mobile-alt fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Last 2 Features -->
+                <div class="col-lg-4">
                     <div class="feature-item">
                         <div class="feature-icon">
                             <i class="fas fa-hand-holding-usd"></i>
@@ -1455,25 +1485,12 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="col-lg-6">
-                    <div class="position-relative">
-                        <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-                             alt="Dashboard Preview" 
-                             class="img-fluid rounded-3 shadow-lg">
-                        <div class="position-absolute top-0 end-0 bg-white p-3 rounded-3 shadow m-3">
-                            <i class="fas fa-chart-line fa-2x text-primary"></i>
-                        </div>
-                        <div class="position-absolute bottom-0 start-0 bg-white p-3 rounded-3 shadow m-3">
-                            <i class="fas fa-mobile-alt fa-2x text-primary"></i>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
+
+    <!---------------------------------------------------------------------------------------- CTA Section -->
 
 
     <!-- Footer -->
