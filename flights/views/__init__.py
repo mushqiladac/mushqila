@@ -801,3 +801,143 @@ def initialize_views():
 
 # Auto-initialize on module import
 initialize_views()
+
+
+# ==============================================
+# FUNCTIONAL SEARCH WIDGET API VIEWS
+# ==============================================
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.db.models import Q
+import json
+
+@require_http_methods(["GET"])
+def airport_search(request):
+    """API endpoint for airport autocomplete"""
+    from flights.models import Airport
+    
+    query = request.GET.get('q', '').strip()
+    
+    if len(query) < 2:
+        return JsonResponse({'results': []})
+    
+    # Search by iata_code, city, or airport name
+    airports = Airport.objects.filter(
+        Q(iata_code__icontains=query) |
+        Q(city__icontains=query) |
+        Q(name__icontains=query),
+        is_active=True
+    )[:10]
+    
+    results = [{
+        'code': airport.iata_code,
+        'city': airport.city,
+        'name': airport.name,
+        'country': airport.country,
+        'display': f"{airport.city}, {airport.country} ({airport.iata_code})",
+        'full_display': f"{airport.city}, {airport.name}"
+    } for airport in airports]
+    
+    return JsonResponse({'results': results})
+
+
+@require_http_methods(["POST"])
+def flight_search(request):
+    """Handle flight search requests"""
+    from flights.models import FlightSearch, Airport
+    import hashlib
+    
+    try:
+        data = json.loads(request.body)
+        
+        # Validate required fields
+        required_fields = ['origin', 'destination', 'departure_date', 'search_type']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Missing required field: {field}'
+                }, status=400)
+        
+        # Get Airport objects
+        try:
+            origin_airport = Airport.objects.get(iata_code=data['origin'])
+            destination_airport = Airport.objects.get(iata_code=data['destination'])
+        except Airport.DoesNotExist as e:
+            return JsonResponse({
+                'success': False,
+                'error': f'Invalid airport code: {str(e)}'
+            }, status=400)
+        
+        # Generate search hash
+        search_string = f"{data['origin']}-{data['destination']}-{data['departure_date']}-{data.get('return_date', '')}"
+        search_hash = hashlib.md5(search_string.encode()).hexdigest()
+        
+        # Save search query (only if user is authenticated)
+        if request.user.is_authenticated:
+            search = FlightSearch.objects.create(
+                user=request.user,
+                search_type=data['search_type'],
+                origin=origin_airport,
+                destination=destination_airport,
+                departure_date=data['departure_date'],
+                return_date=data.get('return_date'),
+                adults=data.get('adults', 1),
+                children=data.get('children', 0),
+                infants=data.get('infants', 0),
+                cabin_class=data.get('cabin_class', 'economy'),
+                search_hash=search_hash
+            )
+            search_id = str(search.id)
+        else:
+            search_id = None
+        
+        # TODO: Integrate with Travelport Galileo GDS API
+        # For now, return demo response
+        demo_flights = [
+            {
+                'id': 1,
+                'airline': 'Biman Bangladesh Airlines',
+                'flight_number': 'BG147',
+                'departure_time': '10:30',
+                'arrival_time': '11:45',
+                'duration': '1h 15m',
+                'price': 4500,
+                'currency': 'BDT',
+                'available_seats': 12
+            },
+            {
+                'id': 2,
+                'airline': 'US-Bangla Airlines',
+                'flight_number': 'BS325',
+                'departure_time': '14:00',
+                'arrival_time': '15:20',
+                'duration': '1h 20m',
+                'price': 4200,
+                'currency': 'BDT',
+                'available_seats': 8
+            }
+        ]
+        
+        return JsonResponse({
+            'success': True,
+            'search_id': search_id,
+            'flights': demo_flights,
+            'message': 'Demo data - Galileo GDS integration pending'
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+# Add to __all__ for export
+__all__.extend(['airport_search', 'flight_search'])

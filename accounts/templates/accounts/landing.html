@@ -100,9 +100,12 @@
             padding: 100px 0 120px;
             position: relative;
             overflow: hidden;
-            min-height: 650px;
+            min-height: 300px;
+            max-height: 1000px;
         }
         
+
+
         .hero-title {
             font-size: 3.5rem;
             font-weight: 800;
@@ -121,22 +124,68 @@
             font-size: 1.25rem;
             opacity: 0.9;
             margin-bottom: 2rem;
-            max-width: 600px;
+            max-width: 500px;
         }
         
         /* Search Widget */
+/* ---------------------------------------------------------------------------------*/
+        .extra-div {
+            background-color: transparent;
+            
+
+            align-self: start;
+     
+        }
+
+        .extra-min {
+            background-color: transparent;
+            
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            
+     
+        }
+        .extra-01 {
+            background-color:transparent;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 0;
+            margin-top: 300px;
+            
+        }
+        .extra-02 {
+            background-color:transparent;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 0;
+        }
+        .extra-03 {
+            background-color:transparent;
+            flex: 1;
+            text-align: center;
+        }
+/*-------------------------------------------------------------------------------------------*/
         .search-widget {
             background: rgba(255, 255, 255, 0.98);
             border-radius: 16px;
             padding: 35px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-            margin-top: 50px;
+            margin-top: 20px;
             position: relative;
             z-index: 10;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        
+
+
+
         .search-tabs {
             display: flex;
             background: #f1f5f9;
@@ -824,7 +873,8 @@
 
     <!-- Hero Section with Search -->
     <section class="hero-section">
-        <div class="container">
+<!----------------------------------------Extra Work ----------------------------------------------->
+     <div class="extra-div">
             <div class="row">
                 <div class="col-lg-12 text-center animate-fade-in-up">
                     <h1 class="hero-title">
@@ -835,17 +885,39 @@
                     </p>
                 </div>
             </div>
+    </div>
+
+    <!-------------------------------- Search Left Section------------------------------------------->
+    <div class="extra-min">
+        
+        <div class="extra-01">
+            {% include 'accounts/components/functional_search_widget.html' %}
+        </div>
+        <div class="extra-02">
+            <!----------------------------- Extra 02 -------------------------------------------->
+        </div>
+        <div class="extra-03">
+            <!----------------------------- Extra 03 --------------------------------------------->
+
+        </div>
+    </div>
+
+
+<!----------------------------------------- Extra Work End ------------------------------------------>
+
+
+
+
+
  <!-------------------------------------Quick Search---------------------------------> 
 
 <!--------------------------------Quick Search------------------------------------------------->          
 
 
-
-
-
+            
 
             <!-- Modern Search Widget -->
-            {% include 'accounts/components/modern_search_widget.html' %}
+            
             
 
         </div>
@@ -1402,27 +1474,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8 text-center">
-                    <h2 class="display-5 fw-bold mb-4">Ready to Grow Your Travel Business?</h2>
-                    <p class="lead mb-5">
-                        Join hundreds of successful travel agents who trust Mushqila for their 
-                        bookings. Start earning higher commissions today!
-                    </p>
-                    <div class="d-flex flex-wrap gap-3 justify-content-center">
-                        <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg px-5 py-3">
-                            <i class="fas fa-user-plus me-2"></i>Register as Agent
-                        </a>
-                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg px-5 py-3">
-                            <i class="fas fa-sign-in-alt me-2"></i>Agent Login
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- Footer -->
     <footer id="contact" class="footer">
@@ -1434,7 +1486,7 @@
                     <a class="navbar-brand" href="{% url 'accounts:home' %}">
                          <img src="{% static 'accounts/images/sinan-logos.png' %}" alt="Sinan Travel" style="height: 50px; width: auto;">
                     </a>
-                        </i>Int Travel & Tourism
+                        </i>Int. Travel & Tourism
                     </h4>
                     <p class="mb-4">
                         Your trusted partner for premium travel services. 
@@ -1483,7 +1535,7 @@
                         </p>
                         <p class="mb-2">
                             <i class="fas fa-envelope me-2"></i>
-                            info@mushqila.com
+                            support@mushqila.com
                         </p>
                         <p>
                             <i class="fas fa-clock me-2"></i>

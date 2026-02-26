@@ -9,8 +9,8 @@ from accounts.views import HomeView  # HomeView import করুন
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls', namespace='accounts')),
-    # path('flights/', include('flights.urls', namespace='flights')),  # Temporarily disabled
-    path('', HomeView.as_view(), name='home'),  # HomeView ব্যবহার করুন
+    path('flights/', include('flights.urls', namespace='flights')),
+    path('', HomeView.as_view(), name='home'),
 ]
 
 if settings.DEBUG:

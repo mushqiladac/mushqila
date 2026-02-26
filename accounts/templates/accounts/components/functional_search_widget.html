@@ -1,0 +1,677 @@
+{% load static %}
+
+<!-- Functional Flight Search Widget -->
+<style>
+    .modern-search-widget {
+        background: white;
+        border-radius: 12px;
+        padding: 20px 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-top: 0;
+        max-width: 750px;
+        margin-left: auto;
+        margin-right: auto;
+        position: relative;
+    }
+    
+    .service-tabs-row {
+        display: flex;
+        justify-content: center;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .service-tabs {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+    }
+    
+    .service-tab {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -14px;
+    }
+    
+    .service-tab:hover {
+        color: #1a56db;
+    }
+    
+    .service-tab.active {
+        color: #1a56db;
+        border-bottom-color: #1a56db;
+    }
+    
+    .service-tab i {
+        font-size: 0.95rem;
+    }
+    
+    .trip-type-row {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 18px;
+    }
+    
+    .trip-type-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .trip-type-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 18px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        border-radius: 18px;
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .trip-type-btn:hover {
+        border-color: #1a56db;
+        color: #1a56db;
+    }
+    
+    .trip-type-btn.active {
+        background: #1a56db;
+        border-color: #1a56db;
+        color: white;
+    }
+    
+    .trip-type-btn input[type="radio"] {
+        display: none;
+    }
+    
+    .trip-type-btn i {
+        font-size: 0.7rem;
+    }
+    
+    .search-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .search-field {
+        flex: 1;
+        min-width: 0;
+        position: relative;
+    }
+    
+    .search-field label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 4px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        font-weight: 600;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #1a56db;
+        box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+    }
+    
+    .search-input:read-only {
+        background-color: #f8fafc;
+        cursor: pointer;
+    }
+    
+    .details-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+        font-size: 0.7rem;
+        color: #64748b;
+    }
+    
+    .details-row > div {
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .swap-button {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        flex-shrink: 0;
+    }
+    
+    .swap-button:hover {
+        background: #1a56db;
+        color: white;
+        border-color: #1a56db;
+    }
+    
+    .fare-type-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 0;
+        justify-content: center;
+    }
+    
+    .fare-option {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+    }
+    
+    .fare-option input[type="radio"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+    
+    .fare-option label {
+        font-size: 0.8rem;
+        color: #475569;
+        cursor: pointer;
+        margin: 0;
+    }
+    
+    .search-button {
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+        border: none;
+        color: white;
+        padding: 10px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+        height: 36px;
+    }
+    
+    .search-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+    }
+    
+    .search-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    /* Autocomplete Dropdown */
+    .autocomplete-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        margin-top: 4px;
+    }
+    
+    .autocomplete-item {
+        padding: 12px;
+        cursor: pointer;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    
+    .autocomplete-item:hover {
+        background: #f8fafc;
+    }
+    
+    .airport-code {
+        font-weight: 700;
+        color: #1a56db;
+        font-size: 0.9rem;
+        min-width: 40px;
+    }
+    
+    .airport-info {
+        flex: 1;
+    }
+    
+    .airport-city {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.85rem;
+    }
+    
+    .airport-name {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+    
+    /* Passenger Modal */
+    .passenger-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 400px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #1e293b;
+    }
+    
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #64748b;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .passenger-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .passenger-info h4 {
+        margin: 0 0 4px 0;
+        font-size: 0.95rem;
+        color: #1e293b;
+    }
+    
+    .passenger-info p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    
+    .counter {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .counter-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #1a56db;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+    
+    .counter-btn:hover:not(:disabled) {
+        background: #1a56db;
+        color: white;
+    }
+    
+    .counter-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+    
+    .counter-value {
+        font-weight: 600;
+        font-size: 1rem;
+        min-width: 30px;
+        text-align: center;
+    }
+    
+    .cabin-class-section {
+        margin-top: 20px;
+    }
+    
+    .cabin-class-section h4 {
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+        color: #1e293b;
+    }
+    
+    .cabin-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .cabin-option {
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .cabin-option:hover {
+        border-color: #1a56db;
+        background: #f8fafc;
+    }
+    
+    .cabin-option.active {
+        background: #1a56db;
+        color: white;
+        border-color: #1a56db;
+    }
+    
+    .modal-footer {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .btn-done {
+        background: #1a56db;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-done:hover {
+        background: #1543b8;
+    }
+    
+    @media (max-width: 768px) {
+        .modern-search-widget {
+            padding: 15px 20px;
+            max-width: 100%;
+        }
+        
+        .search-row {
+            flex-direction: column;
+        }
+        
+        .swap-button {
+            transform: rotate(90deg);
+            margin: 10px auto;
+        }
+        
+        .details-row {
+            flex-direction: column;
+            gap: 4px;
+        }
+    }
+</style>
+
+<div class="modern-search-widget">
+    <!-- 1st Row: Service Tabs -->
+    <div class="service-tabs-row">
+        <div class="service-tabs">
+            <button class="service-tab active" data-service="flight">
+                <i class="fas fa-plane"></i>
+                <span>Flight</span>
+            </button>
+            <button class="service-tab" data-service="hotel">
+                <i class="fas fa-hotel"></i>
+                <span>Hotel</span>
+            </button>
+            <button class="service-tab" data-service="holiday">
+                <i class="fas fa-umbrella-beach"></i>
+                <span>Holiday</span>
+            </button>
+            <button class="service-tab" data-service="visa">
+                <i class="fas fa-passport"></i>
+                <span>Visa</span>
+            </button>
+            <button class="service-tab" data-service="cars">
+                <i class="fas fa-car"></i>
+                <span>Cars</span>
+            </button>
+            <button class="service-tab" data-service="recharge">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Top-Up</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- 2nd Row: Trip Type Buttons -->
+    <div class="trip-type-row">
+        <div class="trip-type-buttons">
+            <label class="trip-type-btn active">
+                <input type="radio" name="trip-type" value="one-way" checked>
+                <i class="fas fa-circle"></i>
+                <span>One Way</span>
+            </label>
+            <label class="trip-type-btn">
+                <input type="radio" name="trip-type" value="round-trip">
+                <i class="fas fa-circle"></i>
+                <span>Round Trip</span>
+            </label>
+            <label class="trip-type-btn">
+                <input type="radio" name="trip-type" value="multi-city">
+                <i class="fas fa-circle"></i>
+                <span>Multi City</span>
+            </label>
+        </div>
+    </div>
+    
+    <!-- Flight Search Form -->
+    <div id="flight-search-form">
+        <!-- 3rd Row: Search Fields -->
+        <div class="search-row">
+            <!-- Origin -->
+            <div class="search-field">
+                <label id="origin-code">DAC</label>
+                <input type="text" id="origin-input" class="search-input" value="Dhaka" placeholder="From" autocomplete="off">
+                <div id="origin-results" class="autocomplete-results"></div>
+            </div>
+            
+            <!-- Swap Button -->
+            <button class="swap-button" type="button">
+                <i class="fas fa-exchange-alt"></i>
+            </button>
+            
+            <!-- Destination -->
+            <div class="search-field">
+                <label id="destination-code">CXB</label>
+                <input type="text" id="destination-input" class="search-input" value="Cox's Bazar" placeholder="To" autocomplete="off">
+                <div id="destination-results" class="autocomplete-results"></div>
+            </div>
+            
+            <!-- Departure Date -->
+            <div class="search-field">
+                <label id="departure-date-label">22</label>
+                <input type="text" id="departure-date-input" class="search-input" value="February" placeholder="Journey Date" readonly>
+                <input type="hidden" id="departure-date">
+            </div>
+            
+            <!-- Passengers -->
+            <div class="search-field">
+                <label id="passenger-label">1 Traveller</label>
+                <input type="text" id="passenger-input" class="search-input" value="Economy" placeholder="Class" readonly>
+            </div>
+            
+            <!-- Search Button -->
+            <button class="search-button" type="button" id="search-flights-btn">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </button>
+        </div>
+        
+        <!-- 4th Row: Details -->
+        <div class="details-row">
+            <div id="origin-detail">Bangladesh, Hazrat Shahjalal International Airport</div>
+            <div style="width: 36px;"></div>
+            <div id="destination-detail">Bangladesh, Cox's Bazar Airport</div>
+            <div id="departure-date-detail">Sunday, 2026</div>
+            <div></div>
+            <div style="width: 100px;"></div>
+        </div>
+        
+        <!-- 5th Row: Fare Types -->
+        <div class="fare-type-row">
+            <label class="fare-option">
+                <input type="radio" name="fare-type" value="regular" checked>
+                <label>Regular Fare</label>
+            </label>
+            <label class="fare-option">
+                <input type="radio" name="fare-type" value="student">
+                <label>Student Fare</label>
+            </label>
+            <label class="fare-option">
+                <input type="radio" name="fare-type" value="umrah">
+                <label>Umrah Fare</label>
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- Passenger Modal -->
+<div id="passenger-modal" class="passenger-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Passengers & Class</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <!-- Adults -->
+            <div class="passenger-row">
+                <div class="passenger-info">
+                    <h4>Adults</h4>
+                    <p>12+ years</p>
+                </div>
+                <div class="counter">
+                    <button class="counter-btn" id="adults-decrease">−</button>
+                    <span class="counter-value" id="adults-count">1</span>
+                    <button class="counter-btn" id="adults-increase">+</button>
+                </div>
+            </div>
+            
+            <!-- Children -->
+            <div class="passenger-row">
+                <div class="passenger-info">
+                    <h4>Children</h4>
+                    <p>2-11 years</p>
+                </div>
+                <div class="counter">
+                    <button class="counter-btn" id="children-decrease">−</button>
+                    <span class="counter-value" id="children-count">0</span>
+                    <button class="counter-btn" id="children-increase">+</button>
+                </div>
+            </div>
+            
+            <!-- Infants -->
+            <div class="passenger-row">
+                <div class="passenger-info">
+                    <h4>Infants</h4>
+                    <p>0-2 years</p>
+                </div>
+                <div class="counter">
+                    <button class="counter-btn" id="infants-decrease">−</button>
+                    <span class="counter-value" id="infants-count">0</span>
+                    <button class="counter-btn" id="infants-increase">+</button>
+                </div>
+            </div>
+            
+            <!-- Cabin Class -->
+            <div class="cabin-class-section">
+                <h4>Cabin Class</h4>
+                <div class="cabin-options">
+                    <div class="cabin-option active" data-class="economy">Economy</div>
+                    <div class="cabin-option" data-class="premium">Premium</div>
+                    <div class="cabin-option" data-class="business">Business</div>
+                    <div class="cabin-option" data-class="first">First Class</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-done" id="passenger-done">Done</button>
+        </div>
+    </div>
+</div>
+
+<!-- Load Flight Search JavaScript -->
+<script src="{% static 'accounts/js/flight_search.js' %}"></script>
