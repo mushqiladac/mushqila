@@ -38,6 +38,30 @@ class LandingPageView(TemplateView):
         return context
 
 
+class Landing2PageView(TemplateView):
+    """
+    Alternative Landing Page - Landing2 for testing and modifications
+    """
+    template_name = 'accounts/landing2.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        """If user is already logged in, redirect to appropriate dashboard"""
+        if request.user.is_authenticated:
+            return redirect('accounts:dashboard_redirect')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': 'Mushqila B2B Travel - Book Flights, Hotels, Hajj & Umrah',
+            'meta_description': 'Premium B2B travel platform for agents. Book flights, hotels, Hajj packages, Umrah packages, and visa services with competitive rates.',
+            'meta_keywords': 'travel, flights, hotels, hajj, umrah, visa, saudi arabia, travel agent, b2b',
+            'show_navbar': True,
+            'is_landing_page': True,
+        })
+        return context
+
+
 class HomeView(TemplateView):
     """
     Home Page for logged-in users (Dashboard redirect)

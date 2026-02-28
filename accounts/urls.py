@@ -45,6 +45,7 @@ web_patterns = [
     # ✅ MAIN HOME PAGE
     path('', home_views.LandingPageView.as_view(), name='home'),
     path('landing/', home_views.LandingPageView.as_view(), name='landing'),
+    path('landing2/', home_views.Landing2PageView.as_view(), name='landing2'),
 
     
     # ✅ DASHBOARD URLS - CRITICAL FIXES

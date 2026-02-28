@@ -97,21 +97,23 @@
             background-position: center;
             background-attachment: fixed;
             color: white;
-            padding: 100px 0 120px;
+            padding: 100px 0 40px;
             position: relative;
             overflow: hidden;
-            min-height: 300px;
-            max-height: 1000px;
+            min-height: 950px;
         }
         
-
-
+        .hero-section .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+        }
         .hero-title {
             font-size: 3.5rem;
             font-weight: 800;
             margin-bottom: 1rem;
             line-height: 1.2;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         @media (max-width: 768px) {
@@ -128,50 +130,6 @@
         }
         
         /* Search Widget */
-/* ---------------------------------------------------------------------------------*/
-        .extra-div {
-            background-color: transparent;
-            
-
-            align-self: start;
-     
-        }
-
-        .extra-min {
-            background-color: transparent;
-            
-            display: flex;
-            flex-direction: row;
-            gap: 5px;
-            
-     
-        }
-        .extra-01 {
-            background-color:transparent;
-            text-align: center;
-            flex: 1;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            padding-top: 0;
-            margin-top: 300px;
-            
-        }
-        .extra-02 {
-            background-color:transparent;
-            text-align: center;
-            flex: 1;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            padding-top: 0;
-        }
-        .extra-03 {
-            background-color:transparent;
-            flex: 1;
-            text-align: center;
-        }
-/*-------------------------------------------------------------------------------------------*/
         .search-widget {
             background: rgba(255, 255, 255, 0.98);
             border-radius: 16px;
@@ -546,7 +504,7 @@
 
         /* Services Section */
         .services-section {
-            padding: 20px;
+            padding: 0;
             background-color: var(--light-bg);
         }
         
@@ -583,13 +541,13 @@
         
         /* Services Section */
         .services-section {
-            padding: 20px;
+            padding: 20px 0;
             background-color: var(--light-bg);
         }
         
         /* Offers Section */
         .offers-section {
-            padding: 20px;
+            padding: 20px 0;
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         }
         
@@ -685,7 +643,7 @@
         /* Responsive */
         @media (max-width: 768px) {
             .hero-section {
-                padding: 120px 0 60px;
+                padding: 80px 0 30px;
                 text-align: center;
             }
             
@@ -879,53 +837,21 @@
 
     <!-- Hero Section with Search -->
     <section class="hero-section">
-<!----------------------------------------Extra Work ----------------------------------------------->
-     <div class="extra-div">
+        <div class="container">
             <div class="row">
-                <div class="col-lg-12 text-center animate-fade-in-up">
+                <div class="col-lg-12 text-center animate-fade-in-up mb-3">
                     <h1 class="hero-title">
                         Book Flights, Hotels & Hajj Packages
                     </h1>
-                    <p class="hero-subtitle">
-                       
-                    </p>
                 </div>
             </div>
-    </div>
-
-    <!-------------------------------- Search Left Section------------------------------------------->
-    <div class="extra-min">
-        
-        <div class="extra-01">
-            {% include 'accounts/components/functional_search_widget.html' %}
-        </div>
-        <div class="extra-02">
-            <!----------------------------- Extra 02 -------------------------------------------->
-        </div>
-        <div class="extra-03">
-            <!----------------------------- Extra 03 --------------------------------------------->
-
-        </div>
-    </div>
-
-
-<!----------------------------------------- Extra Work End ------------------------------------------>
-
-
-
-
-
- <!-------------------------------------Quick Search---------------------------------> 
-
-<!--------------------------------Quick Search------------------------------------------------->          
-
-
             
-
-            <!-- Modern Search Widget -->
-            
-            
-
+            <!-------------------------------- Horizontal Search Widget Inside Hero ------------------------------------------->
+            <div class="row">
+                <div class="col-12">
+                    {% include 'accounts/components/horizontal_search_widget.html' %}
+                </div>
+            </div>
         </div>
     </section>
 <!------------------------------------------------------------------------------------------------------->
@@ -940,8 +866,8 @@
 <section id="top-airlines" class="services-section">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="section-title fw-bold mb-3">Our Partner Airlines.</h2>
-        </div>
+            <h2 class="section-title fw-bold mb-3">Our Partner Airlines</h2>
+           </div>
 
         <div class="row g-3">
             <!-------------------------------------------- Row 1 ---------------------------------------->
@@ -1298,6 +1224,121 @@
 
 
 
+
+
+
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3">Our Premium Services</h2>
+                <p class="lead text-muted">Comprehensive travel solutions for all your needs</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-plane"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Flight Bookings</h4>
+                        <p class="text-muted">
+                            Book domestic & international flights with best prices. One way, round trip, and multi-city options available.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Instant Confirmation</span>
+                            <span class="badge bg-secondary ms-1">Flexible Dates</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-hotel"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Hotel Reservations</h4>
+                        <p class="text-muted">
+                            5-star hotels to budget accommodations. Special rates for Makkah, Madinah, and major cities worldwide.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Free Cancellation</span>
+                            <span class="badge bg-secondary ms-1">Breakfast Included</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-passport"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Visa Services</h4>
+                        <p class="text-muted">
+                            Saudi visa, Umrah visa, business visa, and tourist visa processing with guaranteed approval.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Fast Processing</span>
+                            <span class="badge bg-secondary ms-1">Document Assistance</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-kaaba"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3 arabic-font">حَجّ Packages</h4>
+                        <p class="text-muted">
+                            Complete Hajj packages with accommodation near Haram, transport, meals, and guidance services.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Certified Muassasa</span>
+                            <span class="badge bg-secondary ms-1">Medical Support</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-mosque"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3 arabic-font">عُمْرَة Packages</h4>
+                        <p class="text-muted">
+                            Year-round Umrah packages with visa processing, accommodation, and comprehensive support.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">Flexible Dates</span>
+                            <span class="badge bg-secondary ms-1">Group Discounts</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Transport & Tours</h4>
+                        <p class="text-muted">
+                            Airport transfers, city tours, and intercity transport with professional drivers and guides.
+                        </p>
+                        <div class="mt-3">
+                            <span class="badge bg-primary">24/7 Service</span>
+                            <span class="badge bg-secondary ms-1">English Speaking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+
+
     <!------------------------------------------------------------------------------------------- Features Section -->
        <section id="features" class="features-section">
         <div class="container">
@@ -1381,7 +1422,8 @@
     </section>
 
 
-    <!---------------------------------------------------------------------------------------- CTA Section -->
+
+   <!---------------------------------------------------------------------------------------- CTA Section -->
 
 
     <!-- Footer -->
