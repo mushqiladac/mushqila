@@ -19,7 +19,7 @@ from accounts.models import (
     User, BusinessUnit, PermissionGroup, APIKey, BusinessRule,
     SystemConfiguration, AuditLog, Transaction
 )
-from flights.services.galileo_client import galileo_client
+# from flights.services.galileo_client import galileo_client
 from flights.services.flight_search_service import FlightSearchService
 from flights.services.booking_service import BookingService
 
@@ -35,7 +35,7 @@ class B2BPlatformService:
     """
 
     def __init__(self):
-        self.galileo = galileo_client
+        # self.galileo = galileo_client  # Will be initialized when needed
         self.flight_search = FlightSearchService()
         self.booking_service = BookingService()
 

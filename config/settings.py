@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     # Local apps
     'accounts',
     'flights',
+    'b2c',
 ]
 
 MIDDLEWARE = [
