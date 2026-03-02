@@ -655,9 +655,9 @@
         <div class="fare-type-row">
             <div class="fare-type-options" style="display: flex; gap: 15px; margin-top: 8px;">
                 <button class="fare-type-btn active" data-fare="regular">Regular Fare</button>
-                <button class="fare-type-btn active" data-fare="regular">Umrah Fare</button>
-                <button class="fare-type-btn" data-fare="flex">Senior Citizen Fare</button>
-                <button class="fare-type-btn" data-fare="premium">Promo Code</button>
+                <button class="fare-type-btn" data-fare="umrah">Umrah Fare</button>
+                <button class="fare-type-btn" data-fare="senior">Senior Citizen Fare</button>
+                <button class="fare-type-btn" data-fare="promo">Promo Code</button>
             </div>
         </div>
         
@@ -757,8 +757,10 @@
     // Fare Type Selection
     document.querySelectorAll('.fare-type-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            // Toggle active state for fare type buttons
-            this.classList.toggle('active');
+            // Remove active from all fare type buttons
+            document.querySelectorAll('.fare-type-btn').forEach(b => b.classList.remove('active'));
+            // Add active to clicked button only
+            this.classList.add('active');
         });
     });
     
