@@ -754,6 +754,14 @@
         });
     });
     
+    // Fare Type Selection
+    document.querySelectorAll('.fare-type-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Toggle active state for fare type buttons
+            this.classList.toggle('active');
+        });
+    });
+    
     // Tab Selection
     document.querySelectorAll('.search-tab-horizontal').forEach(tab => {
         tab.addEventListener('click', function() {
