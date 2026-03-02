@@ -896,7 +896,7 @@
     <!-------------------------------- Search Left Section------------------------------------------->
     <div class="extra-min">
         
-                 
+     docker            
             {% include 'accounts/components/horizontal_search_widget.html' %}
             
 
@@ -1420,7 +1420,9 @@
                         <a href="#"><i class="fas fa-briefcase me-1"></i> Careers</a>
                         <a href="#"><i class="fas fa-handshake me-1"></i> Partners</a>
                         <a href="#"><i class="fas fa-newspaper me-1"></i> News</a>
-                        <a href="#"><i class="fas fa-phone me-1"></i> Contact</a>
+                        
+                        <a href="{% url 'accounts:register' %}">
+                        <i class="fas fa-user-plus me-2"></i>Register as Agent</a>
                     </div>
                 </div>
                 
