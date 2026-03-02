@@ -27,24 +27,6 @@
         transform: translateY(-2px);
     }
     
-    .horizontal-search-widget::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(90deg, #10b981, #059669, #047857, #059669, #10b981);
-        background-size: 200% 100%;
-        border-radius: 24px 24px 0 0;
-        animation: gradientShift 3s ease infinite;
-    }
-    
-    @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-    
     .search-tabs-horizontal {
         display: flex;
         gap: 8px;
