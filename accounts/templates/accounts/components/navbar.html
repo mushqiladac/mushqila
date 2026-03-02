@@ -31,12 +31,7 @@
                         <span>Offers</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link nav-btn" href="{% url 'accounts:flight_bookings' %}">
-                        <i class="fas fa-plane-departure"></i>
-                        <span>Deals</span>
-                    </a>
-                </li>
+
                 <li class="nav-item">
                     <a class="nav-link nav-btn" href="#manage_my_trip">
                         <i class="fas fa-suitcase"></i>
@@ -60,8 +55,15 @@
                         <i class="fas fa-sign-in-alt me-2"></i>Agent Login
                     </a>
                 </li>
+                <li class="nav-item ms-2">
+                    <a href="{% url 'accounts:register' %}" class="btn btn-register">
+                        <i class="fas fa-user-plus me-2"></i>Register as Agent
+                    </a>
+                </li>
+                   <!------------------------------->
 
-                                    
+
+                   <!--------------------------------->
             </ul>
         </div>
     </div>
@@ -135,7 +137,21 @@
     }
     
     .btn-login {
-        background: linear-gradient(135deg, #f59e0b, #f97316);
+        background: linear-gradient(135deg, #80cd7e, #04480f);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+    .btn-register {
+        background: linear-gradient(135deg, #d5eb57, #cc8267);
         color: white;
         padding: 12px 25px;
         border-radius: 10px;
@@ -152,6 +168,11 @@
     .btn-login:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+        color: white;
+    }
+    .btn-register:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(123, 176, 236, 0.4);
         color: white;
     }
     
@@ -242,6 +263,11 @@
         }
         
         .btn-login {
+            width: 100%;
+            justify-content: center;
+            padding: 15px;
+        }
+        .btn-register {
             width: 100%;
             justify-content: center;
             padding: 15px;
