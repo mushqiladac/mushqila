@@ -267,3 +267,31 @@ RATELIMIT_USE_CACHE = 'default'
 # Create logs directory if it doesn't exist
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOGS_DIR, exist_ok=True)
+
+
+# ===========================
+# AWS Configuration for Webmail (Production)
+# ===========================
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
+AWS_S3_BUCKET_NAME = os.getenv('AWS_S3_BUCKET_NAME', 'mushqila-webmail-prod')
+
+# AWS SES Configuration
+AWS_SES_REGION = os.getenv('AWS_SES_REGION', AWS_REGION)
+AWS_SES_CONFIGURATION_SET = os.getenv('AWS_SES_CONFIGURATION_SET', 'mushqila-production')
+
+# Email Settings
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@mushqila.com')
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+# Webmail Production Settings
+WEBMAIL_MAX_ATTACHMENT_SIZE = 25 * 1024 * 1024  # 25 MB
+WEBMAIL_EMAILS_PER_PAGE = 50
+WEBMAIL_ENABLE_THREADING = True
+WEBMAIL_AUTO_ARCHIVE_DAYS = 90  # Auto-archive emails older than 90 days
+WEBMAIL_TRASH_RETENTION_DAYS = 30  # Permanently delete trash after 30 days
+
+# S3 Lifecycle Rules (configure in AWS Console)
+# - Move to Glacier after 90 days
+# - Delete from Glacier after 365 days

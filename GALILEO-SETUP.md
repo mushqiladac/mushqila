@@ -147,7 +147,63 @@ ticket_result = galileo_service.issue_ticket({
 if ticket_result['success']:
     print(f"Ticket issued: {ticket_result['ticket_numbers']}")
 ```
+<!--------------------------------------------------->
+ticket_search_result =  galileo_service.search_ticket({
 
+    'booking_id': 'search_id',
+    'universal_record_locastor': 'search_reasult',
+    'air_reservation_locator': 'search_field',
+    'payment_info': {
+        'type': 'Cash'
+        'search' : 'user_id'
+        'name' : 'search_id'
+        'destination' : 'destination_user_id'
+        'origin' : 'destination' 
+        'date' : 'curent_date'
+        'last_name' : 'user_surname'
+        'first_name' : user_givenname'
+        'gender' : 'user_gender'
+        'mobile_number' : 'user_mobile_number'
+        'passport_number' : 'user_passport_number'
+        'passport_issue_place' : 'country_code_two_digit'
+    }
+
+})
+
+if ticket_search_result['success']:
+    print(f"Booking search result :{ticket_search_result['booking_search_result']}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!----------------------------------------------------->
 ### 3.4 Void Ticket (within 24 hours)
 ```python
 void_result = galileo_service.void_ticket({

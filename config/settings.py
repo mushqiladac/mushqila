@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'accounts',
     'flights',
     'b2c',
+    'webmail',
 ]
 
 MIDDLEWARE = [
@@ -187,3 +188,35 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+
+# ===========================
+# AWS Configuration for Webmail
+# ===========================
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
+AWS_S3_BUCKET_NAME = os.getenv('AWS_S3_BUCKET_NAME', 'mushqila-webmail')
+
+# AWS SES Configuration
+AWS_SES_REGION = os.getenv('AWS_SES_REGION', AWS_REGION)
+AWS_SES_CONFIGURATION_SET = os.getenv('AWS_SES_CONFIGURATION_SET', '')
+
+# Email Settings
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@mushqila.com')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Can be changed to SES backend
+
+# Webmail Settings
+WEBMAIL_MAX_ATTACHMENT_SIZE = 25 * 1024 * 1024  # 25 MB
+WEBMAIL_ALLOWED_ATTACHMENT_TYPES = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'text/plain',
+    'application/zip',
+]
