@@ -1,0 +1,290 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Webmail{% endblock %} - Mushqila</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #10b981;
+            --secondary-color: #059669;
+            --dark-color: #1e293b;
+            --light-bg: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+        }
+        
+        .sidebar {
+            background: white;
+            border-right: 1px solid var(--border-color);
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .sidebar-header h4 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #64748b;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .sidebar-menu a i {
+            width: 25px;
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .sidebar-menu .badge {
+            margin-left: auto;
+            background: var(--primary-color);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .top-bar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+        }
+        
+        .search-box input {
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .btn-compose {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-compose:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h4><i class="fas fa-envelope"></i> Webmail</h4>
+            <small class="text-muted">{{ account.email_address }}</small>
+        </div>
+        
+        <div class="p-3">
+            <a href="{% url 'webmail:compose' %}" class="btn btn-compose w-100">
+                <i class="fas fa-plus"></i> Compose
+            </a>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="{% url 'webmail:inbox' %}?folder=inbox" class="{% if folder == 'inbox' %}active{% endif %}">
+                <i class="fas fa-inbox"></i>
+                <span>Inbox</span>
+                {% if unread_count %}
+                <span class="badge">{{ unread_count }}</span>
+                {% endif %}
+            </a>
+            <a href="{% url 'webmail:inbox' %}?folder=sent" class="{% if folder == 'sent' %}active{% endif %}">
+                <i class="fas fa-paper-plane"></i>
+                <span>Sent</span>
+            </a>
+            <a href="{% url 'webmail:inbox' %}?folder=drafts" class="{% if folder == 'drafts' %}active{% endif %}">
+                <i class="fas fa-file-alt"></i>
+                <span>Drafts</span>
+            </a>
+            <a href="{% url 'webmail:inbox' %}?folder=starred" class="{% if folder == 'starred' %}active{% endif %}">
+                <i class="fas fa-star"></i>
+                <span>Starred</span>
+            </a>
+            <a href="{% url 'webmail:inbox' %}?folder=spam" class="{% if folder == 'spam' %}active{% endif %}">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Spam</span>
+            </a>
+            <a href="{% url 'webmail:inbox' %}?folder=trash" class="{% if folder == 'trash' %}active{% endif %}">
+                <i class="fas fa-trash"></i>
+                <span>Trash</span>
+            </a>
+            <a href="{% url 'webmail:inbox' %}?folder=archive" class="{% if folder == 'archive' %}active{% endif %}">
+                <i class="fas fa-archive"></i>
+                <span>Archive</span>
+            </a>
+        </div>
+        
+        <hr>
+        
+        <div class="sidebar-menu">
+            <a href="{% url 'webmail:contacts' %}">
+                <i class="fas fa-address-book"></i>
+                <span>Contacts</span>
+            </a>
+            <a href="{% url 'webmail:account_setup' %}">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="{% url 'accounts:dashboard' %}">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <button class="btn btn-link d-md-none" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="search-box">
+                <form action="{% url 'webmail:search' %}" method="get">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Search emails..." value="{{ query }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <div>
+                    <div class="fw-bold">{{ user.username }}</div>
+                    <small class="text-muted">{{ user.email }}</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Sidebar toggle for mobile
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('show');
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

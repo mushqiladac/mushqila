@@ -1,0 +1,117 @@
+{% extends 'webmail/base.html' %}
+
+{% block title %}Search Results - Webmail{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="mb-4">
+        <h3 class="mb-3">
+            <i class="fas fa-search text-primary"></i> Search Results
+        </h3>
+        {% if query %}
+        <p class="text-muted">
+            Showing results for: <strong>"{{ query }}"</strong>
+            {% if emails %}
+            ({{ emails.paginator.count }} email{{ emails.paginator.count|pluralize }})
+            {% endif %}
+        </p>
+        {% endif %}
+    </div>
+    
+    {% if emails %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <tbody>
+                {% for email in emails %}
+                <tr class="email-row {% if not email.is_read %}fw-bold{% endif %}" 
+                    onclick="window.location='{% url 'webmail:email_detail' email.id %}'">
+                    <td style="width: 40px;">
+                        <input type="checkbox" class="form-check-input" onclick="event.stopPropagation()">
+                    </td>
+                    <td style="width: 40px;">
+                        <button class="btn btn-sm btn-link text-warning" onclick="event.stopPropagation()">
+                            <i class="{% if email.is_starred %}fas{% else %}far{% endif %} fa-star"></i>
+                        </button>
+                    </td>
+                    <td style="width: 250px;">
+                        <div class="text-truncate">
+                            {% if email.from_name %}
+                                {{ email.from_name }}
+                            {% else %}
+                                {{ email.from_address }}
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <span class="text-truncate me-2">{{ email.subject }}</span>
+                            {% if email.attachments.count %}
+                            <i class="fas fa-paperclip text-muted"></i>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td style="width: 100px;" class="text-end">
+                        <span class="badge bg-secondary">{{ email.folder }}</span>
+                    </td>
+                    <td style="width: 150px;" class="text-end text-muted">
+                        {{ email.received_at|date:"M d, Y H:i" }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if emails.has_other_pages %}
+    <nav aria-label="Search pagination">
+        <ul class="pagination justify-content-center">
+            {% if emails.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&page={{ emails.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">Page {{ emails.number }} of {{ emails.paginator.num_pages }}</span>
+            </li>
+            
+            {% if emails.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&page={{ emails.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-search fa-4x text-muted mb-3"></i>
+        {% if query %}
+        <h5 class="text-muted">No results found for "{{ query }}"</h5>
+        <p class="text-muted">Try different keywords or check your spelling</p>
+        {% else %}
+        <h5 class="text-muted">Enter a search query</h5>
+        <p class="text-muted">Search by subject, sender, or content</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .email-row {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .email-row:hover {
+        background-color: #f8fafc;
+    }
+    
+    .email-row td {
+        vertical-align: middle;
+        padding: 15px 10px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'webmail/base.html' %}
+
+{% block title %}{{ email.subject }} - Webmail{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <!-- Email Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'webmail:inbox' %}?folder={{ email.folder }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary" title="Reply">
+                <i class="fas fa-reply"></i>
+            </button>
+            <button class="btn btn-outline-secondary" title="Forward">
+                <i class="fas fa-share"></i>
+            </button>
+            <button class="btn btn-outline-warning" title="Star">
+                <i class="{% if email.is_starred %}fas{% else %}far{% endif %} fa-star"></i>
+            </button>
+            <a href="{% url 'webmail:delete_email' email.id %}" class="btn btn-outline-danger" title="Delete">
+                <i class="fas fa-trash"></i>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Email Subject -->
+    <h3 class="mb-4">{{ email.subject }}</h3>
+    
+    <!-- Email Meta -->
+    <div class="email-meta p-3 bg-light rounded mb-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-2">
+                    <strong>From:</strong>
+                    {% if email.from_name %}
+                        {{ email.from_name }} &lt;{{ email.from_address }}&gt;
+                    {% else %}
+                        {{ email.from_address }}
+                    {% endif %}
+                </div>
+                <div class="mb-2">
+                    <strong>To:</strong>
+                    {% for to_addr in email.to_addresses %}
+                        {{ to_addr }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                {% if email.cc_addresses %}
+                <div class="mb-2">
+                    <strong>CC:</strong>
+                    {% for cc_addr in email.cc_addresses %}
+                        {{ cc_addr }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="text-muted">
+                    {{ email.received_at|date:"F d, Y" }}<br>
+                    {{ email.received_at|date:"h:i A" }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Attachments -->
+    {% if email.attachments.count %}
+    <div class="attachments mb-4">
+        <h6 class="mb-3"><i class="fas fa-paperclip"></i> Attachments ({{ email.attachments.count }})</h6>
+        <div class="d-flex flex-wrap gap-2">
+            {% for attachment in email.attachments.all %}
+            <a href="{{ attachment.s3_url }}" class="btn btn-outline-primary btn-sm" download>
+                <i class="fas fa-download"></i> {{ attachment.filename }}
+                <small class="text-muted">({{ attachment.size_bytes|filesizeformat }})</small>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Email Body -->
+    <div class="email-body">
+        {% if email.body_html %}
+        <div class="border rounded p-4">
+            {{ email.body_html|safe }}
+        </div>
+        {% else %}
+        <div class="border rounded p-4" style="white-space: pre-wrap;">{{ email.body_text }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .email-meta {
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .email-body {
+        line-height: 1.8;
+    }
+    
+    .email-body img {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+{% endblock %}

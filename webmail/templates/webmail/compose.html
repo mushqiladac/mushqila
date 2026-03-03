@@ -1,0 +1,160 @@
+{% extends 'webmail/base.html' %}
+
+{% block title %}Compose Email - Webmail{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+    .compose-form {
+        background: white;
+    }
+    
+    .form-control-compose {
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 0;
+        padding: 15px;
+    }
+    
+    .form-control-compose:focus {
+        box-shadow: none;
+        border-bottom-color: var(--primary-color);
+    }
+    
+    #editor-container {
+        height: 400px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+    }
+    
+    .ql-toolbar {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0"><i class="fas fa-pen"></i> Compose Email</h3>
+        <a href="{% url 'webmail:inbox' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-times"></i> Cancel
+        </a>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" id="composeForm">
+        {% csrf_token %}
+        
+        <div class="compose-form">
+            <!-- To -->
+            <div class="mb-0">
+                <input type="text" name="to" class="form-control form-control-compose" 
+                       placeholder="To" required>
+            </div>
+            
+            <!-- CC (Hidden by default) -->
+            <div class="mb-0" id="ccField" style="display: none;">
+                <input type="text" name="cc" class="form-control form-control-compose" 
+                       placeholder="CC">
+            </div>
+            
+            <!-- BCC (Hidden by default) -->
+            <div class="mb-0" id="bccField" style="display: none;">
+                <input type="text" name="bcc" class="form-control form-control-compose" 
+                       placeholder="BCC">
+            </div>
+            
+            <!-- CC/BCC Toggle -->
+            <div class="px-3 py-2">
+                <button type="button" class="btn btn-sm btn-link" onclick="toggleField('ccField')">CC</button>
+                <button type="button" class="btn btn-sm btn-link" onclick="toggleField('bccField')">BCC</button>
+            </div>
+            
+            <!-- Subject -->
+            <div class="mb-0">
+                <input type="text" name="subject" class="form-control form-control-compose" 
+                       placeholder="Subject" required>
+            </div>
+        </div>
+        
+        <!-- Rich Text Editor -->
+        <div class="mt-4">
+            <div id="editor-container"></div>
+            <input type="hidden" name="body_html" id="body_html">
+            <textarea name="body_text" id="body_text" style="display: none;"></textarea>
+        </div>
+        
+        <!-- Attachments -->
+        <div class="mt-4">
+            <label class="btn btn-outline-secondary">
+                <i class="fas fa-paperclip"></i> Attach Files
+                <input type="file" name="attachments" multiple style="display: none;" 
+                       onchange="showAttachments(this)">
+            </label>
+            <div id="attachmentsList" class="mt-2"></div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="mt-4 d-flex justify-content-between">
+            <div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+                <button type="submit" name="save_draft" class="btn btn-outline-secondary">
+                    <i class="fas fa-save"></i> Save Draft
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    // Initialize Quill editor
+    var quill = new Quill('#editor-container', {
+        theme: 'snow',
+        placeholder: 'Compose your email...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'color': [] }, { 'background': [] }],
+                ['link', 'image'],
+                ['clean']
+            ]
+        }
+    });
+    
+    // Submit form
+    document.getElementById('composeForm').addEventListener('submit', function(e) {
+        // Get HTML content
+        document.getElementById('body_html').value = quill.root.innerHTML;
+        // Get plain text
+        document.getElementById('body_text').value = quill.getText();
+    });
+    
+    // Toggle CC/BCC fields
+    function toggleField(fieldId) {
+        var field = document.getElementById(fieldId);
+        field.style.display = field.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    // Show attachments
+    function showAttachments(input) {
+        var list = document.getElementById('attachmentsList');
+        list.innerHTML = '';
+        
+        for (var i = 0; i < input.files.length; i++) {
+            var file = input.files[i];
+            var div = document.createElement('div');
+            div.className = 'badge bg-secondary me-2 mb-2';
+            div.innerHTML = '<i class="fas fa-file"></i> ' + file.name;
+            list.appendChild(div);
+        }
+    }
+</script>
+{% endblock %}
