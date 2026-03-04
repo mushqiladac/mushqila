@@ -715,6 +715,25 @@
             font-size: 0.9rem;
         }
         
+        /* Payment Logos */
+        .payment-logo {
+            height: 30px;
+            width: auto;
+            margin: 0 5px;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            filter: brightness(0.9);
+            border-radius: 4px;
+            background: white;
+            padding: 3px;
+        }
+        
+        .payment-logo:hover {
+            opacity: 1;
+            filter: brightness(1);
+            transform: translateY(-2px);
+        }
+        
         /* Buttons */
         .btn-primary-custom {
             background: linear-gradient(135deg, var(--primary-color), #3b82f6);
@@ -1502,8 +1521,12 @@
                         &copy; 2026 Mushqila Holding Co. All rights reserved.
                     </div>
                     <div class="col-md-6 text-md-end">
-                        <a href="#" class="text-white-50 me-3">Privacy Policy</a>
-                        <a href="#" class="text-white-50">Terms of Service</a>
+                        <a href="#" class="text-white-50 me-3">We Accept</a>
+                        <img src="{% static 'accounts/images/payment/p-visa.webp' %}" alt="Visa" class="payment-logo">
+                        <img src="{% static 'accounts/images/payment/p-master.webp' %}" alt="Master Card" class="payment-logo">
+                        <img src="{% static 'accounts/images/payment/p-amex.webp' %}" alt="American Express" class="payment-logo">
+                        <img src="{% static 'accounts/images/payment/p-bkash.webp' %}" alt="Bkash" class="payment-logo">
+                        <img src="{% static 'accounts/images/payment/sslcom.png' %}" alt="SSL Com" class="payment-logo">
                     </div>
                 </div>
             </div>
