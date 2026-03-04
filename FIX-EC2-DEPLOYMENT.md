@@ -1,141 +1,115 @@
-# Fix EC2 Deployment - Website Not Updating
+# Fix EC2 Deployment Issues
 
-## Problem
-The deployment completed but the website is not showing updates. Error: `.env.production` file not found.
+## Issues Found:
+1. Port 80 already in use
+2. SECRET_KEY parsing error with special characters
 
-## Solution Steps
+## Solution
 
-### Step 1: SSH into EC2
+Run these commands on your EC2 server:
+
 ```bash
-ssh -i "your-key.pem" ubuntu@your-ec2-ip
-```
+# Step 1: Stop any existing containers
+docker-compose -f docker-compose.prod.yml down
 
-### Step 2: Navigate to Project
-```bash
-cd ~/mushqila
-```
+# Step 2: Find what's using port 80
+sudo lsof -i :80
 
-### Step 3: Check Current Status
-```bash
-# Check if containers are running
-docker-compose -f docker-compose.prod.yml ps
+# Step 3: Stop the process using port 80 (usually nginx or apache)
+sudo systemctl stop nginx
+# OR
+sudo systemctl stop apache2
 
-# Check logs
-docker-compose -f docker-compose.prod.yml logs web --tail=50
-```
-
-### Step 4: Create .env.production File
-```bash
-# Create the missing .env.production file
+# Step 4: Create a proper .env.production file (without special characters that cause issues)
 cat > .env.production << 'EOF'
-# Django Settings
+SECRET_KEY=django-insecure-abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
 DEBUG=False
-SECRET_KEY=your-production-secret-key-here
-ALLOWED_HOSTS=your-ec2-ip,your-domain.com
+ALLOWED_HOSTS=16.170.25.9,localhost,127.0.0.1
 
-# Database
+DB_ENGINE=postgresql
 DB_NAME=mushqila_db
 DB_USER=mushqila_user
-DB_PASSWORD=your-db-password
+DB_PASSWORD=mushqila_secure_password_2024
 DB_HOST=db
 DB_PORT=5432
 
-# Redis
-REDIS_URL=redis://redis:6379/0
+GALILEO_PCC=YOUR_PCC_CODE
+GALILEO_USERNAME=YOUR_API_USERNAME
+GALILEO_PASSWORD=YOUR_API_PASSWORD
+GALILEO_TARGET_BRANCH=YOUR_TARGET_BRANCH
+GALILEO_PROVIDER_CODE=1G
+GALILEO_TIMEOUT=30
+GALILEO_DEBUG=False
 
-# Email (optional)
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+DEFAULT_FROM_EMAIL=noreply@mushqila.com
+
+AWS_ACCESS_KEY_ID=your_aws_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret
+AWS_REGION=us-east-1
+AWS_S3_BUCKET_NAME=mushqila-webmail
+AWS_SES_REGION=us-east-1
+
+REDIS_URL=redis://redis:6379/1
+USE_CELERY=False
+USE_S3=False
+
+COMPANY_NAME=Mushqila Travel
+DEFAULT_CURRENCY=SAR
+TIME_ZONE=Asia/Riyadh
+
+LOG_LEVEL=INFO
 EOF
+
+# Step 5: Start services
+docker-compose -f docker-compose.prod.yml up -d --build
+
+# Step 6: Wait 10 seconds for services to start
+sleep 10
+
+# Step 7: Run migrations
+docker-compose -f docker-compose.prod.yml exec web python manage.py migrate
+
+# Step 8: Collect static files
+docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+
+# Step 9: Check status
+docker-compose -f docker-compose.prod.yml ps
 ```
 
-### Step 5: Restart Containers
+## Alternative: Use Port 8000 Instead of 80
+
+If you can't stop the service on port 80, access via port 8000:
+
 ```bash
-# Stop containers
-docker-compose -f docker-compose.prod.yml down
-
-# Start containers
-docker-compose -f docker-compose.prod.yml up -d
-
-# Wait for startup
-sleep 10
+# Just start without nginx
+docker-compose -f docker-compose.prod.yml up -d web db redis
 
 # Run migrations
 docker-compose -f docker-compose.prod.yml exec web python manage.py migrate
 
-# Collect static files
-docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
-
-# Restart to apply changes
-docker-compose -f docker-compose.prod.yml restart
+# Access via
+http://16.170.25.9:8000/webmail/
 ```
 
-### Step 6: Clear Browser Cache
-- Press `Ctrl + Shift + R` (Windows/Linux)
-- Press `Cmd + Shift + R` (Mac)
-- Or open in incognito/private mode
+## Verify Deployment
 
-### Step 7: Verify Deployment
 ```bash
-# Check container status
+# Check running containers
 docker-compose -f docker-compose.prod.yml ps
 
-# Check web logs
-docker-compose -f docker-compose.prod.yml logs web --tail=100
+# Check logs
+docker-compose -f docker-compose.prod.yml logs web
 
-# Test if site is accessible
-curl http://localhost:8000/accounts/landing/
+# Test webmail
+curl http://localhost:8000/webmail/
 ```
 
-## Alternative: Use docker-compose.yml Instead
-
-If docker-compose.prod.yml is causing issues, use the regular docker-compose.yml:
+## If Still Having Issues
 
 ```bash
-cd ~/mushqila
-
-# Stop any running containers
-docker-compose down
-
-# Start with regular compose file
-docker-compose up -d
-
-# Run migrations
-docker-compose exec web python manage.py migrate
-
-# Collect static
-docker-compose exec web python manage.py collectstatic --noinput
-```
-
-## Quick Fix Command (All-in-One)
-
-```bash
-cd ~/mushqila && \
-docker-compose down && \
-docker-compose up -d --build && \
-sleep 10 && \
-docker-compose exec web python manage.py migrate && \
-docker-compose exec web python manage.py collectstatic --noinput && \
-docker-compose restart && \
-docker-compose ps
-```
-
-## Check Your Site
-Visit: `http://your-ec2-ip:8000/accounts/landing/`
-
-## Still Not Working?
-
-### Check if port 8000 is accessible:
-```bash
-sudo netstat -tulpn | grep 8000
-```
-
-### Check Docker logs:
-```bash
-docker-compose logs -f web
-```
-
-### Restart everything:
-```bash
-docker-compose down -v
-docker-compose up -d --build
+# Complete cleanup and restart
+docker-compose -f docker-compose.prod.yml down -v
+docker system prune -f
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
