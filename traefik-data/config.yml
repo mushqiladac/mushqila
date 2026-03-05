@@ -1,0 +1,25 @@
+http:
+  middlewares:
+    secureHeaders:
+      headers:
+        sslRedirect: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+
+    user-auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$8evjzm8h$FU3mLYqYt5Y8FKZcqkqNX1"
+
+  routers:
+    traefik-rtr:
+      entryPoints:
+        - "https"
+      rule: "Host(`traefik.mushqila.com`)"
+      middlewares:
+        - user-auth
+      tls:
+        certResolver: cloudflare
+      service: api@internal

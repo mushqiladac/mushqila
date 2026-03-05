@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
+      - CF_DNS_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik-data/traefik.yml:/traefik.yml:ro
+      - ./traefik-data/acme.json:/acme.json
+      - ./traefik-data/config.yml:/config.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.mushqila.com`)"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$8evjzm8h$$FU3mLYqYt5Y8FKZcqkqNX1"
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+      - "traefik.http.routers.traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik.mushqila.com`)"
+      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=mushqila.com"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.mushqila.com"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+    networks:
+      - proxy
+
+  web:
+    build: .
+    container_name: mushqila_web
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mushqila.entrypoints=http"
+      - "traefik.http.routers.mushqila.rule=Host(`mushqila.com`) || Host(`www.mushqila.com`)"
+      - "traefik.http.middlewares.mushqila-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.mushqila.middlewares=mushqila-https-redirect"
+      - "traefik.http.routers.mushqila-secure.entrypoints=https"
+      - "traefik.http.routers.mushqila-secure.rule=Host(`mushqila.com`) || Host(`www.mushqila.com`)"
+      - "traefik.http.routers.mushqila-secure.tls=true"
+      - "traefik.http.routers.mushqila-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.mushqila-secure.service=mushqila"
+      - "traefik.http.services.mushqila.loadbalancer.server.port=8000"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+      - internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: mushqila_redis
+    restart: unless-stopped
+    networks:
+      - internal
+
+  celery:
+    build: .
+    container_name: mushqila_celery
+    command: celery -A config worker -l info
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    depends_on:
+      - redis
+      - web
+    networks:
+      - internal
+
+  celery-beat:
+    build: .
+    container_name: mushqila_celery_beat
+    command: celery -A config beat -l info
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    depends_on:
+      - redis
+      - web
+    networks:
+      - internal
+
+volumes:
+  static_volume:
+  media_volume:
+
+networks:
+  proxy:
+    external: true
+  internal:
+    external: false
