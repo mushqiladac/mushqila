@@ -10,9 +10,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    environment:
-      - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
-      - CF_DNS_API_TOKEN=${CLOUDFLARE_API_TOKEN}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -31,9 +28,7 @@ services:
       - "traefik.http.routers.traefik-secure.rule=Host(`traefik.mushqila.com`)"
       - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-secure.tls=true"
-      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
-      - "traefik.http.routers.traefik-secure.tls.domains[0].main=mushqila.com"
-      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.mushqila.com"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=letsencrypt"
       - "traefik.http.routers.traefik-secure.service=api@internal"
     networks:
       - proxy
@@ -58,7 +53,7 @@ services:
       - "traefik.http.routers.mushqila-secure.entrypoints=https"
       - "traefik.http.routers.mushqila-secure.rule=Host(`mushqila.com`) || Host(`www.mushqila.com`)"
       - "traefik.http.routers.mushqila-secure.tls=true"
-      - "traefik.http.routers.mushqila-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.mushqila-secure.tls.certresolver=letsencrypt"
       - "traefik.http.routers.mushqila-secure.service=mushqila"
       - "traefik.http.services.mushqila.loadbalancer.server.port=8000"
       - "traefik.docker.network=proxy"

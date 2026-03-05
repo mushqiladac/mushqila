@@ -54,7 +54,7 @@ nano .env.production
 ```bash
 # Cloudflare API for SSL
 CLOUDFLARE_EMAIL=mushqiladac@gmail.com
-CLOUDFLARE_API_TOKEN=your_cloudflare_api_token_here
+CLOUDFLARE_API_TOKEN=0qxpIFsGHd7P5-0M3n23zXu7s1Jfi4EMBOulrAya
 
 # Django HTTPS Settings
 SECURE_SSL_REDIRECT=True
