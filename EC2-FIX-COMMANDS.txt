@@ -1,0 +1,12 @@
+# Copy and paste these commands on EC2 to fix CSRF and webmail errors
+
+cd ~/mushqila
+git pull
+docker-compose -f docker-compose.traefik.yml down
+docker-compose -f docker-compose.traefik.yml up -d
+sleep 10
+docker logs mushqila_web --tail=50
+
+# Then test in browser:
+# https://mushqila.com/admin/login/
+# https://mushqila.com/webmail/

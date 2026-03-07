@@ -180,7 +180,11 @@ LOGOUT_REDIRECT_URL = 'accounts:login'
 # CSRF and Session Configuration for Proxy
 # ===========================
 # Get CSRF trusted origins from environment
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='').split(',')
+csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='')
+if csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',') if origin.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = []
 
 # Cookie settings for proxy setup
 CSRF_COOKIE_DOMAIN = config('CSRF_COOKIE_DOMAIN', default=None)

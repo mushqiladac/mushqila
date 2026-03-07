@@ -1,0 +1,21 @@
+# Fix CSRF_TRUSTED_ORIGINS on EC2
+
+# 1. Check current value
+cat .env.production | grep CSRF_TRUSTED_ORIGINS
+
+# 2. Verify it has the correct format (should be comma-separated with https://)
+# Expected: CSRF_TRUSTED_ORIGINS=https://mushqila.com,https://www.mushqila.com
+
+# 3. If it looks correct, restart the web container
+docker-compose -f docker-compose.traefik.yml restart web
+
+# 4. Wait and check logs
+sleep 5
+docker logs mushqila_web --tail=30
+
+# 5. Test Django shell to verify settings are loaded
+docker-compose -f docker-compose.traefik.yml exec -T web python manage.py shell << 'EOF'
+from django.conf import settings
+print("CSRF_TRUSTED_ORIGINS:", settings.CSRF_TRUSTED_ORIGINS)
+print("Type:", type(settings.CSRF_TRUSTED_ORIGINS))
+EOF
