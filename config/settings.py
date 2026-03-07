@@ -176,6 +176,28 @@ LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'accounts:home'  # Set to home instead of dashboard
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
+# ===========================
+# CSRF and Session Configuration for Proxy
+# ===========================
+# Get CSRF trusted origins from environment
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='').split(',')
+
+# Cookie settings for proxy setup
+CSRF_COOKIE_DOMAIN = config('CSRF_COOKIE_DOMAIN', default=None)
+SESSION_COOKIE_DOMAIN = config('SESSION_COOKIE_DOMAIN', default=None)
+
+# Security settings for HTTPS
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
+
+# Proxy SSL header
+SECURE_PROXY_SSL_HEADER_NAME = config('SECURE_PROXY_SSL_HEADER', default='HTTP_X_FORWARDED_PROTO,https')
+if SECURE_PROXY_SSL_HEADER_NAME:
+    parts = SECURE_PROXY_SSL_HEADER_NAME.split(',')
+    if len(parts) == 2:
+        SECURE_PROXY_SSL_HEADER = (parts[0], parts[1])
+
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
