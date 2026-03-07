@@ -93,7 +93,7 @@
         
         /* Hero Section with Search */
         .hero-section {
-            background: url('{% static "accounts/images/hero-bg.jpg.jpeg" %}');
+            background: url('{% static "accounts/images/hero-bg.jpg.jpg" %}');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -1392,8 +1392,8 @@
                         <a href="https://www.youtube.com/@mushqila" class="text-white-50"><i class="fab fa-youtube fa-lg"></i></a>
                         <a href="https://www.facebook.com/@mushqila" class="text-white-50"><i class="fab fa-facebook fa-lg"></i></a>
                         <a href="+966507572999" class="text-white-50"><i class="fab fa-whatsapp fa-lg"></i></a>
-                        <!-- Webmail link - will work after EC2 deployment -->
-                        <!-- <a href="/webmail/" class="text-white-50" title="Webmail"><i class="fas fa-envelope fa-lg"></i></a> -->
+                        <!-- Webmail link -->
+                        <a href="{% url 'webmail:login' %}" class="text-white-50" title="Webmail"><i class="fas fa-envelope fa-lg"></i></a>
                     </div>
                 </div>
                 

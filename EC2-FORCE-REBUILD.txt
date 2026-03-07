@@ -1,0 +1,26 @@
+# Force rebuild Docker image on EC2
+
+cd ~/mushqila
+
+# Stop all containers
+docker-compose -f docker-compose.traefik.yml down
+
+# Remove the old web image to force rebuild
+docker rmi mushqila-web || true
+docker rmi mushqila_web || true
+
+# Rebuild from scratch (no cache)
+docker-compose -f docker-compose.traefik.yml build --no-cache web
+
+# Start containers
+docker-compose -f docker-compose.traefik.yml up -d
+
+# Wait
+sleep 15
+
+# Verify the fix is in the container
+echo "=== Checking if fix is applied ==="
+docker-compose -f docker-compose.traefik.yml exec web grep -A 2 "Check login attempts" accounts/backends.py
+
+# Check logs
+docker logs mushqila_web --tail=30

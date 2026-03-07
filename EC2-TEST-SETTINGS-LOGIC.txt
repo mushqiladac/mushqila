@@ -1,0 +1,30 @@
+# Test the settings.py logic directly
+
+docker-compose -f docker-compose.traefik.yml exec -T web python << 'EOF'
+from decouple import config
+
+# Simulate the settings.py logic
+csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='')
+print("Step 1 - csrf_origins:", repr(csrf_origins))
+print("Step 2 - bool(csrf_origins):", bool(csrf_origins))
+
+if csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',') if origin.strip()]
+    print("Step 3 - CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
+else:
+    CSRF_TRUSTED_ORIGINS = []
+    print("Step 3 - CSRF_TRUSTED_ORIGINS: [] (empty because csrf_origins was falsy)")
+
+print("\nFinal result:", CSRF_TRUSTED_ORIGINS)
+EOF
+
+echo ""
+echo "Now check what Django actually has:"
+docker-compose -f docker-compose.traefik.yml exec -T web python manage.py shell << 'EOF'
+from django.conf import settings
+print("Django CSRF_TRUSTED_ORIGINS:", settings.CSRF_TRUSTED_ORIGINS)
+
+# Check if there's another place setting it
+import config.settings as settings_module
+print("\nDirect from settings module:", settings_module.CSRF_TRUSTED_ORIGINS)
+EOF

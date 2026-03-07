@@ -1,0 +1,27 @@
+# Test URLs on EC2
+
+# First, deploy the CSRF fix
+cd ~/mushqila
+git pull
+docker-compose -f docker-compose.traefik.yml restart web
+sleep 5
+
+# Test URLs from inside the container
+echo "=== Testing URL routing ==="
+docker-compose -f docker-compose.traefik.yml exec -T web python manage.py shell << 'EOF'
+from django.urls import reverse
+print("Home URL:", reverse('home'))
+print("Landing URL:", reverse('accounts:landing'))
+print("Landing2 URL:", reverse('accounts:landing2'))
+print("Admin URL:", reverse('admin:index'))
+EOF
+
+# Check if landing page template exists
+echo ""
+echo "=== Checking templates ==="
+docker-compose -f docker-compose.traefik.yml exec web ls -la accounts/templates/accounts/ | grep landing
+
+# Test with curl
+echo ""
+echo "=== Testing with curl ==="
+curl -I http://localhost:8000/accounts/landing/

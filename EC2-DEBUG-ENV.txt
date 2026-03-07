@@ -1,0 +1,38 @@
+# Debug environment variable loading
+
+cd ~/mushqila
+
+echo "=== 1. Check .env.production file ==="
+cat .env.production | grep CSRF_TRUSTED_ORIGINS
+echo ""
+
+echo "=== 2. Check if file has correct line endings ==="
+file .env.production
+echo ""
+
+echo "=== 3. Check environment inside container ==="
+docker-compose -f docker-compose.traefik.yml exec web env | grep CSRF
+echo ""
+
+echo "=== 4. Check if decouple is reading it ==="
+docker-compose -f docker-compose.traefik.yml exec -T web python << 'EOF'
+from decouple import config
+csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='NOT_FOUND')
+print("Raw value from decouple:", repr(csrf_origins))
+print("Type:", type(csrf_origins))
+print("Length:", len(csrf_origins))
+if csrf_origins:
+    print("Split result:", csrf_origins.split(','))
+EOF
+echo ""
+
+echo "=== 5. Check Django settings loading ==="
+docker-compose -f docker-compose.traefik.yml exec -T web python manage.py shell << 'EOF'
+from decouple import config
+from django.conf import settings
+
+csrf_origins = config('CSRF_TRUSTED_ORIGINS', default='')
+print("1. Raw from decouple:", repr(csrf_origins))
+print("2. After split:", csrf_origins.split(',') if csrf_origins else [])
+print("3. Django setting:", settings.CSRF_TRUSTED_ORIGINS)
+EOF

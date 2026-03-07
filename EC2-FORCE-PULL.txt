@@ -1,0 +1,27 @@
+# Force pull latest changes from GitHub (discarding local EC2 changes)
+
+cd ~/mushqila
+
+# Option 1: Stash local changes (saves them for later)
+git stash
+git pull
+# If you want to see what was stashed: git stash show -p
+
+# Option 2: Discard local changes completely (recommended for deployment files)
+# git reset --hard HEAD
+# git pull
+
+# After pulling, restart containers
+docker-compose -f docker-compose.traefik.yml down
+docker-compose -f docker-compose.traefik.yml up -d
+
+# Wait and check logs
+sleep 10
+docker logs mushqila_web --tail=50
+
+# Verify CSRF settings
+docker-compose -f docker-compose.traefik.yml exec -T web python manage.py shell << 'EOF'
+from django.conf import settings
+print("CSRF_TRUSTED_ORIGINS:", settings.CSRF_TRUSTED_ORIGINS)
+print("ALLOWED_HOSTS:", settings.ALLOWED_HOSTS)
+EOF

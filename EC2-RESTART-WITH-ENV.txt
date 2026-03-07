@@ -1,0 +1,22 @@
+# Restart containers to load updated .env.production
+
+cd ~/mushqila
+
+# Stop all containers
+docker-compose -f docker-compose.traefik.yml down
+
+# Start containers (this will reload .env.production)
+docker-compose -f docker-compose.traefik.yml up -d
+
+# Wait for containers to start
+sleep 10
+
+# Check logs
+docker logs mushqila_web --tail=30
+
+# Verify CSRF_TRUSTED_ORIGINS is now loaded
+docker-compose -f docker-compose.traefik.yml exec -T web python manage.py shell << 'EOF'
+from django.conf import settings
+print("CSRF_TRUSTED_ORIGINS:", settings.CSRF_TRUSTED_ORIGINS)
+print("Expected: ['https://mushqila.com', 'https://www.mushqila.com']")
+EOF

@@ -1,0 +1,40 @@
+# Fix .env.production file on EC2
+
+cd ~/mushqila
+
+# Check current CSRF_TRUSTED_ORIGINS value
+echo "=== Current CSRF_TRUSTED_ORIGINS ==="
+cat .env.production | grep CSRF_TRUSTED_ORIGINS
+
+# If it's missing or empty, add/update it
+echo ""
+echo "=== Updating .env.production ==="
+
+# Check if CSRF_TRUSTED_ORIGINS exists
+if grep -q "CSRF_TRUSTED_ORIGINS" .env.production; then
+    # Update existing line
+    sed -i 's|CSRF_TRUSTED_ORIGINS=.*|CSRF_TRUSTED_ORIGINS=https://mushqila.com,https://www.mushqila.com|' .env.production
+    echo "✓ Updated CSRF_TRUSTED_ORIGINS"
+else
+    # Add new line
+    echo "CSRF_TRUSTED_ORIGINS=https://mushqila.com,https://www.mushqila.com" >> .env.production
+    echo "✓ Added CSRF_TRUSTED_ORIGINS"
+fi
+
+# Verify the change
+echo ""
+echo "=== Verification ==="
+cat .env.production | grep CSRF_TRUSTED_ORIGINS
+
+# Restart web container to load new environment
+echo ""
+echo "=== Restarting web container ==="
+docker-compose -f docker-compose.traefik.yml restart web
+
+# Wait and verify
+sleep 5
+docker-compose -f docker-compose.traefik.yml exec -T web python manage.py shell << 'EOF'
+from django.conf import settings
+print("CSRF_TRUSTED_ORIGINS:", settings.CSRF_TRUSTED_ORIGINS)
+print("Expected: ['https://mushqila.com', 'https://www.mushqila.com']")
+EOF

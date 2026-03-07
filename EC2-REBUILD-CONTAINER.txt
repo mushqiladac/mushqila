@@ -1,0 +1,25 @@
+# Rebuild Docker image with new code
+
+cd ~/mushqila
+
+# Stop containers
+docker-compose -f docker-compose.traefik.yml down
+
+# Rebuild the web image (this copies new code into the image)
+docker-compose -f docker-compose.traefik.yml build web
+
+# Start containers with rebuilt image
+docker-compose -f docker-compose.traefik.yml up -d
+
+# Wait for startup
+sleep 10
+
+# Check logs
+docker logs mushqila_web --tail=30
+
+# Verify CSRF_TRUSTED_ORIGINS is now in settings
+docker-compose -f docker-compose.traefik.yml exec -T web python manage.py shell << 'EOF'
+from django.conf import settings
+print("CSRF_TRUSTED_ORIGINS:", settings.CSRF_TRUSTED_ORIGINS)
+print("Expected: ['https://mushqila.com', 'https://www.mushqila.com']")
+EOF
