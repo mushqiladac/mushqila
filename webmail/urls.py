@@ -4,6 +4,9 @@ from . import views
 app_name = 'webmail'
 
 urlpatterns = [
+    # Authentication
+    path('login/', views.webmail_login, name='login'),
+    
     # Main views
     path('', views.inbox, name='inbox'),
     path('inbox/', views.inbox, name='inbox'),

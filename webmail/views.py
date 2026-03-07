@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login as auth_login
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
@@ -9,7 +10,30 @@ from .models import EmailAccount, Email, EmailAttachment, Contact, EmailLabel
 from .services import EmailService
 
 
-@login_required
+def webmail_login(request):
+    """Custom login view for webmail"""
+    if request.user.is_authenticated:
+        return redirect('webmail:inbox')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        next_url = request.POST.get('next', 'webmail:inbox')
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            auth_login(request, user)
+            messages.success(request, 'Welcome to Webmail!')
+            return redirect(next_url)
+        else:
+            messages.error(request, 'Invalid email/username or password.')
+    
+    next_url = request.GET.get('next', 'webmail:inbox')
+    return render(request, 'webmail/login.html', {'next': next_url})
+
+
+@login_required(login_url='/webmail/login/')
 def inbox(request):
     """Inbox view - main webmail interface"""
     # Get user's default email account

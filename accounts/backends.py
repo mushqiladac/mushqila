@@ -54,9 +54,9 @@ class EmailOrUsernameBackend(ModelBackend):
         ip_address = get_client_ip(request) if request else '0.0.0.0'
         
         # Check login attempts before proceeding
-        allowed, message = check_login_attempts(ip_address, username)
-        if not allowed:
-            logger.warning(f"Login blocked for {username} from {ip_address}: {message}")
+        is_blocked, remaining = check_login_attempts(username)
+        if is_blocked:
+            logger.warning(f"Login blocked for {username} from {ip_address}: Too many attempts")
             self._log_failed_attempt(request, username, ip_address, 'rate_limit_exceeded')
             return None
         
@@ -290,9 +290,9 @@ class PhoneNumberBackend(ModelBackend):
         ip_address = get_client_ip(request) if request else '0.0.0.0'
         
         # Check login attempts
-        allowed, message = check_login_attempts(ip_address, phone)
-        if not allowed:
-            logger.warning(f"Phone login blocked for {phone} from {ip_address}: {message}")
+        is_blocked, remaining = check_login_attempts(phone)
+        if is_blocked:
+            logger.warning(f"Phone login blocked for {phone} from {ip_address}: Too many attempts")
             return None
         
         try:
