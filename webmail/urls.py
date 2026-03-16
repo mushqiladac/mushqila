@@ -22,4 +22,5 @@ urlpatterns = [
     
     # Settings
     path('account/setup/', views.account_setup, name='account_setup'),
+    path('change-password/', views.change_password, name='change_password'),
 ]

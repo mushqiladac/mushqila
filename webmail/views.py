@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import authenticate, login as auth_login, update_session_auth_hash
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
@@ -251,3 +251,32 @@ def contacts(request):
     }
     
     return render(request, 'webmail/contacts.html', context)
+
+
+@login_required(login_url='/webmail/login/')
+def change_password(request):
+    """Change password from within webmail"""
+    account = EmailAccount.objects.filter(user=request.user, is_active=True).first()
+
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not request.user.check_password(current_password):
+            messages.error(request, 'Current password is incorrect.')
+        elif new_password != confirm_password:
+            messages.error(request, 'New passwords do not match.')
+        elif len(new_password) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
+        else:
+            request.user.set_password(new_password)
+            request.user.save()
+            update_session_auth_hash(request, request.user)  # Keep user logged in
+            messages.success(request, 'Password changed successfully!')
+            return redirect('webmail:inbox')
+
+    context = {
+        'account': account,
+    }
+    return render(request, 'webmail/change_password.html', context)
