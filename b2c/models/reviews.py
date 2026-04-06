@@ -21,7 +21,7 @@ class Review(models.Model):
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
-    
+   
     customer = models.ForeignKey(
         Customer,
         on_delete=models.CASCADE,

@@ -77,20 +77,20 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # ========================================
 DB_ENGINE = config('DB_ENGINE', default='postgres')
 
-if DB_ENGINE == 'sqlite':
+if DB_ENGINE == 'mushqila':
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': BASE_DIR / 'mushqila',
         }
     }
 else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('DB_NAME', default='mushqilaruh'),
+            'NAME': config('DB_NAME', default='mushqila'),
             'USER': config('DB_USER', default='postgres'),
-            'PASSWORD': config('DB_PASSWORD', default='password'),
+            'PASSWORD': config('DB_PASSWORD', default='EMR@55nondita'),
             'HOST': config('DB_HOST', default='localhost'),
             'PORT': config('DB_PORT', default='5432'),
             'CONN_MAX_AGE': 60,

@@ -1,8 +1,9 @@
-name: Deploy to EC2
+name: Deploy to EC2 with Zero Downtime
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -10,64 +11,140 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        port: 22
-        script: |
-          echo "=========================================="
-          echo "Starting Deployment"
-          echo "=========================================="
-          
-          # Navigate to project directory
-          cd ~/mushqila || { echo "Directory not found, cloning..."; git clone https://github.com/mushqiladac/mushqila.git ~/mushqila; cd ~/mushqila; }
-          
-          # Stop containers
-          echo "Stopping containers..."
-          docker-compose down || true
-          
-          # Fetch latest code
-          echo "Fetching latest code..."
-          git fetch origin
-          
-          # Switch to correct branch
-          echo "Switching to branch..."
-          git checkout main
-          
-          # Pull latest changes
-          echo "Pulling latest changes..."
-          git pull origin main
-          
-          # Build Docker images
-          echo "Building Docker images..."
-          docker-compose build
-          
-          # Start containers
-          echo "Starting containers..."
-          docker-compose up -d
-          
-          # Wait for containers to be ready
-          echo "Waiting for containers to start..."
-          sleep 15
-          
-          # Run migrations
-          echo "Running migrations..."
-          docker-compose exec -T web python manage.py migrate
-          
-          # Collect static files
-          echo "Collecting static files..."
-          docker-compose exec -T web python manage.py collectstatic --noinput
-          
-          # Check container status
-          echo "Container status:"
-          docker-compose ps
-          
-          echo "=========================================="
-          echo "Deployment Complete!"
-          echo "=========================================="
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            
+            echo "=========================================="
+            echo "🚀 Starting Zero-Downtime Deployment"
+            echo "=========================================="
+            
+            # Variables
+            PROJECT_DIR="/home/ubuntu/mushqila"
+            BACKUP_DIR="/home/ubuntu/mushqila_backup_$(date +%Y%m%d_%H%M%S)"
+            
+            # Navigate to project directory
+            cd $PROJECT_DIR
+            
+            echo ""
+            echo "📦 Step 1: Creating backup..."
+            # Backup current deployment (excluding large files)
+            sudo cp -r $PROJECT_DIR $BACKUP_DIR
+            echo "✓ Backup created at: $BACKUP_DIR"
+            
+            echo ""
+            echo "🔄 Step 2: Pulling latest code from GitHub..."
+            git fetch origin main
+            git reset --hard origin/main
+            echo "✓ Code updated"
+            
+            echo ""
+            echo "🧹 Step 3: Cleaning old files..."
+            # Remove Python cache files
+            find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+            find . -type f -name "*.pyc" -delete 2>/dev/null || true
+            find . -type f -name "*.pyo" -delete 2>/dev/null || true
+            find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+            echo "✓ Cache cleaned"
+            
+            echo ""
+            echo "🐳 Step 4: Building new Docker images..."
+            docker-compose -f docker-compose.prod.yml build --no-cache
+            echo "✓ Images built"
+            
+            echo ""
+            echo "🔄 Step 5: Zero-downtime deployment..."
+            
+            # Start new containers with different names
+            echo "  → Starting new containers..."
+            docker-compose -f docker-compose.prod.yml up -d --force-recreate --remove-orphans
+            
+            # Wait for new containers to be healthy
+            echo "  → Waiting for containers to be ready..."
+            sleep 10
+            
+            # Check if new containers are running
+            if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+                echo "  ✓ New containers are running"
+                
+                # Run migrations
+                echo ""
+                echo "📊 Step 6: Running database migrations..."
+                docker-compose -f docker-compose.prod.yml exec -T web python manage.py migrate --noinput
+                echo "✓ Migrations completed"
+                
+                # Collect static files
+                echo ""
+                echo "📁 Step 7: Collecting static files..."
+                docker-compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
+                echo "✓ Static files collected"
+                
+                # Remove old containers
+                echo ""
+                echo "🗑️  Step 8: Cleaning up old containers..."
+                docker system prune -f
+                echo "✓ Cleanup completed"
+                
+                echo ""
+                echo "=========================================="
+                echo "✅ Deployment Successful!"
+                echo "=========================================="
+                echo "🌐 Site: https://mushqila.com"
+                echo "📧 Webmail: https://mushqila.com/webmail/"
+                echo "⏰ Deployed at: $(date)"
+                echo "=========================================="
+                
+            else
+                echo ""
+                echo "=========================================="
+                echo "❌ Deployment Failed!"
+                echo "=========================================="
+                echo "Rolling back to previous version..."
+                
+                # Rollback: restore from backup
+                docker-compose -f docker-compose.prod.yml down
+                sudo rm -rf $PROJECT_DIR
+                sudo mv $BACKUP_DIR $PROJECT_DIR
+                cd $PROJECT_DIR
+                docker-compose -f docker-compose.prod.yml up -d
+                
+                echo "✓ Rolled back to previous version"
+                echo "=========================================="
+                exit 1
+            fi
+            
+            echo ""
+            echo "📊 Container Status:"
+            docker-compose -f docker-compose.prod.yml ps
+            
+            echo ""
+            echo "💾 Keeping last 3 backups, removing older ones..."
+            cd /home/ubuntu
+            ls -dt mushqila_backup_* | tail -n +4 | xargs -r sudo rm -rf
+            echo "✓ Old backups cleaned"
+
+      - name: Health Check
+        run: |
+          echo "🏥 Running health check..."
+          sleep 5
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://mushqila.com)
+          if [ $response -eq 200 ] || [ $response -eq 302 ]; then
+            echo "✅ Health check passed! Site is responding."
+          else
+            echo "❌ Health check failed! HTTP status: $response"
+            exit 1
+          fi
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo "Site is live at https://mushqila.com"

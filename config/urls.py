@@ -11,9 +11,10 @@ urlpatterns = [
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('flights/', include('flights.urls', namespace='flights')),
     path('webmail/', include('webmail.urls', namespace='webmail')),
-
     path('', HomeView.as_view(), name='home'),
     path('', include('b2c.urls')),
+]   path('', include('b2c.urls')),
+]   path('', include('b2c.urls')),
 ]
 
 if settings.DEBUG:
