@@ -44,6 +44,7 @@ jobs:
             echo "🔄 Step 2: Pulling latest code from GitHub..."
             git fetch origin main
             git reset --hard origin/main
+            git pull origin main
             echo "✓ Code updated"
             
             echo ""
@@ -57,8 +58,16 @@ jobs:
             
             echo ""
             echo "🐳 Step 4: Building new Docker images..."
-            docker-compose -f docker-compose.prod.yml build --no-cache
+            docker-compose -f docker-compose.prod.yml build --no-cache web
             echo "✓ Images built"
+            
+            echo ""
+            echo "🔍 Step 4.5: Validating Python syntax..."
+            docker-compose -f docker-compose.prod.yml run --rm web python -m py_compile config/urls.py || {
+                echo "❌ Syntax error detected in urls.py"
+                exit 1
+            }
+            echo "✓ Syntax validation passed"
             
             echo ""
             echo "🔄 Step 5: Zero-downtime deployment..."
@@ -84,8 +93,22 @@ jobs:
                 # Collect static files
                 echo ""
                 echo "📁 Step 7: Collecting static files..."
-                docker-compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
+                docker-compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput --clear
                 echo "✓ Static files collected"
+                
+                # Create superuser if needed (idempotent)
+                echo ""
+                echo "👤 Step 7.5: Ensuring admin user exists..."
+                docker-compose -f docker-compose.prod.yml exec -T web python manage.py shell << 'PYTHON'
+from django.contrib.auth import get_user_model
+User = get_user_model()
+if not User.objects.filter(email='admin@mushqila.com').exists():
+    User.objects.create_superuser('admin@mushqila.com', 'Admin@123')
+    print('✓ Admin user created')
+else:
+    print('✓ Admin user already exists')
+PYTHON
+                echo "✓ Admin check completed"
                 
                 # Remove old containers
                 echo ""

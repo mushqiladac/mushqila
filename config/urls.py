@@ -4,7 +4,9 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import HomeView  # HomeView import করুন
+from django.views.generic import RedirectView
+from django.views.static import serve
+from accounts.views import HomeView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -13,8 +15,10 @@ urlpatterns = [
     path('webmail/', include('webmail.urls', namespace='webmail')),
     path('', HomeView.as_view(), name='home'),
     path('', include('b2c.urls')),
-]   path('', include('b2c.urls')),
-]   path('', include('b2c.urls')),
+    
+    # Static files
+    path('robots.txt', serve, {'path': 'robots.txt', 'document_root': settings.STATIC_ROOT}),
+    path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'accounts/images/sinan-logo.png')),
 ]
 
 if settings.DEBUG:
