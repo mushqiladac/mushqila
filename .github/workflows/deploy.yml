@@ -96,20 +96,6 @@ jobs:
                 docker-compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput --clear
                 echo "✓ Static files collected"
                 
-                # Create superuser if needed (idempotent)
-                echo ""
-                echo "👤 Step 7.5: Ensuring admin user exists..."
-                docker-compose -f docker-compose.prod.yml exec -T web python manage.py shell << 'PYTHON'
-from django.contrib.auth import get_user_model
-User = get_user_model()
-if not User.objects.filter(email='admin@mushqila.com').exists():
-    User.objects.create_superuser('admin@mushqila.com', 'Admin@123')
-    print('✓ Admin user created')
-else:
-    print('✓ Admin user already exists')
-PYTHON
-                echo "✓ Admin check completed"
-                
                 # Remove old containers
                 echo ""
                 echo "🗑️  Step 8: Cleaning up old containers..."
