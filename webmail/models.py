@@ -208,7 +208,7 @@ class EmailFilter(models.Model):
     
     class Meta:
         ordering = ['-priority', 'name']
-        c
+    
     def __str__(self):
         return self.name
 
