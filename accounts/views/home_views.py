@@ -64,20 +64,31 @@ class Landing2PageView(TemplateView):
 
 class HomeView(TemplateView):
     """
-    Home Page for logged-in users (Dashboard redirect)
-    This view redirects users to their respective dashboards
+    Home Page - Shows landing page for non-logged in users
+    Redirects to dashboard for logged-in users
     """
+    template_name = 'accounts/landing.html'
     
     def dispatch(self, request, *args, **kwargs):
         """Redirect to appropriate dashboard based on user type"""
-        if not request.user.is_authenticated:
-            # If not logged in, show landing page
-            return redirect('accounts:landing')
+        if request.user.is_authenticated:
+            # If logged in, redirect to dashboard
+            from .dashboard_views import dashboard_redirect
+            return dashboard_redirect(request)
         
-        # Import dashboard redirect function
-        from .dashboard_views import dashboard_redirect
-        
-        return dashboard_redirect(request)
+        # If not logged in, show landing page
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'page_title': 'Mushqila B2B Travel - Book Flights, Hotels, Hajj & Umrah',
+            'meta_description': 'Premium B2B travel platform for agents. Book flights, hotels, Hajj packages, Umrah packages, and visa services with competitive rates.',
+            'meta_keywords': 'travel, flights, hotels, hajj, umrah, visa, saudi arabia, travel agent, b2b',
+            'show_navbar': True,
+            'is_landing_page': True,
+        })
+        return context
 
 
 class DashboardRedirectView(LoginRequiredMixin, TemplateView):
