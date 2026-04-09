@@ -23,93 +23,57 @@ jobs:
           command_timeout: 20m
           script: |
             set -e
-
             PROJECT_DIR="/home/ubuntu/mushqila"
-            NEW_DIR="/home/ubuntu/mushqila_new"
-            OLD_DIR="/home/ubuntu/mushqila_old"
+            cd $PROJECT_DIR
 
             echo "=========================================="
-            echo "🚀 Zero-Downtime Deployment Starting..."
+            echo "🚀 Deployment Starting..."
             echo "=========================================="
 
-            # Step 1: Fresh clone to new directory
-            echo "📥 Step 1: Fresh clone from GitHub..."
-            rm -rf $NEW_DIR
-            git clone https://github.com/mushqiladac/mushqila.git $NEW_DIR
-            echo "✅ Clone complete"
+            # Step 1: Pull latest code
+            echo "📥 Pulling latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+            echo "✅ Code updated"
 
-            # Step 2: Copy .env.production (not in git)
-            echo "📋 Step 2: Copying production config..."
-            cp $PROJECT_DIR/.env.production $NEW_DIR/.env.production
-            echo "✅ Config copied"
+            # Step 2: Stop old containers
+            echo "🛑 Stopping old containers..."
+            docker-compose -f docker-compose.prod.yml down
+            echo "✅ Containers stopped"
 
-            # Step 3: Build new Docker image
-            echo "🐳 Step 3: Building new Docker image..."
-            cd $NEW_DIR
-            docker-compose -f docker-compose.prod.yml build --no-cache web
+            # Step 3: Clean old Docker images and cache
+            echo "🧹 Cleaning old Docker data..."
+            docker system prune -af --volumes 2>/dev/null || true
+            echo "✅ Docker cleaned"
+
+            # Step 4: Build fresh image
+            echo "🐳 Building fresh Docker image..."
+            docker-compose -f docker-compose.prod.yml build --no-cache
             echo "✅ Image built"
 
-            # Step 4: Start new containers
-            echo "🚀 Step 4: Starting new containers..."
+            # Step 5: Start containers
+            echo "🚀 Starting containers..."
             docker-compose -f docker-compose.prod.yml up -d
             echo "✅ Containers started"
 
-            # Step 5: Wait for health check
-            echo "⏳ Step 5: Waiting for app to be ready..."
-            sleep 15
-            for i in {1..10}; do
-              if curl -sf http://localhost:8000/ > /dev/null 2>&1; then
-                echo "✅ App is healthy!"
-                break
-              fi
-              echo "  Waiting... ($i/10)"
-              sleep 5
-            done
+            # Step 6: Wait for startup
+            echo "⏳ Waiting for app to start..."
+            sleep 20
 
-            # Step 6: Swap directories
-            echo "🔄 Step 6: Swapping directories..."
-            cd /home/ubuntu
-
-            # Stop old containers
-            if [ -d "$PROJECT_DIR" ]; then
-              cd $PROJECT_DIR
-              docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
-              cd /home/ubuntu
-            fi
-
-            # Move old to backup, new to current
-            rm -rf $OLD_DIR
-            [ -d "$PROJECT_DIR" ] && mv $PROJECT_DIR $OLD_DIR
-            mv $NEW_DIR $PROJECT_DIR
-
-            echo "✅ Directories swapped"
-
-            # Step 7: Restart with correct paths
-            echo "🔄 Step 7: Final restart..."
-            cd $PROJECT_DIR
-            docker-compose -f docker-compose.prod.yml down
-            docker-compose -f docker-compose.prod.yml up -d
-            sleep 10
-
-            # Step 8: Run migrations
-            echo "📊 Step 8: Running migrations..."
+            # Step 7: Run migrations
+            echo "📊 Running migrations..."
             docker-compose -f docker-compose.prod.yml exec -T web python manage.py migrate --noinput
             echo "✅ Migrations done"
 
-            # Step 9: Collect static files
-            echo "📁 Step 9: Collecting static files..."
+            # Step 8: Collect static files
+            echo "📁 Collecting static files..."
             docker-compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput --clear
             echo "✅ Static files collected"
 
-            # Step 10: Cleanup
-            echo "🧹 Step 10: Cleaning up..."
-            rm -rf $OLD_DIR
-            docker system prune -f
-            echo "✅ Cleanup done"
-
+            # Step 9: Final status
             echo ""
             echo "=========================================="
-            echo "✅ Deployment Successful!"
+            echo "✅ Deployment Complete!"
             echo "=========================================="
             docker-compose -f docker-compose.prod.yml ps
 
