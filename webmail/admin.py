@@ -3,18 +3,29 @@ from .models import (
     EmailAccount, Email, EmailAttachment, EmailLabel,
     EmailLabelAssignment, EmailFilter, EmailTemplate, Contact
 )
+from .forms import EmailAccountCreationForm, EmailAccountChangeForm
 
 
 @admin.register(EmailAccount)
 class EmailAccountAdmin(admin.ModelAdmin):
-    list_display = ['email_address', 'display_name', 'user', 'ses_verified', 'is_default', 'is_active', 'created_at']
+    form = EmailAccountChangeForm
+    add_form = EmailAccountCreationForm
+    
+    list_display = ['email_address', 'display_name', 'first_name', 'last_name', 'user', 'mobile_number', 'ses_verified', 'is_default', 'is_active', 'created_at']
     list_filter = ['ses_verified', 'is_default', 'is_active', 'created_at']
-    search_fields = ['email_address', 'display_name', 'user__username']
+    search_fields = ['email_address', 'display_name', 'first_name', 'last_name', 'user__username', 'mobile_number']
     readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('user', 'email_address', 'display_name', 'signature')
+            'fields': ('user', 'email_address', 'first_name', 'last_name', 'display_name')
+        }),
+        ('Contact Information', {
+            'fields': ('mobile_number', 'alternate_email')
+        }),
+        ('Password', {
+            'fields': ('password', 'confirm_password'),
+            'description': 'Set password for webmail login'
         }),
         ('AWS SES Configuration', {
             'fields': ('aws_access_key', 'aws_secret_key', 'aws_region', 'ses_verified')
@@ -22,7 +33,10 @@ class EmailAccountAdmin(admin.ModelAdmin):
         ('AWS S3 Configuration', {
             'fields': ('s3_bucket_name', 's3_inbox_prefix')
         }),
-        ('Settings', {
+        ('Email Settings', {
+            'fields': ('signature',)
+        }),
+        ('Status', {
             'fields': ('is_default', 'is_active')
         }),
         ('Timestamps', {
@@ -30,6 +44,45 @@ class EmailAccountAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+    
+    add_fieldsets = (
+        ('Basic Information', {
+            'fields': ('user', 'email_address', 'first_name', 'last_name', 'display_name')
+        }),
+        ('Contact Information', {
+            'fields': ('mobile_number', 'alternate_email')
+        }),
+        ('Password', {
+            'fields': ('password', 'confirm_password'),
+            'description': 'Set password for webmail login (minimum 8 characters)'
+        }),
+        ('AWS SES Configuration', {
+            'fields': ('aws_access_key', 'aws_secret_key', 'aws_region', 'ses_verified')
+        }),
+        ('AWS S3 Configuration', {
+            'fields': ('s3_bucket_name', 's3_inbox_prefix')
+        }),
+        ('Email Settings', {
+            'fields': ('signature',)
+        }),
+        ('Status', {
+            'fields': ('is_default', 'is_active')
+        }),
+    )
+    
+    def get_form(self, request, obj=None, **kwargs):
+        """Use special form during account creation"""
+        defaults = {}
+        if obj is None:
+            defaults['form'] = self.add_form
+        defaults.update(kwargs)
+        return super().get_form(request, obj, **defaults)
+    
+    def get_fieldsets(self, request, obj=None):
+        """Use special fieldsets during account creation"""
+        if not obj:
+            return self.add_fieldsets
+        return super().get_fieldsets(request, obj)
 
 
 @admin.register(Email)

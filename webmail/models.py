@@ -1,7 +1,11 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 import uuid
+import secrets
+import string
+from datetime import timedelta
 
 User = get_user_model()
 
@@ -11,6 +15,17 @@ class EmailAccount(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_accounts')
     email_address = models.EmailField(unique=True)
     display_name = models.CharField(max_length=255)
+    
+    # User Information
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
+    password = models.CharField(max_length=255, default='')  # Hashed password for webmail login
+    mobile_number = models.CharField(max_length=20, blank=True)
+    alternate_email = models.EmailField(blank=True)
+    
+    # Password Reset
+    reset_token = models.CharField(max_length=100, blank=True)
+    reset_token_created = models.DateTimeField(null=True, blank=True)
     
     # AWS SES Configuration
     aws_access_key = models.CharField(max_length=255, blank=True)
@@ -35,6 +50,48 @@ class EmailAccount(models.Model):
         
     def __str__(self):
         return f"{self.display_name} <{self.email_address}>"
+    
+    def set_password(self, raw_password):
+        """Set hashed password for webmail login"""
+        self.password = make_password(raw_password)
+    
+    def check_password(self, raw_password):
+        """Check if provided password matches"""
+        return check_password(raw_password, self.password)
+    
+    def generate_reset_token(self):
+        """Generate a temporary password reset token"""
+        # Generate random 8-character token
+        alphabet = string.ascii_letters + string.digits
+        token = ''.join(secrets.choice(alphabet) for _ in range(8))
+        
+        self.reset_token = token
+        self.reset_token_created = timezone.now()
+        self.save(update_fields=['reset_token', 'reset_token_created'])
+        
+        return token
+    
+    def is_reset_token_valid(self, token):
+        """Check if reset token is valid (matches and not expired)"""
+        if not self.reset_token or not self.reset_token_created:
+            return False
+        
+        # Check if token matches
+        if self.reset_token != token:
+            return False
+        
+        # Check if token is expired (15 minutes)
+        expiry_time = self.reset_token_created + timedelta(minutes=15)
+        if timezone.now() > expiry_time:
+            return False
+        
+        return True
+    
+    def clear_reset_token(self):
+        """Clear reset token after use"""
+        self.reset_token = ''
+        self.reset_token_created = None
+        self.save(update_fields=['reset_token', 'reset_token_created'])
 
 
 class Email(models.Model):

@@ -8,29 +8,45 @@ from django.db.models import Q
 
 from .models import EmailAccount, Email, EmailAttachment, Contact, EmailLabel
 from .services import EmailService
+from .forms import WebmailLoginForm, ForgotPasswordForm, ResetPasswordForm
 
 
 def webmail_login(request):
-    """Custom login view for webmail"""
+    """Custom login view for webmail using email and password"""
     if request.user.is_authenticated:
-        return redirect('webmail:inbox')
+        # Check if user has email account
+        account = EmailAccount.objects.filter(user=request.user, is_active=True).first()
+        if account:
+            return redirect('webmail:inbox')
     
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        next_url = request.POST.get('next', 'webmail:inbox')
+        form = WebmailLoginForm(request.POST)
         
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            auth_login(request, user)
-            messages.success(request, 'Welcome to Webmail!')
+        if form.is_valid():
+            # Get the email account from form
+            account = form.cleaned_data['account']
+            
+            # Log in the associated user
+            auth_login(request, account.user, backend='django.contrib.auth.backends.ModelBackend')
+            
+            # Store account ID in session
+            request.session['webmail_account_id'] = account.id
+            
+            messages.success(request, f'Welcome to Webmail, {account.first_name or account.display_name}!')
+            
+            next_url = request.POST.get('next', 'webmail:inbox')
             return redirect(next_url)
-        else:
-            messages.error(request, 'Invalid email/username or password.')
+    else:
+        form = WebmailLoginForm()
     
     next_url = request.GET.get('next', 'webmail:inbox')
-    return render(request, 'webmail/login.html', {'next': next_url})
+    
+    context = {
+        'form': form,
+        'next': next_url
+    }
+    
+    return render(request, 'webmail/login.html', context)
 
 
 @login_required(login_url='/webmail/login/')
@@ -255,7 +271,7 @@ def contacts(request):
 
 @login_required(login_url='/webmail/login/')
 def change_password(request):
-    """Change password from within webmail"""
+    """Change password from within webmail - updates both User and EmailAccount password"""
     account = EmailAccount.objects.filter(user=request.user, is_active=True).first()
 
     if request.method == 'POST':
@@ -263,15 +279,22 @@ def change_password(request):
         new_password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
 
-        if not request.user.check_password(current_password):
+        # Verify current password against EmailAccount
+        if account and not account.check_password(current_password):
             messages.error(request, 'Current password is incorrect.')
         elif new_password != confirm_password:
             messages.error(request, 'New passwords do not match.')
         elif len(new_password) < 8:
             messages.error(request, 'Password must be at least 8 characters long.')
         else:
+            # Update both User and EmailAccount passwords
             request.user.set_password(new_password)
             request.user.save()
+            
+            if account:
+                account.set_password(new_password)
+                account.save()
+            
             update_session_auth_hash(request, request.user)  # Keep user logged in
             messages.success(request, 'Password changed successfully!')
             return redirect('webmail:inbox')
@@ -280,3 +303,55 @@ def change_password(request):
         'account': account,
     }
     return render(request, 'webmail/change_password.html', context)
+
+
+
+def forgot_password(request):
+    """Forgot password - send temporary password to alternate email"""
+    if request.method == 'POST':
+        form = ForgotPasswordForm(request.POST)
+        
+        if form.is_valid():
+            # Send reset email
+            if form.send_reset_email():
+                account = form.cleaned_data['account']
+                messages.success(
+                    request,
+                    f'A temporary password has been sent to {account.alternate_email}. '
+                    'It will be valid for 15 minutes.'
+                )
+                return redirect('webmail:reset_password')
+            else:
+                messages.error(request, 'Failed to send reset email. Please try again.')
+    else:
+        form = ForgotPasswordForm()
+    
+    context = {
+        'form': form,
+    }
+    
+    return render(request, 'webmail/forgot_password.html', context)
+
+
+def reset_password(request):
+    """Reset password using temporary password"""
+    if request.method == 'POST':
+        form = ResetPasswordForm(request.POST)
+        
+        if form.is_valid():
+            if form.save():
+                messages.success(
+                    request,
+                    'Password reset successfully! You can now login with your new password.'
+                )
+                return redirect('webmail:login')
+            else:
+                messages.error(request, 'Failed to reset password. Please try again.')
+    else:
+        form = ResetPasswordForm()
+    
+    context = {
+        'form': form,
+    }
+    
+    return render(request, 'webmail/reset_password.html', context)

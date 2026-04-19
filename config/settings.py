@@ -13,6 +13,9 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
+# Site URL for email links
+SITE_URL = config('SITE_URL', default='http://localhost:8000')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -231,6 +234,9 @@ AWS_SES_CONFIGURATION_SET = os.getenv('AWS_SES_CONFIGURATION_SET', '')
 # Email Settings
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@mushqila.com')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Can be changed to SES backend
+
+# Webmail Domain
+WEBMAIL_DOMAIN = os.getenv('WEBMAIL_DOMAIN', 'mushqila.com')
 
 # Webmail Settings
 WEBMAIL_MAX_ATTACHMENT_SIZE = 25 * 1024 * 1024  # 25 MB
