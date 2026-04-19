@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login as auth_login, update_session_auth_hash
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, update_session_auth_hash
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
@@ -47,6 +47,13 @@ def webmail_login(request):
     }
     
     return render(request, 'webmail/login.html', context)
+
+
+def webmail_logout(request):
+    """Logout from webmail"""
+    auth_logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('webmail:login')
 
 
 @login_required(login_url='/webmail/login/')

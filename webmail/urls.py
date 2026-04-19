@@ -6,6 +6,7 @@ app_name = 'webmail'
 urlpatterns = [
     # Authentication
     path('login/', views.webmail_login, name='login'),
+    path('logout/', views.webmail_logout, name='logout'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('reset-password/', views.reset_password, name='reset_password'),
     
