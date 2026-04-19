@@ -38,6 +38,9 @@ WEBMAIL_DOMAIN=mushqila.com
 
 # Site URL
 SITE_URL=https://mushqila.com
+
+# CSRF Configuration (Important for logout and forms)
+CSRF_TRUSTED_ORIGINS=https://mushqila.com,https://www.mushqila.com
 ```
 
 ### ৩. S3 Bucket তৈরি করুন
@@ -156,6 +159,33 @@ send_mail(
 
 ---
 
+## Webmail Features
+
+### Login & Authentication
+- Email ও password দিয়ে login
+- Separate webmail authentication
+- Session management
+
+### Password Management
+- **Forgot Password**: Temporary password alternate email এ পাঠানো হয় (15 মিনিট valid)
+- **Change Password**: Webmail থেকে password পরিবর্তন করা যায়
+- **Password Reset**: Temporary password দিয়ে নতুন password সেট করা যায়
+
+### Logout
+- Sidebar থেকে logout করা যায়
+- Confirmation dialog সহ
+- Secure logout with session cleanup
+
+### Email Management
+- Inbox, Sent, Drafts, Trash folders
+- Compose new emails
+- Reply and forward
+- Attachments support
+- Search functionality
+- Contact management
+
+---
+
 ## Troubleshooting
 
 ### Problem: Email verification email আসছে না
@@ -192,7 +222,12 @@ send_mail(
 
 ```bash
 # নতুন email account তৈরি
-python manage.py create_webmail_account --email user@mushqila.com --password Pass123
+python manage.py create_webmail_account \
+  --email user@mushqila.com \
+  --password Pass123 \
+  --first-name "User" \
+  --last-name "Name" \
+  --alternate-email "user@gmail.com"
 
 # সব accounts setup করুন
 python manage.py setup_all_email_accounts
@@ -207,7 +242,23 @@ python manage.py verify_email_accounts --email user@mushqila.com
 python manage.py setup_all_email_accounts --force
 
 # Existing accounts এ default password set
-python manage.py set_default_passwords
+python manage.py set_default_passwords --default-password "changeme123"
+```
+
+---
+
+## Webmail URLs
+
+```
+/webmail/login/              - Login page
+/webmail/logout/             - Logout
+/webmail/forgot-password/    - Forgot password (temporary password request)
+/webmail/reset-password/     - Reset password with temporary password
+/webmail/change-password/    - Change password (logged in users)
+/webmail/inbox/              - Inbox
+/webmail/compose/            - Compose new email
+/webmail/contacts/           - Contacts
+/webmail/account/setup/      - Account settings
 ```
 
 ---
@@ -221,9 +272,12 @@ python manage.py set_default_passwords
 ✅ IAM user created with proper permissions
 ✅ Email receiving rule set configured
 ✅ Django settings configured
+✅ CSRF_TRUSTED_ORIGINS configured
 ✅ Migrations applied
 ✅ Test email sent successfully
 ✅ Test email received successfully
+✅ Login/Logout working
+✅ Password reset working
 ✅ SSL/TLS enabled for webmail
 ✅ Backup strategy in place
 
