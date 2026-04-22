@@ -13,6 +13,11 @@ urlpatterns = [
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('flights/', include('flights.urls', namespace='flights')),
     path('webmail/', include('webmail.urls', namespace='webmail')),
+    
+    # API endpoints
+    path('api/v1/webmail/', include('webmail.api_urls', namespace='webmail_api')),
+    path('api/v1/b2b/', include('accounts.api_urls', namespace='accounts_api')),
+    
     path('', HomeView.as_view(), name='home'),
     path('', include('b2c.urls')),
     
