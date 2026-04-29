@@ -725,6 +725,22 @@
                 <i class="fas fa-minus-circle"></i>
                 <span>Withdraw</span>
             </a>
+            <a href="{% url 'accounting:dashboard' %}" class="nav-link {% if '/accounting/' in request.path %}active{% endif %}">
+                <i class="fas fa-chart-line"></i>
+                <span>Accounting Dashboard</span>
+            </a>
+            <a href="{% url 'accounting:sales_list' %}" class="nav-link {% if '/accounting/sales/' in request.path %}active{% endif %}">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Accounting Sales</span>
+            </a>
+            <a href="{% url 'accounting:outstanding' %}" class="nav-link {% if '/accounting/outstanding/' in request.path %}active{% endif %}">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Outstanding</span>
+            </a>
+            <a href="{% url 'accounting:reports' %}" class="nav-link {% if '/accounting/reports/' in request.path %}active{% endif %}">
+                <i class="fas fa-chart-pie"></i>
+                <span>Accounting Reports</span>
+            </a>
             
             <!-- Account -->
             <div class="nav-title">ACCOUNT</div>

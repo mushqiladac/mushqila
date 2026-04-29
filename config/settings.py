@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'flights',
     'b2c',
     'webmail',
+    'accounting',
 ]
 
 MIDDLEWARE = [

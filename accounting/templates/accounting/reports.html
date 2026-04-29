@@ -1,0 +1,94 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Reports - Accounting{% endblock %}
+{% block page_title %}Accounting Reports{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2">
+            <div class="col-md-3"><input type="date" name="from_date" value="{{ filters.from_date }}" class="form-control"></div>
+            <div class="col-md-3"><input type="date" name="to_date" value="{{ filters.to_date }}" class="form-control"></div>
+            <div class="col-md-3"><button class="btn btn-primary w-100">Generate</button></div>
+            <div class="col-md-3">
+                <a href="?from_date={{ filters.from_date }}&to_date={{ filters.to_date }}&export=csv" class="btn btn-outline-success w-100">Export CSV</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Total Sales</h6>
+                <h4 class="mb-0">{{ summary.total_sales|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card info">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Collection</h6>
+                <h4 class="mb-0">{{ summary.total_collection|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card success">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Commission</h6>
+                <h4 class="mb-0">{{ summary.total_commission|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card warning">
+            <div class="card-body">
+                <h6 class="text-muted mb-1">Est. Profit</h6>
+                <h4 class="mb-0">{{ summary.profit_estimate|floatformat:2 }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h6 class="mb-3">Quick Notes</h6>
+        <ul class="mb-0">
+            <li>Profit Estimate = Total Sales - Total Airline Cost</li>
+            <li>Detailed export APIs are available at `api/v1/accounting/reports/sales/`</li>
+            <li>You can extend this page with date-range filter and chart widgets.</li>
+        </ul>
+    </div>
+</div>
+<div class="card mt-3">
+    <div class="card-header bg-white"><strong>Monthly Sales vs Collection</strong></div>
+    <div class="card-body">
+        <canvas id="reportTrendChart" height="90"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const reportLabels = {{ trend_labels|safe }};
+    const reportSales = {{ sales_values|safe }};
+    const reportCollection = {{ collection_values|safe }};
+    const reportCtx = document.getElementById('reportTrendChart');
+    if (reportCtx) {
+        new Chart(reportCtx, {
+            type: 'bar',
+            data: {
+                labels: reportLabels,
+                datasets: [
+                    { label: 'Sales', data: reportSales, backgroundColor: '#0d6efd99' },
+                    { label: 'Collection', data: reportCollection, backgroundColor: '#19875499' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+</script>
+{% endblock %}

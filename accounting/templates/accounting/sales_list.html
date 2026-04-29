@@ -1,0 +1,113 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Sales - Accounting{% endblock %}
+{% block page_title %}Sales List{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2">
+            <div class="col-md-2">
+                <input type="date" name="from_date" value="{{ filters.from_date }}" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="to_date" value="{{ filters.to_date }}" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <select name="airline_id" class="form-select">
+                    <option value="">All Airlines</option>
+                    {% for airline in airlines %}
+                    <option value="{{ airline.id }}" {% if filters.airline_id == airline.id|stringformat:"s" %}selected{% endif %}>{{ airline.code }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="issued" {% if filters.status == "issued" %}selected{% endif %}>issued</option>
+                    <option value="void" {% if filters.status == "void" %}selected{% endif %}>void</option>
+                    <option value="refund" {% if filters.status == "refund" %}selected{% endif %}>refund</option>
+                    <option value="reissue" {% if filters.status == "reissue" %}selected{% endif %}>reissue</option>
+                </select>
+            </div>
+            {% if users %}
+            <div class="col-md-2">
+                <select name="user_id" class="form-select">
+                    <option value="">All Users</option>
+                    {% for u in users %}
+                    <option value="{{ u.id }}" {% if filters.user_id == u.id|stringformat:"s" %}selected{% endif %}>{{ u.email }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="col-md-2 d-flex gap-2">
+                <button class="btn btn-primary w-100">Filter</button>
+                <a href="{% url 'accounting:sales_list' %}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <strong>Ticket Sales</strong>
+        <div class="d-flex gap-2">
+            <a href="{% url 'accounting:sale_create' %}" class="btn btn-sm btn-primary">+ New Sale</a>
+            <a href="{% url 'accounting:dashboard' %}" class="btn btn-sm btn-outline-primary">Dashboard</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Issue Date</th>
+                    <th>User</th>
+                    <th>Airline</th>
+                    <th>Ticket</th>
+                    <th>Passenger</th>
+                    <th>Price</th>
+                    <th>Due</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.issue_date }}</td>
+                    <td>{{ sale.user.get_full_name|default:sale.user.email }}</td>
+                    <td>{{ sale.airline.code }}</td>
+                    <td>{{ sale.ticket_number }}</td>
+                    <td>{{ sale.passenger_name }}</td>
+                    <td>{{ sale.customer_price|floatformat:2 }}</td>
+                    <td>{{ sale.due_amount|floatformat:2 }}</td>
+                    <td><span class="badge bg-secondary">{{ sale.status }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-muted">No sale records found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if page_obj %}
+    <div class="card-footer bg-white">
+        <nav>
+            <ul class="pagination mb-0 flex-wrap">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&from_date={{ filters.from_date }}&to_date={{ filters.to_date }}&airline_id={{ filters.airline_id }}&status={{ filters.status }}&user_id={{ filters.user_id }}">Previous</a></li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}&from_date={{ filters.from_date }}&to_date={{ filters.to_date }}&airline_id={{ filters.airline_id }}&status={{ filters.status }}&user_id={{ filters.user_id }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&from_date={{ filters.from_date }}&to_date={{ filters.to_date }}&airline_id={{ filters.airline_id }}&status={{ filters.status }}&user_id={{ filters.user_id }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
