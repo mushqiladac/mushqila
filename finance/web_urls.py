@@ -3,7 +3,6 @@ Finance App Web URLs for PC Interface
 Flutter mobile app এর পাশাপাশি PC web interface জন্য
 """
 from django.urls import path
-from . import views
 from .views import web_views
 
 app_name = 'finance'

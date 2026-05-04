@@ -30,12 +30,9 @@ router.register(r'notification-templates', NotificationTemplateViewSet, basename
 app_name = 'finance'
 
 urlpatterns = [
-    # API endpoints
-    path('', include(router.urls)),
+    # Web interface pages (priority over API)
+    path('', include('finance.web_urls')),
     
-    # Web interface (optional, for admin access)
-    path('', include([
-        path('dashboard/', DashboardViewSet.as_view({'get': 'overview'}), name='web-dashboard'),
-        path('login/', AuthViewSet.as_view({'post': 'login'}), name='web-login'),
-    ])),
+    # API endpoints
+    path('api/', include(router.urls)),
 ]
