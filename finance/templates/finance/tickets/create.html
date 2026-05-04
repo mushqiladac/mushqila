@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>নতুন টিকেট তৈরি - Finance App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 1rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        .form-section h5 {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f1f3f5;
+        }
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+        .form-floating label {
+            color: #6c757d;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-outline-secondary {
+            border: 1px solid #dee2e6;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-secondary:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        .input-group-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-weight: 600;
+        }
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .page-subtitle {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .profit-display {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .profit-display h6 {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        .profit-display h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="p-3">
+            <h4 class="text-center mb-4">
+                <i class="fas fa-chart-line me-2"></i>Finance App
+            </h4>
+            <nav class="nav flex-column">
+                <a href="{% url 'finance:dashboard' %}" class="nav-link">
+                    <i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড
+                </a>
+                <a href="{% url 'finance:ticket_list' %}" class="nav-link">
+                    <i class="fas fa-ticket-alt"></i> টিকেট ব্যবস্থাপনা
+                </a>
+                <a href="{% url 'finance:ticket_create' %}" class="nav-link active">
+                    <i class="fas fa-plus"></i> নতুন টিকেট
+                </a>
+                <a href="{% url 'finance:submission_list' %}" class="nav-link">
+                    <i class="fas fa-file-alt"></i> জমা দেওয়া
+                </a>
+                <a href="{% url 'finance:profile' %}" class="nav-link">
+                    <i class="fas fa-user"></i> প্রোফাইল
+                </a>
+                <a href="{% url 'finance:logout' %}" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i> লগআউট
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="container-fluid">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+                    </div>
+                    <div>
+                        <div class="fw-bold">{{ user.get_full_name|default:user.email }}</div>
+                        <small class="text-muted">{{ user.get_user_type_display }}</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="text-muted me-3">
+                        <i class="fas fa-clock me-1"></i>
+                        {% now "d M Y, H:i" %}
+                    </span>
+                    <button class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-plus me-2"></i> নতুন টিকেট তৈরি
+                    </h1>
+                    <p class="page-subtitle">নতুন টিকেট তৈরি করুন এবং বিক্রয় রেকর্ড করুন</p>
+                </div>
+                <a href="{% url 'finance:ticket_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> টিকেট তালিকায় ফিরে যান
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Form Container -->
+        <div class="form-container">
+            <form method="post" id="ticketForm">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h5><i class="fas fa-info-circle me-2"></i> মৌলিক তথ্য</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="pnr" name="pnr" placeholder="PNR Number" required>
+                                <label for="pnr">PNR নম্বর *</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="ticket_number" name="ticket_number" placeholder="Ticket Number" required>
+                                <label for="ticket_number">টিকেট নম্বর *</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="airline" name="airline" required>
+                                    <option value="">এয়ারলাইন নির্বাচন করুন</option>
+                                    {% for airline in airlines %}
+                                        <option value="{{ airline.id }}">{{ airline.name }} ({{ airline.code }})</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="airline">এয়ারলাইন *</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="passenger_name" name="passenger_name" placeholder="Passenger Name" required>
+                                <label for="passenger_name">যাত্রীর নাম *</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Information -->
+                <div class="form-section">
+                    <h5><i class="fas fa-money-bill-wave me-2"></i> আর্থিক তথ্য</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="customer_price" name="customer_price" placeholder="Customer Price" step="0.01" min="0" required>
+                                <label for="customer_price">গ্রাহক মূল্য *</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="number" class="form-control" id="airline_cost" name="airline_cost" placeholder="Airline Cost" step="0.01" min="0" required>
+                                <label for="airline_cost">এয়ারলাইন খরচ *</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="payment_method" name="payment_method" required>
+                                    <option value="">পেমেন্ট মেথড নির্বাচন করুন</option>
+                                    {% for method in payment_methods %}
+                                        <option value="{{ method.id }}">{{ method.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="payment_method">পেমেন্ট মেথড *</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Profit Display -->
+                    <div class="profit-display" id="profitDisplay" style="display: none;">
+                        <h6>আনুমানিক লাভ</h6>
+                        <h3 id="profitAmount">৳0</h3>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="form-section">
+                    <h5><i class="fas fa-plus-circle me-2"></i> অতিরিক্ত তথ্য</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="travel_date" name="travel_date">
+                                <label for="travel_date">ভ্রমণ তারিখ</label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="route" name="route" placeholder="Route">
+                                <label for="route">রুট</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <textarea class="form-control" id="remarks" name="remarks" placeholder="Remarks" style="height: 100px"></textarea>
+                        <label for="remarks">মন্তব্য</label>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'finance:ticket_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i> বাতিল করুন
+                    </a>
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                            <i class="fas fa-redo me-2"></i> রিসেট করুন
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i> টিকেট তৈরি করুন
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Calculate profit
+        function calculateProfit() {
+            const customerPrice = parseFloat(document.getElementById('customer_price').value) || 0;
+            const airlineCost = parseFloat(document.getElementById('airline_cost').value) || 0;
+            const profit = customerPrice - airlineCost;
+            
+            const profitDisplay = document.getElementById('profitDisplay');
+            const profitAmount = document.getElementById('profitAmount');
+            
+            if (customerPrice > 0 && airlineCost > 0) {
+                profitDisplay.style.display = 'block';
+                profitAmount.textContent = '৳' + profit.toFixed(2);
+                
+                // Change color based on profit
+                if (profit > 0) {
+                    profitDisplay.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                } else if (profit < 0) {
+                    profitDisplay.style.background = 'linear-gradient(135deg, #dc3545 0%, #fd7e14 100%)';
+                } else {
+                    profitDisplay.style.background = 'linear-gradient(135deg, #6c757d 0%, #495057 100%)';
+                }
+            } else {
+                profitDisplay.style.display = 'none';
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('ticketForm').reset();
+            document.getElementById('profitDisplay').style.display = 'none';
+        }
+
+        // Add event listeners
+        document.getElementById('customer_price').addEventListener('input', calculateProfit);
+        document.getElementById('airline_cost').addEventListener('input', calculateProfit);
+
+        // Form validation
+        document.getElementById('ticketForm').addEventListener('submit', function(e) {
+            const customerPrice = parseFloat(document.getElementById('customer_price').value);
+            const airlineCost = parseFloat(document.getElementById('airline_cost').value);
+            
+            if (customerPrice < 0 || airlineCost < 0) {
+                e.preventDefault();
+                alert('দাম ঋণাত্মক হতে পারে না');
+                return false;
+            }
+            
+            if (customerPrice < airlineCost) {
+                if (!confirm('গ্রাহক মূল্য এয়ারলাইন খরচের চেয়ে কম। আপনি কি নিশ্চিত?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+
+        // Auto-format PNR (uppercase)
+        document.getElementById('pnr').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Auto-format ticket number
+        document.getElementById('ticket_number').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase().replace(/\s/g, '');
+        });
+    </script>
+</body>
+</html>

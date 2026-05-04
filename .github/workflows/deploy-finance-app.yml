@@ -1,0 +1,249 @@
+name: Deploy Finance App
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'finance/**'
+      - 'config/settings.py'
+      - 'config/urls.py'
+      - 'requirements.txt'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'finance/**'
+      - 'config/settings.py'
+      - 'config/urls.py'
+      - 'requirements.txt'
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mushqila_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-django coverage
+    
+    - name: Run tests
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/mushqila_test
+        SECRET_KEY: test-secret-key-for-github-actions
+        DEBUG: True
+      run: |
+        python manage.py test finance --settings=config.settings_local --verbosity=2
+    
+    - name: Run migrations test
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/mushqila_test
+        SECRET_KEY: test-secret-key-for-github-actions
+        DEBUG: True
+      run: |
+        python manage.py makemigrations finance --settings=config.settings_local --dry-run
+        python manage.py migrate finance --settings=config.settings_local --dry-run
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+        pip install -r requirements.txt
+    
+    - name: Run security scan
+      run: |
+        bandit -r finance/ -f json -o bandit-report.json || true
+        safety check --json --output safety-report.json || true
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    needs: [test, security-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install gunicorn
+    
+    - name: Collect static files
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        DEBUG: False
+      run: |
+        python manage.py collectstatic --noinput --settings=config.settings_production
+    
+    - name: Create deployment package
+      run: |
+        tar -czf finance-app-deployment.tar.gz \
+          finance/ \
+          config/ \
+          manage.py \
+          requirements.txt \
+          static/ \
+          media/ \
+          --exclude=.git \
+          --exclude=node_modules \
+          --exclude=__pycache__ \
+          --exclude=*.pyc
+    
+    - name: Upload deployment package
+      uses: actions/upload-artifact@v3
+      with:
+        name: finance-app-deployment
+        path: finance-app-deployment.tar.gz
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: staging
+    
+    steps:
+    - name: Download deployment package
+      uses: actions/download-artifact@v3
+      with:
+        name: finance-app-deployment
+    
+    - name: Deploy to staging
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USER }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        script: |
+          cd /var/www/mushqila
+          
+          # Backup current version
+          if [ -d "finance_app_backup" ]; then
+            rm -rf finance_app_backup
+          fi
+          cp -r finance_app finance_app_backup
+          
+          # Extract new version
+          tar -xzf finance-app-deployment.tar.gz
+          
+          # Install dependencies
+          source venv/bin/activate
+          pip install -r requirements.txt
+          
+          # Run migrations
+          python manage.py migrate finance --settings=config.settings_production --noinput
+          
+          # Collect static files
+          python manage.py collectstatic --noinput --settings=config.settings_production
+          
+          # Restart application
+          sudo systemctl restart gunicorn
+          sudo systemctl restart nginx
+          
+          # Health check
+          curl -f http://localhost/finance/ || exit 1
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    
+    steps:
+    - name: Deploy to production
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        script: |
+          cd /var/www/mushqila
+          
+          # Pull from staging
+          rsync -avz --delete staging_user@staging_host:/var/www/mushqila/ ./
+          
+          # Run migrations
+          source venv/bin/activate
+          python manage.py migrate finance --settings=config.settings_production --noinput
+          
+          # Collect static files
+          python manage.py collectstatic --noinput --settings=config.settings_production
+          
+          # Restart application
+          sudo systemctl restart gunicorn
+          sudo systemctl restart nginx
+          
+          # Health check
+          curl -f https://mushqila.com/finance/ || exit 1
+
+  notify-deployment:
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: always()
+    
+    steps:
+    - name: Notify deployment status
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
