@@ -62,31 +62,33 @@ class AuthViewSet(viewsets.ViewSet):
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=False, methods=['post'], url_path='register')
-    def register(self, request):
-        """User registration endpoint"""
+    @action(detail=False, methods=['post'], url_path='create-user', permission_classes=[IsAuthenticated])
+    def create_user(self, request):
+        """Create new user (Admin/Manager only)"""
+        user = request.user
+        
+        # Check if user has permission to create users
+        if user.user_type not in ['admin', 'manager']:
+            return Response({
+                'success': False,
+                'message': 'Permission denied. Only Admin or Manager can create users.'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            
-            # Generate JWT tokens
-            refresh = RefreshToken.for_user(user)
+            new_user = serializer.save()
             
             return Response({
                 'success': True,
-                'message': 'Registration successful',
+                'message': 'User created successfully',
                 'data': {
-                    'user': FinanceUserSerializer(user).data,
-                    'tokens': {
-                        'access': str(refresh.access_token),
-                        'refresh': str(refresh)
-                    }
+                    'user': FinanceUserSerializer(new_user).data
                 }
             }, status=status.HTTP_201_CREATED)
         
         return Response({
             'success': False,
-            'message': 'Registration failed',
+            'message': 'User creation failed',
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
     

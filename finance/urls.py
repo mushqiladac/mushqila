@@ -15,7 +15,7 @@ from .views import (
 
 # Create a router and register our viewsets
 router = DefaultRouter()
-router.register(r'auth', AuthViewSet, basename='finance-auth')
+router.register(r'auth', AuthViewSet, basename='auth')
 router.register(r'dashboard', DashboardViewSet, basename='finance-dashboard')
 router.register(r'tickets', TicketSaleViewSet, basename='finance-tickets')
 router.register(r'airlines', AirlineViewSet, basename='finance-airlines')

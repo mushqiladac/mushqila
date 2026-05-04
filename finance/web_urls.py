@@ -12,6 +12,7 @@ urlpatterns = [
     # Authentication URLs
     path('login/', web_views.finance_login, name='login'),
     path('logout/', web_views.finance_logout, name='logout'),
+    path('create-user/', web_views.create_user, name='create_user'),
     
     # Dashboard URLs
     path('dashboard/', web_views.finance_dashboard, name='dashboard'),

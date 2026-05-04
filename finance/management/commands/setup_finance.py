@@ -22,6 +22,9 @@ class Command(BaseCommand):
         # Create admin user
         self.create_admin_user()
         
+        # Create manager user
+        self.create_manager_user()
+        
         self.stdout.write(self.style.SUCCESS('Finance app setup completed successfully!'))
     
     def create_airlines(self):
@@ -179,3 +182,37 @@ class Command(BaseCommand):
             self.stdout.write(f'  Password: {password}')
         else:
             self.stdout.write(f'  Admin user already exists: {email}')
+    
+    def create_manager_user(self):
+        """Create default manager user for finance app"""
+        FinanceUser = get_user_model()
+        
+        email = 'finance.manager@mushqila.com'
+        password = 'FinanceManager123!'
+        
+        if not FinanceUser.objects.filter(email=email).exists():
+            manager_user = FinanceUser.objects.create_user(
+                email=email,
+                password=password,
+                first_name='Finance',
+                last_name='Manager',
+                user_type=FinanceUser.UserType.MANAGER,
+                status=FinanceUser.Status.ACTIVE,
+                is_staff=True,
+                is_superuser=False,
+                is_active=True
+            )
+            
+            # Create user profile
+            from finance.models import FinanceUserProfile
+            FinanceUserProfile.objects.create(
+                user=manager_user,
+                company_name='Mushqila Finance',
+                language='en',
+                timezone='Asia/Riyadh'
+            )
+            
+            self.stdout.write(f'  Created manager user: {email}')
+            self.stdout.write(f'  Password: {password}')
+        else:
+            self.stdout.write(f'  Manager user already exists: {email}')

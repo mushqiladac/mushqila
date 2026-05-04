@@ -234,6 +234,32 @@ def profile_view(request):
     return render(request, 'finance/profile.html', context)
 
 
+@login_required
+def create_user(request):
+    """Create new user (Admin/Manager only)"""
+    user = request.user.financeuser
+    
+    # Check if user has permission to create users
+    if user.user_type not in ['admin', 'manager']:
+        messages.error(request, 'আপনার ইউজার তৈরির অনুমতি নেই। শুধুমাত্র Admin বা Manager ইউজার তৈরি করতে পারে।')
+        return redirect('finance:dashboard')
+    
+    if request.method == 'POST':
+        from ..models.user import FinanceUser
+        from ..serializers.user import RegisterSerializer
+        
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            new_user = serializer.save()
+            
+            messages.success(request, f'ইউজার সফলভাবে তৈরি হয়েছে: {new_user.email}')
+            return redirect('finance:dashboard')
+        else:
+            messages.error(request, f'ইউজার তৈরিতে সমস্যা: {serializer.errors}')
+    
+    # For GET request, show user creation form
+    return render(request, 'finance/create_user.html', {'user': user})
+
 @require_POST
 @login_required
 def update_profile(request):
