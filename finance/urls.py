@@ -31,7 +31,7 @@ app_name = 'finance'
 
 urlpatterns = [
     # API endpoints
-    path('api/v1/', include(router.urls)),
+    path('', include(router.urls)),
     
     # Web interface (optional, for admin access)
     path('', include([

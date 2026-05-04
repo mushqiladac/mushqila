@@ -88,6 +88,24 @@ class FinanceUser(AbstractUser):
     otp_code = models.CharField(_('OTP code'), max_length=6, blank=True)
     otp_expires_at = models.DateTimeField(_('OTP expires at'), null=True, blank=True)
     
+    # Override groups and user_permissions to avoid reverse accessor clashes
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name=_('groups'),
+        blank=True,
+        help_text=_('The groups this user belongs to.'),
+        related_name="finance_user_set",
+        related_query_name="finance_user",
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name=_('user permissions'),
+        blank=True,
+        help_text=_('Specific permissions for this user.'),
+        related_name="finance_user_set",
+        related_query_name="finance_user",
+    )
+    
     # Login tracking
     last_login_ip = models.GenericIPAddressField(_('last login IP'), null=True, blank=True)
     

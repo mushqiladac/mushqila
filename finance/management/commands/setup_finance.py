@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
-from finance.models import Airline, PaymentMethod, NotificationTemplate
+from finance.models import FinanceUser, Airline, PaymentMethod
 from decimal import Decimal
 
 
@@ -16,9 +15,7 @@ class Command(BaseCommand):
         # Create payment methods
         self.create_payment_methods()
         
-        # Create notification templates
-        self.create_notification_templates()
-        
+                
         # Create admin user
         self.create_admin_user()
         
@@ -151,7 +148,6 @@ class Command(BaseCommand):
     
     def create_admin_user(self):
         """Create default admin user for finance app"""
-        FinanceUser = get_user_model()
         
         email = 'finance.admin@mushqila.com'
         password = 'FinanceAdmin123!'
@@ -162,6 +158,7 @@ class Command(BaseCommand):
                 password=password,
                 first_name='Finance',
                 last_name='Administrator',
+                phone='+966500000001',
                 user_type=FinanceUser.UserType.ADMIN,
                 status=FinanceUser.Status.ACTIVE,
                 is_staff=True,
@@ -169,15 +166,7 @@ class Command(BaseCommand):
                 is_active=True
             )
             
-            # Create user profile
-            from finance.models import FinanceUserProfile
-            FinanceUserProfile.objects.create(
-                user=admin_user,
-                company_name='Mushqila Finance',
-                language='en',
-                timezone='Asia/Riyadh'
-            )
-            
+                        
             self.stdout.write(f'  Created admin user: {email}')
             self.stdout.write(f'  Password: {password}')
         else:
@@ -185,7 +174,6 @@ class Command(BaseCommand):
     
     def create_manager_user(self):
         """Create default manager user for finance app"""
-        FinanceUser = get_user_model()
         
         email = 'finance.manager@mushqila.com'
         password = 'FinanceManager123!'
@@ -196,6 +184,7 @@ class Command(BaseCommand):
                 password=password,
                 first_name='Finance',
                 last_name='Manager',
+                phone='+966500000002',
                 user_type=FinanceUser.UserType.MANAGER,
                 status=FinanceUser.Status.ACTIVE,
                 is_staff=True,
@@ -203,15 +192,7 @@ class Command(BaseCommand):
                 is_active=True
             )
             
-            # Create user profile
-            from finance.models import FinanceUserProfile
-            FinanceUserProfile.objects.create(
-                user=manager_user,
-                company_name='Mushqila Finance',
-                language='en',
-                timezone='Asia/Riyadh'
-            )
-            
+                        
             self.stdout.write(f'  Created manager user: {email}')
             self.stdout.write(f'  Password: {password}')
         else:
