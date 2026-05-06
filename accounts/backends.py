@@ -12,6 +12,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.db.models import Q
 from django.core.cache import cache
 from django.utils import timezone
+from django.conf import settings
 
 from .models import User, LoginHistory
 from .utils import get_client_ip, log_user_activity, check_login_attempts, increment_login_attempts

@@ -8,118 +8,28 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Import primary views that actually exist
-try:
-    from .search_views import (
-        FlightSearchView,
-        SearchResultsView,
-        FareCalendarView,
-        FlexibleSearchView,
-        MultiCitySearchView,
-        AutoCompleteView,
-        RecentSearchesView,
-        PopularRoutesView,
-    )
-except ImportError as e:
-    logger.warning(f"Could not import search views: {e}")
-
-try:
-    from .booking_views import (
-        BookingCreateView,
-        PassengerDetailsView,
-        ReviewBookingView,
-        PaymentView,
-        BookingConfirmationView,
-        QuickBookingView,
-        GroupBookingView,
-    )
-except ImportError as e:
-    logger.warning(f"Could not import booking views: {e}")
-
-try:
-    from .ticketing_views import (
-        TicketListView,
-        TicketDetailView,
-        TicketIssueView,
-        TicketVoidView,
-        TicketReissueView,
-        TicketRevalidationView,
-        TicketRefundView,
-        EMDManagementView,
-        TicketingQueueView,
-        TicketingDashboardView,
-    )
-except ImportError as e:
-    logger.warning(f"Could not import ticketing views: {e}")
-    # Use stubs
-    from .stub_views import (
-        TicketListView,
-        TicketDetailView,
-        TicketIssueView,
-        TicketVoidView,
-        TicketReissueView,
-        TicketRevalidationView,
-        TicketRefundView,
-        EMDManagementView,
-        TicketingQueueView,
-        TicketingDashboardView,
-    )
-
-try:
-    from .fare_rules_views import (
-        FareRulesListView,
-        FareRuleDetailView,
-        FareRuleSearchView,
-        FareRuleComparisonView,
-        FareRuleParserView,
-        BaggageRulesView,
-        GDSFareRulesView,
-        FareRuleValidatorView,
-        FareRuleCategoriesView,
-    )
-except ImportError as e:
-    logger.warning(f"Could not import fare rules views: {e}")
-
-try:
-    from .ancillary_views import (
-        BaggageServicesView,
-        MealServicesView,
-        LoungeAccessView,
-        ServiceBundlesView,
-        AncillaryBookingManagementView,
-    )
-except ImportError as e:
-    logger.warning(f"Could not import ancillary views: {e}")
-
-try:
-    from .reporting_views import (
-        SalesDashboardView,
-        SalesReportView,
-        AgentPerformanceView,
-    )
-except ImportError as e:
-    logger.warning(f"Could not import reporting views: {e}")
-
-# API Views with error handling
-try:
-    from .api_views import (
-        FlightSearchAPI,
-        BookingListAPI,
-        BookingDetailAPI,
-        TicketListAPI,
-        PaymentProcessAPI,
-        RefundRequestAPI,
-    )
-except ImportError as e:
-    logger.warning(f"Could not import API views: {e}")
-
-# Stub views for missing functionality
+# Import only views that actually exist
 from .stub_views import (
+    # Ticketing Views
+    TicketListView,
+    TicketDetailView,
+    TicketIssueView,
+    TicketVoidView,
+    TicketReissueView,
+    TicketRevalidationView,
+    TicketRefundView,
+    EMDManagementView,
+    TicketingQueueView,
+    TicketingDashboardView,
+    
+    # Fare Rules Views
     BaggageCalculatorView,
     ExcessBaggageView,
     FareConditionsView,
     PenaltyCalculatorView,
     ChangeFeeCalculatorView,
+    
+    # Ancillary Services Views
     AncillaryServicesListView,
     AncillaryServiceDetailView,
     AncillaryBookingView,
@@ -128,37 +38,29 @@ from .stub_views import (
     BaggageSelectionView,
     LoungePurchaseView,
     TravelInsuranceView,
+    
+    # Seat Map Views
     SeatMapDisplayView,
     SeatMapAPIView,
     FlexibleSeatMapView,
+    
+    # Reporting Views
     TicketingReportView,
     BookingAnalyticsView,
     RevenueReportView,
     CommissionReportView,
     BookingReportView,
+    
+    # API Views
+    FlightSearchAPIView,
+    BookingAPIView,
+    TicketingAPIView,
+    PaymentAPIView,
+    NotificationAPIView,
 )
 
-# Define the public API
+# Define public API - only views that exist
 __all__ = [
-    # Search Views 
-    'FlightSearchView',
-    'SearchResultsView',
-    'FareCalendarView',
-    'FlexibleSearchView',
-    'MultiCitySearchView',
-    'AutoCompleteView',
-    'RecentSearchesView',
-    'PopularRoutesView',
-    
-    # Booking Views
-    'BookingCreateView',
-    'PassengerDetailsView',
-    'ReviewBookingView',
-    'PaymentView',
-    'BookingConfirmationView',
-    'QuickBookingView',
-    'GroupBookingView',
-    
     # Ticketing Views
     'TicketListView',
     'TicketDetailView',
@@ -172,46 +74,41 @@ __all__ = [
     'TicketingDashboardView',
     
     # Fare Rules Views
-    'FareRulesListView',
-    'FareRuleDetailView',
-    'FareRuleSearchView',
-    'FareRuleComparisonView',
-    'FareRuleParserView',
-    'BaggageRulesView',
     'BaggageCalculatorView',
     'ExcessBaggageView',
     'FareConditionsView',
     'PenaltyCalculatorView',
     'ChangeFeeCalculatorView',
-    'GDSFareRulesView',
-    'FareRuleValidatorView',
-    'FareRuleCategoriesView',
     
-    # Ancillary Views
+    # Ancillary Services Views
     'AncillaryServicesListView',
     'AncillaryServiceDetailView',
     'AncillaryBookingView',
-    'BaggageServicesView',
-    'MealServicesView',
-    'LoungeAccessView',
+    'SeatSelectionView',
+    'MealSelectionView',
+    'BaggageSelectionView',
+    'LoungePurchaseView',
     'TravelInsuranceView',
-    'ServiceBundlesView',
-    'AncillaryBookingManagementView',
+    
+    # Seat Map Views
+    'SeatMapDisplayView',
+    'SeatMapAPIView',
+    'FlexibleSeatMapView',
     
     # Reporting Views
-    'SalesDashboardView',
-    'SalesReportView',
-    'AgentPerformanceView',
+    'TicketingReportView',
+    'BookingAnalyticsView',
+    'RevenueReportView',
+    'CommissionReportView',
+    'BookingReportView',
     
     # API Views
-    'FlightSearchAPI',
-    'BookingListAPI',
-    'BookingDetailAPI',
-    'TicketListAPI',
-    'PaymentProcessAPI',
-    'RefundRequestAPI',
+    'FlightSearchAPIView',
+    'BookingAPIView',
+    'TicketingAPIView',
+    'PaymentAPIView',
+    'NotificationAPIView',
 ]
-
 
 logger.info("Flights views module initialized successfully")
 
@@ -360,118 +257,6 @@ __all__ = [
     
     # API Views
     'APILoginView',
-    'APILogoutView',
-    'APIStatusView',
-    'APIKeyManagementView',
-    'FlightSearchAPI',
-    'FlightAvailabilityAPI',
-    'FareCalendarAPI',
-    'LowFareSearchAPI',
-    'ScheduleSearchAPI',
-    'BookingListAPI',
-    'BookingDetailAPI',
-    'BookingCreateAPI',
-    'BookingConfirmAPI',
-    'BookingCancelAPI',
-    'BookingRetrieveAPI',
-    'BookingPriceAPI',
-    'TicketListAPI',
-    'TicketDetailAPI',
-    'TicketIssueAPI',
-    'TicketVoidAPI',
-    'TicketReissueAPI',
-    'EMDIssueAPI',
-    'PaymentProcessAPI',
-    'PaymentListAPI',
-    'RefundRequestAPI',
-    'AncillaryServiceListAPI',
-    'AncillaryBookingAPI',
-    'SeatMapAPI',
-    'AirlineListAPI',
-    'AirportListAPI',
-    'AirportAutocompleteAPI',
-    'CountryListAPI',
-    'CurrencyRatesAPI',
-    'SalesReportAPI',
-    'PerformanceReportAPI',
-    'BookingReportAPI',
-    'GDSWebhookView',
-    'PaymentWebhookView',
-    'NotificationWebhookView',
-    'BulkBookingAPI',
-    'BulkTicketingAPI',
-    'BulkPaymentAPI',
-    'CurrencyConverterAPI',
-    'DocumentValidatorAPI',
-    'PNRDecoderAPI',
-    'APIUsageAPI',
-    'APIPerformanceAPI',
-    'SystemHealthAPI',
-    
-    # Admin Views
-    'AgentManagementView',
-    'SubAgentManagementView',
-    'UserProfileView',
-    'CommissionManagementView',
-    'AirlineManagementView',
-    'AirportManagementView',
-    'FareRuleManagementView',
-    'ServiceConfigurationView',
-    'GDSConfigurationView',
-    'PaymentGatewayView',
-    'SMTPConfigurationView',
-    'SystemLogsView',
-    'AuditTrailView',
-    'ComplianceCheckView',
-    'TransactionAuditView',
-    'ReportAuditView',
-    
-    # Utility Views
-    'FareCalculatorView',
-    'BaggageCalculatorView',
-    'CurrencyConverterView',
-    'DistanceCalculatorView',
-    'PNRValidatorView',
-    'TicketValidatorView',
-    'PassengerValidatorView',
-    'DocumentValidatorView',
-    'PNRDecoderView',
-    'TicketDecoderView',
-    'AirlineCodeView',
-    'AirportCodeView',
-    'DocumentDownloadView',
-    'ReportDownloadView',
-    'TemplateDownloadView',
-    'ExportDataView',
-    
-    # Customer Views
-    'CustomerListView',
-    'CustomerDetailView',
-    'CustomerCreateView',
-    'CustomerUpdateView',
-    'CorporateAccountView',
-    'CorporateUserView',
-    'TravelPolicyView',
-    'ApprovalWorkflowView',
-    'CustomerPortalView',
-    'BookingHistoryView',
-    'TravelDocumentView',
-    'PreferenceManagementView',
-    'NotificationView',
-    'MessageCenterView',
-    'AnnouncementView',
-    'AlertView',
-    
-    # Travelport GDS Views
-    'GDSConnectionView',
-    'GDSSessionView',
-    'GDSStatusView',
-    'GDSReconnectView',
-    'GDSLowFareSearchView',
-    'GDSAvailabilityView',
-    'GDSScheduleView',
-    'GDSFareRulesView',
-    'GDSCreateBookingView',
 ]
 
 
