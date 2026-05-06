@@ -64,10 +64,16 @@ class GalileoClient:
         )
         
         # Initialize SOAP clients if zeep is available
-        if ZEEP_AVAILABLE and self.username and self.password:
-            self._init_soap_clients()
+        if ZEEP_AVAILABLE:
+            # Only initialize if credentials are available
+            if self.username and self.password:
+                self._init_soap_clients()
+            else:
+                logger.info("Galileo client credentials not configured. Using mock client.")
+                self.air_client = None
+                self.universal_client = None
         else:
-            logger.warning("Galileo client not fully initialized. Check credentials and zeep installation.")
+            logger.warning("zeep library not available. Galileo client disabled.")
             self.air_client = None
             self.universal_client = None
     
@@ -126,7 +132,12 @@ class GalileoClient:
             }
         """
         if not self.air_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             # Build search request
@@ -191,7 +202,12 @@ class GalileoClient:
             }
         """
         if not self.universal_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             # Build booking travelers
@@ -256,7 +272,12 @@ class GalileoClient:
     def retrieve_universal_record(self, pnr: str) -> Dict:
         """Retrieve universal record by PNR"""
         if not self.universal_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.universal_client.service.UniversalRecordRetrieveReq(
@@ -285,7 +306,12 @@ class GalileoClient:
             }
         """
         if not self.air_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             # Build form of payment
@@ -319,7 +345,12 @@ class GalileoClient:
     def void_ticket(self, ticket_number: str) -> Dict:
         """Void ticket"""
         if not self.air_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.air_client.service.AirVoidDocumentReq(
@@ -340,7 +371,12 @@ class GalileoClient:
     def refund_ticket(self, refund_data: Dict) -> Dict:
         """Process ticket refund"""
         if not self.air_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.air_client.service.AirRefundReq(
@@ -362,7 +398,12 @@ class GalileoClient:
     def reissue_ticket(self, reissue_data: Dict) -> Dict:
         """Reissue/Exchange ticket"""
         if not self.air_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.air_client.service.AirExchangeReq(
@@ -384,7 +425,12 @@ class GalileoClient:
     def cancel_universal_record(self, pnr: str) -> Dict:
         """Cancel universal record"""
         if not self.universal_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.universal_client.service.UniversalRecordCancelReq(
@@ -404,7 +450,12 @@ class GalileoClient:
     def get_fare_rules(self, fare_data: Dict) -> Dict:
         """Get fare rules"""
         if not self.air_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.air_client.service.AirFareRulesReq(
@@ -427,7 +478,12 @@ class GalileoClient:
     def get_seat_map(self, flight_data: Dict) -> Dict:
         """Get seat map for flight"""
         if not self.air_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.air_client.service.SeatMapReq(
@@ -447,7 +503,12 @@ class GalileoClient:
     def add_ancillaries(self, pnr: str, services: List[Dict]) -> Dict:
         """Add ancillary services"""
         if not self.universal_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.universal_client.service.UniversalRecordModifyReq(
@@ -468,7 +529,12 @@ class GalileoClient:
     def queue_place(self, pnr: str, queue_number: str) -> Dict:
         """Place PNR in queue"""
         if not self.universal_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.universal_client.service.QueuePlaceReq(
@@ -489,7 +555,12 @@ class GalileoClient:
     def queue_retrieve(self, queue_number: str) -> Dict:
         """Retrieve PNRs from queue"""
         if not self.universal_client:
-            raise Exception("Galileo client not initialized")
+            logger.warning("Galileo client not initialized. Returning mock response.")
+            return {
+                'status': 'error',
+                'message': 'Galileo client not initialized',
+                'data': None
+            }
         
         try:
             response = self.universal_client.service.QueueRetrieveReq(
