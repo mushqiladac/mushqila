@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
     depends_on:
       - redis
-      db:
+      - db:
         condition: service_healthy
     networks:
       - mushqila_network
@@ -39,7 +39,7 @@ services:
     environment:
       POSTGRES_DB: mushqila
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: EMR@55nondita
     ports:
       - "5432:5432"
     volumes:
