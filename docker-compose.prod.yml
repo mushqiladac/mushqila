@@ -12,8 +12,9 @@ services:
       - media_volume:/app/media
     restart: unless-stopped
     depends_on:
-      - redis
-      - db:
+      redis:
+        condition: service_started
+      db:
         condition: service_healthy
     networks:
       - mushqila_network
