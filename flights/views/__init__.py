@@ -472,20 +472,6 @@ __all__ = [
     'GDSScheduleView',
     'GDSFareRulesView',
     'GDSCreateBookingView',
-    'GDSRetrieveBookingView',
-    'GDSModifyBookingView',
-    'GDSCancelBookingView',
-    'GDSIssueTicketView',
-    'GDSVoidTicketView',
-    'GDSReissueTicketView',
-    'GDSEMDView',
-    'GDSQueueView',
-    'GDSQueueItemView',
-    'GDSQueueProcessingView',
-    'GDSPNRDecoderView',
-    'GDSTicketValidatorView',
-    'GDSReferenceDataView',
-    'GDSTestConnectionView',
 ]
 
 
