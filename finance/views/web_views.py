@@ -53,7 +53,7 @@ def finance_logout(request):
 @login_required
 def finance_dashboard(request):
     """Finance App Dashboard for PC Users"""
-    user = request.user.financeuser
+    user = request.user
     
     # Dashboard data
     today = timezone.now().date()
@@ -105,7 +105,7 @@ def finance_dashboard(request):
 @login_required
 def ticket_list(request):
     """Ticket List for PC Users"""
-    user = request.user.financeuser
+    user = request.user
     tickets = TicketSale.objects.filter(user=user).order_by('-created_at')
     
     context = {
@@ -119,7 +119,7 @@ def ticket_list(request):
 @login_required
 def ticket_create(request):
     """Create New Ticket for PC Users"""
-    user = request.user.financeuser
+    user = request.user
     
     if request.method == 'POST':
         # Get form data
@@ -168,7 +168,7 @@ def ticket_create(request):
 @login_required
 def submission_list(request):
     """Submissions List for PC Users"""
-    user = request.user.financeuser
+    user = request.user
     
     if user.user_type in ['admin', 'manager']:
         submissions = SalesSubmission.objects.all().order_by('-submitted_at')
@@ -187,7 +187,7 @@ def submission_list(request):
 @login_required
 def submission_detail(request, submission_id):
     """Submission Detail and Approval for PC Users"""
-    user = request.user.financeuser
+    user = request.user
     
     try:
         submission = SalesSubmission.objects.get(id=submission_id)
@@ -230,7 +230,7 @@ def submission_detail(request, submission_id):
 @login_required
 def profile_view(request):
     """User Profile for PC Users"""
-    user = request.user.financeuser
+    user = request.user
     
     context = {
         'user': user,
@@ -242,7 +242,7 @@ def profile_view(request):
 @login_required
 def create_user(request):
     """Create new user (Admin/Manager only)"""
-    user = request.user.financeuser
+    user = request.user
     
     # Check if user has permission to create users
     if user.user_type not in ['admin', 'manager']:
@@ -269,7 +269,7 @@ def create_user(request):
 @login_required
 def update_profile(request):
     """Update User Profile"""
-    user = request.user.financeuser
+    user = request.user
     
     try:
         # Update user fields
