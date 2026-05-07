@@ -103,6 +103,7 @@ class User(AbstractUser):
     
     class UserType(models.TextChoices):
         ADMIN = 'admin', _('Administrator')
+        MANAGER = 'manager', _('Manager')
         SUPER_AGENT = 'super_agent', _('Super Agent')
         AGENT = 'agent', _('Travel Agent')
         SUB_AGENT = 'sub_agent', _('Sub Agent')

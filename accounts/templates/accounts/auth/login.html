@@ -37,6 +37,25 @@
                     <form method="post" id="loginForm" novalidate>
                         {% csrf_token %}
                         
+                        <!-- User Role Selection -->
+                        <div class="mb-4">
+                            <label for="id_user_role" class="form-label fw-semibold">
+                                <i class="fas fa-user-tag me-2"></i>Select Your Role
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user-shield"></i></span>
+                                {{ form.user_role }}
+                            </div>
+                            {% if form.user_role.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.user_role.errors %}
+                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text small">Select your account type to proceed with login</div>
+                        </div>
+                        
                         <!-- Login Type Selection -->
                         <div class="mb-4">
                             <label class="form-label fw-semibold mb-3">

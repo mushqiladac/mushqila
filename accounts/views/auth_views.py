@@ -101,6 +101,8 @@ class LoginView(BaseLoginView):
         # FIXED: User type অনুযায়ী redirect
         if user.user_type == 'admin' or user.is_staff or user.is_superuser:
             return reverse_lazy('accounts:admin_dashboard')
+        elif user.user_type == 'manager':
+            return reverse_lazy('accounts:admin_dashboard')  # Manager uses admin dashboard
         elif user.user_type in ['agent', 'super_agent', 'sub_agent', 'corporate']:
             return reverse_lazy('accounts:agent_dashboard')
         elif user.user_type == 'supplier':
@@ -274,6 +276,8 @@ class RegisterView(View):
         # Same logic as login view for consistency
         if user.user_type == 'admin' or user.is_staff or user.is_superuser:
             return redirect('accounts:admin_dashboard')
+        elif user.user_type == 'manager':
+            return redirect('accounts:admin_dashboard')  # Manager uses admin dashboard
         elif user.user_type in ['agent', 'super_agent', 'sub_agent', 'corporate']:
             return redirect('accounts:agent_dashboard')
         elif user.user_type == 'supplier':

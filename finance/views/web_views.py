@@ -25,12 +25,17 @@ def finance_login(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        selected_user_type = request.POST.get('user_type')
         
         user = authenticate(request, username=email, password=password)
-        if user is not None and hasattr(user, 'financeuser'):
-            login(request, user)
-            messages.success(request, 'সফলভাবে লগইন হয়েছে!')
-            return redirect('finance:dashboard')
+        if user is not None and user.is_active:
+            # Check if the selected user type matches the actual user type
+            if hasattr(user, 'user_type') and user.user_type == selected_user_type:
+                login(request, user)
+                messages.success(request, 'সফলভাবে লগইন হয়েছে!')
+                return redirect('finance:dashboard')
+            else:
+                messages.error(request, f'নির্বাচিত ইউজার টাইপ মেলেনি। আপনি {selected_user_type} নির্বাচন করেছেন কিন্তু এই ইউজার {user.user_type}।')
         else:
             messages.error(request, 'ভুল ইমেল বা পাসওয়ার্ড')
     

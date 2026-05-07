@@ -18,7 +18,7 @@ urlpatterns = [
     # API endpoints
     path('api/v1/webmail/', include('webmail.api_urls', namespace='webmail_api')),
     path('api/v1/b2b/', include('accounts.api_urls', namespace='accounts_api')),
-    path('api/v1/finance/', include('finance.urls', namespace='finance_api')),
+    path('api/v1/finance/', include('finance.api_urls', namespace='finance_api')),
     
     path('', HomeView.as_view(), name='home'),
     path('', include('b2c.urls')),

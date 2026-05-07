@@ -71,7 +71,7 @@ class EmailOrUsernameBackend(ModelBackend):
             if not self.user_can_authenticate(user):
                 logger.warning(f"User {username} cannot authenticate (inactive/blocked)")
                 self._log_failed_attempt(request, username, ip_address, 'account_not_authenticable')
-                increment_login_attempts(ip_address, username)
+                increment_login_attempts(username)
                 return None
             
             # Verify password
@@ -81,39 +81,40 @@ class EmailOrUsernameBackend(ModelBackend):
                 if not status_check[0]:
                     logger.warning(f"Login failed for {username}: {status_check[1]}")
                     self._log_failed_attempt(request, username, ip_address, status_check[2])
-                    increment_login_attempts(ip_address, username)
+                    increment_login_attempts(username)
                     return None
                 
                 # Authentication successful
                 self._log_successful_attempt(request, user, ip_address)
                 return user
             else:
-                # Invalid password
-                logger.warning(f"Invalid password for {username}")
-                self._log_failed_attempt(request, username, ip_address, 'invalid_password')
-                increment_login_attempts(ip_address, username)
-                return None
+                 # Invalid password
+                 logger.warning(f"Invalid password for {username}")
+                 self._log_failed_attempt(request, username, ip_address, 'invalid_password')
+                 increment_login_attempts(username)
+                 return None
                 
-        except UserModel.DoesNotExist:
-            # User not found - run dummy password check to prevent timing attacks
-            UserModel().set_password(password)
-            logger.warning(f"User not found: {username}")
-            self._log_failed_attempt(request, username, ip_address, 'user_not_found')
-            increment_login_attempts(ip_address, username)
-            return None
+         except UserModel.DoesNotExist:
+             # User not found - run dummy password check to prevent timing attacks
+             UserModel().set_password(password)
+             logger.warning(f"User not found: {username}")
+             self._log_failed_attempt(request, username, ip_address, 'user_not_found')
+             increment_login_attempts(username)
+             return None
         
-        except UserModel.MultipleObjectsReturned:
-            # Multiple users found (should not happen with unique email constraint)
-            logger.error(f"Multiple users found for {username}")
-            self._log_failed_attempt(request, username, ip_address, 'multiple_users')
-            increment_login_attempts(ip_address, username)
-            return None
+         except UserModel.MultipleObjectsReturned:
+             # Multiple users found (should not happen with unique email constraint)
+             logger.error(f"Multiple users found for {username}")
+             self._log_failed_attempt(request, username, ip_address, 'multiple_users')
+             increment_login_attempts(username)
+             return None
         
-        except Exception as e:
-            # Unexpected error
-            logger.error(f"Authentication error for {username}: {str(e)}", exc_info=True)
-            self._log_failed_attempt(request, username, ip_address, 'system_error')
-            return None
+         except Exception as e:
+             # Unexpected error
+             logger.error(f"Authentication error for {username}: {str(e)}", exc_info=True)
+             self._log_failed_attempt(request, username, ip_address, 'system_error')
+             increment_login_attempts(username)
+             return None
     
     def get_user(self, user_id: int) -> Optional[AbstractBaseUser]:
         """
@@ -303,7 +304,7 @@ class PhoneNumberBackend(ModelBackend):
             # Check if user can authenticate
             if not self.user_can_authenticate(user):
                 logger.warning(f"User with phone {phone} cannot authenticate")
-                increment_login_attempts(ip_address, phone)
+                increment_login_attempts(phone)
                 return None
             
             # Verify password
@@ -311,25 +312,25 @@ class PhoneNumberBackend(ModelBackend):
                 # Check account status
                 status_check = EmailOrUsernameBackend._check_account_status(self, user)
                 if not status_check[0]:
-                    logger.warning(f"Phone login failed for {phone}: {status_check[1]}")
-                    increment_login_attempts(ip_address, phone)
-                    return None
+                     logger.warning(f"Phone login failed for {phone}: {status_check[1]}")
+                     increment_login_attempts(phone)
+                     return None
                 
                 # Authentication successful
                 EmailOrUsernameBackend._log_successful_attempt(self, request, user, ip_address)
                 return user
             else:
-                # Invalid password
-                logger.warning(f"Invalid password for phone {phone}")
-                increment_login_attempts(ip_address, phone)
-                return None
+                 # Invalid password
+                 logger.warning(f"Invalid password for phone {phone}")
+                 increment_login_attempts(phone)
+                 return None
                 
-        except UserModel.DoesNotExist:
-            # User not found
-            UserModel().set_password(password)
-            logger.warning(f"User not found with phone: {phone}")
-            increment_login_attempts(ip_address, phone)
-            return None
+         except UserModel.DoesNotExist:
+             # User not found
+             UserModel().set_password(password)
+             logger.warning(f"User not found with phone: {phone}")
+             increment_login_attempts(phone)
+             return None
         
         except Exception as e:
             logger.error(f"Phone authentication error for {phone}: {str(e)}", exc_info=True)

@@ -13,12 +13,34 @@ import re
 
 
 class LoginForm(forms.Form):
-    """Login form with email/phone option"""
+    """Login form with email/phone option and role selection"""
     
     LOGIN_CHOICES = [
         ('email', _('Email')),
         ('phone', _('Phone'))
     ]
+    
+    ROLE_CHOICES = [
+        ('', _('Select User Role')),
+        ('admin', _('Administrator')),
+        ('manager', _('Manager')),
+        ('agent', _('Travel Agent')),
+        ('super_agent', _('Super Agent')),
+        ('sub_agent', _('Sub Agent')),
+        ('supplier', _('Service Supplier')),
+        ('corporate', _('Corporate Client')),
+        ('pilgrim', _('Pilgrim Service Provider')),
+    ]
+    
+    user_role = forms.ChoiceField(
+        label=_('User Role'),
+        choices=ROLE_CHOICES,
+        required=True,
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+            'id': 'user_role_field'
+        })
+    )
     
     login_type = forms.ChoiceField(
         label=_('Login With'),
@@ -75,10 +97,14 @@ class LoginForm(forms.Form):
         
     def clean(self):
         cleaned_data = super().clean()
+        user_role = cleaned_data.get('user_role')
         login_type = cleaned_data.get('login_type')
         email = cleaned_data.get('email')
         phone = cleaned_data.get('phone')
         password = cleaned_data.get('password')
+        
+        if not user_role:
+            self.add_error('user_role', _('Please select your user role.'))
         
         if login_type == 'email':
             if not email:
@@ -89,6 +115,8 @@ class LoginForm(forms.Form):
                     self.add_error('password', _('Invalid email or password.'))
                 elif not user.is_active:
                     self.add_error('email', _('Your account is inactive. Please contact support.'))
+                elif user.user_type != user_role:
+                    self.add_error('user_role', _('Selected role does not match your account type.'))
                 else:
                     cleaned_data['user'] = user
         else:  # phone login
@@ -107,6 +135,8 @@ class LoginForm(forms.Form):
                         self.add_error('password', _('Invalid phone number or password.'))
                     elif not user.is_active:
                         self.add_error('phone', _('Your account is inactive. Please contact support.'))
+                    elif user.user_type != user_role:
+                        self.add_error('user_role', _('Selected role does not match your account type.'))
                     else:
                         cleaned_data['user'] = user
                 except User.DoesNotExist:

@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database configuration with optional SQLite fallback for local dev
 # Use environment variable `DB_ENGINE=sqlite` to run with SQLite locally
 # ========================================
-DB_ENGINE = config('DB_ENGINE', default='postgres')
+DB_ENGINE = config('DB_ENGINE', default='sqlite')
 
 if DB_ENGINE == 'mushqila':
     DATABASES = {
