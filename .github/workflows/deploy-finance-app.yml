@@ -277,3 +277,12 @@ jobs:
         webhook_url: ${{ secrets.SLACK_WEBHOOK }}
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      if: secrets.SLACK_WEBHOOK != ''
+    
+    - name: Skip Slack notification
+      run: |
+        echo "⚠️ Slack webhook not configured. Skipping notification."
+        echo "To enable Slack notifications:"
+        echo "1. Go to repository Settings > Secrets and variables > Actions"
+        echo "2. Add SLACK_WEBHOOK_URL secret with your Slack webhook URL"
+      if: secrets.SLACK_WEBHOOK == ''
