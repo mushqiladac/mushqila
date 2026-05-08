@@ -617,7 +617,7 @@ class VerifyKYCDocumentView(LoginRequiredMixin, View):
                 notification_type=Notification.NotificationType.SUCCESS,
                 title='KYC Verification Complete',
                 message='Your KYC verification is complete. You can now use all platform features.',
-                action_url=reverse_lazy('dashboard')
+                action_url=reverse_lazy('accounts:dashboard_redirect')
             )
     
     def get_required_documents(self, user):

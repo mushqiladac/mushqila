@@ -628,7 +628,7 @@ class HajjBookingView(LoginRequiredMixin, TemplateView):
                         {'pilgrims': pilgrims}
                     )
                     
-                    return redirect('dashboard')
+                    return redirect('accounts:dashboard_redirect')
             
             except Exception as e:
                 messages.error(request, str(e))
@@ -738,7 +738,7 @@ class UmrahBookingView(LoginRequiredMixin, TemplateView):
                         {'travelers': travelers}
                     )
                     
-                    return redirect('dashboard')
+                    return redirect('accounts:dashboard_redirect')
             
             except Exception as e:
                 messages.error(request, str(e))
@@ -775,7 +775,7 @@ class CancelBookingView(LoginRequiredMixin, View):
             model = HotelBooking
         else:
             messages.error(request, _('Invalid booking type.'))
-            return redirect('dashboard')
+            return redirect('accounts:dashboard_redirect')
         
         # Check if booking can be cancelled
         if booking.status not in [model.BookingStatus.PENDING, model.BookingStatus.CONFIRMED]:
