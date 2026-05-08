@@ -27,23 +27,51 @@ def finance_login(request):
         password = request.POST.get('password')
         selected_user_type = request.POST.get('user_type')
         
-        # Try to authenticate with FinanceUser
+        # Try to authenticate with FinanceUser first
         try:
             from finance.models.user import FinanceUser
-            user = FinanceUser.objects.get(email=email)
+            finance_user = FinanceUser.objects.get(email=email)
             
-            if user.check_password(password) and user.is_active:
+            if finance_user.check_password(password) and finance_user.is_active:
                 # Check if the selected user type matches
-                if user.user_type == selected_user_type:
-                    login(request, user)
+                if finance_user.user_type == selected_user_type:
+                    # Create or get corresponding accounts.User for session authentication
+                    from accounts.models import User
+                    try:
+                        # Try to get existing User
+                        user = User.objects.get(email=email)
+                    except User.DoesNotExist:
+                        # Create a linked User account for session authentication
+                        user = User.objects.create(
+                            email=email,
+                            username=email,
+                            first_name=finance_user.first_name,
+                            last_name=finance_user.last_name,
+                            phone=finance_user.phone if finance_user.phone else '+966500000000',
+                            user_type='admin',  # Finance users are admins
+                            is_staff=True,
+                            is_active=True
+                        )
+                        user.set_password(password)
+                        user.save()
+                    
+                    # Now login with the accounts.User
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    
+                    # Store finance user info in session
+                    request.session['finance_user_id'] = finance_user.id
+                    request.session['finance_user_type'] = finance_user.user_type
+                    
                     messages.success(request, 'সফলভাবে লগইন হয়েছে!')
                     return redirect('finance:dashboard')
                 else:
-                    messages.error(request, f'নির্বাচিত ইউজার টাইপ মেলেনি। আপনি {selected_user_type} নির্বাচন করেছেন কিন্তু এই ইউজার {user.get_user_type_display()}।')
+                    messages.error(request, f'নির্বাচিত ইউজার টাইপ মেলেনি। আপনি {selected_user_type} নির্বাচন করেছেন কিন্তু এই ইউজার {finance_user.get_user_type_display()}।')
             else:
                 messages.error(request, 'ভুল ইমেল বা পাসওয়ার্ড')
-        except:
+        except FinanceUser.DoesNotExist:
             messages.error(request, 'ভুল ইমেল বা পাসওয়ার্ড')
+        except Exception as e:
+            messages.error(request, f'লগইন সমস্যা: {str(e)}')
     
     return render(request, 'finance/login.html')
 
@@ -61,44 +89,66 @@ def finance_dashboard(request):
     """Finance App Dashboard for PC Users"""
     user = request.user
     
+    # Get finance user from session
+    finance_user_id = request.session.get('finance_user_id')
+    finance_user_type = request.session.get('finance_user_type', 'user')
+    
+    # Get FinanceUser if exists
+    finance_user = None
+    if finance_user_id:
+        try:
+            from finance.models.user import FinanceUser
+            finance_user = FinanceUser.objects.get(id=finance_user_id)
+        except:
+            pass
+    
     # Dashboard data
     today = timezone.now().date()
     
     # Today's sales
-    today_sales = FinanceTransaction.objects.filter(
-        user=user,
-        transaction_type='sale',
-        created_at__date=today
-    ).aggregate(
-        total=Sum('amount'),
-        count=Count('id')
-    )
-    
-    # This month's sales
-    this_month_sales = FinanceTransaction.objects.filter(
-        user=user,
-        transaction_type='sale',
-        created_at__month=today.month,
-        created_at__year=today.year
-    ).aggregate(
-        total=Sum('amount'),
-        count=Count('id')
-    )
-    
-    # Recent transactions
-    recent_transactions = FinanceTransaction.objects.filter(
-        user=user
-    ).order_by('-created_at')[:10]
-    
-    # Pending submissions (if user is manager)
+    today_sales = {'total': 0, 'count': 0}
+    this_month_sales = {'total': 0, 'count': 0}
+    recent_transactions = []
     pending_submissions = []
-    if user.user_type in ['admin', 'manager']:
-        pending_submissions = SalesSubmission.objects.filter(
-            status='pending'
-        ).order_by('-submitted_at')[:10]
+    
+    # Try to get finance transactions if FinanceUser exists
+    if finance_user:
+        try:
+            today_sales = FinanceTransaction.objects.filter(
+                user=finance_user,
+                transaction_type='sale',
+                created_at__date=today
+            ).aggregate(
+                total=Sum('amount'),
+                count=Count('id')
+            )
+            
+            this_month_sales = FinanceTransaction.objects.filter(
+                user=finance_user,
+                transaction_type='sale',
+                created_at__month=today.month,
+                created_at__year=today.year
+            ).aggregate(
+                total=Sum('amount'),
+                count=Count('id')
+            )
+            
+            recent_transactions = FinanceTransaction.objects.filter(
+                user=finance_user
+            ).order_by('-created_at')[:10]
+            
+            # Pending submissions (if user is manager)
+            if finance_user_type in ['admin', 'manager']:
+                pending_submissions = SalesSubmission.objects.filter(
+                    status='pending'
+                ).order_by('-submitted_at')[:10]
+        except:
+            pass
     
     context = {
         'user': user,
+        'finance_user': finance_user,
+        'finance_user_type': finance_user_type,
         'today_sales': today_sales,
         'this_month_sales': this_month_sales,
         'recent_transactions': recent_transactions,

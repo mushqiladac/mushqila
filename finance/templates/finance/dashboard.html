@@ -203,11 +203,20 @@
             <div class="container-fluid">
                 <div class="user-info">
                     <div class="user-avatar">
-                        {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+                        {% if finance_user %}
+                            {{ finance_user.first_name.0|upper }}{{ finance_user.last_name.0|upper }}
+                        {% else %}
+                            {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+                        {% endif %}
                     </div>
                     <div>
-                        <div class="fw-bold">{{ user.get_full_name|default:user.email }}</div>
-                        <small class="text-muted">{{ user.get_user_type_display }}</small>
+                        {% if finance_user %}
+                            <div class="fw-bold">{{ finance_user.get_full_name|default:finance_user.email }}</div>
+                            <small class="text-muted">{{ finance_user.get_user_type_display }}</small>
+                        {% else %}
+                            <div class="fw-bold">{{ user.get_full_name|default:user.email }}</div>
+                            <small class="text-muted">Finance User</small>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="d-flex align-items-center">
@@ -324,7 +333,7 @@
         </div>
 
         <!-- Pending Submissions (for managers) -->
-        {% if user.user_type == 'manager' or user.user_type == 'admin' %}
+        {% if finance_user_type == 'manager' or finance_user_type == 'admin' %}
             <div class="row">
                 <div class="col-12">
                     <div class="recent-transactions">
