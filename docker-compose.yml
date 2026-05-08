@@ -3,9 +3,9 @@ services:
     build: .
     container_name: mushqila_web
     ports:
-      - "8000:8000"
+      - "8002:8000"
     env_file:
-      - .env.docker
+      - .env.local
     depends_on:
       - db
       - redis
@@ -15,6 +15,7 @@ services:
       - /app/*/__pycache__
     networks:
       - mushqila_network
+    command: python manage.py runserver 0.0.0.0:8000
 
   db:
     image: postgres:13
@@ -24,7 +25,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -34,7 +35,7 @@ services:
     image: redis:7-alpine
     container_name: mushqila_redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     networks:

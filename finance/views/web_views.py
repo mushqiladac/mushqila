@@ -180,12 +180,23 @@ def finance_dashboard(request):
 @login_required
 def ticket_list(request):
     """Ticket List for PC Users"""
-    user = request.user
-    tickets = TicketSale.objects.filter(user=user).order_by('-created_at')
+    # Get FinanceUser from session instead of request.user
+    finance_user_id = request.session.get('finance_user_id')
+    if not finance_user_id:
+        messages.error(request, 'Session expired. Please login again.')
+        return redirect('finance:login')
+    
+    try:
+        finance_user = FinanceUser.objects.get(id=finance_user_id)
+    except FinanceUser.DoesNotExist:
+        messages.error(request, 'User not found. Please login again.')
+        return redirect('finance:login')
+    
+    tickets = TicketSale.objects.filter(user=finance_user).order_by('-created_at')
     
     context = {
         'tickets': tickets,
-        'user': user,
+        'user': finance_user,
     }
     
     return render(request, 'finance/tickets/list.html', context)
@@ -194,7 +205,17 @@ def ticket_list(request):
 @login_required
 def ticket_create(request):
     """Create New Ticket for PC Users"""
-    user = request.user
+    # Get FinanceUser from session instead of request.user
+    finance_user_id = request.session.get('finance_user_id')
+    if not finance_user_id:
+        messages.error(request, 'Session expired. Please login again.')
+        return redirect('finance:login')
+    
+    try:
+        finance_user = FinanceUser.objects.get(id=finance_user_id)
+    except FinanceUser.DoesNotExist:
+        messages.error(request, 'User not found. Please login again.')
+        return redirect('finance:login')
     
     if request.method == 'POST':
         # Get form data
@@ -209,7 +230,7 @@ def ticket_create(request):
         # Create ticket
         try:
             ticket = TicketSale.objects.create(
-                user=user,
+                user=finance_user,
                 pnr=pnr,
                 ticket_number=ticket_number,
                 airline_id=airline_id,
@@ -234,7 +255,7 @@ def ticket_create(request):
     context = {
         'airlines': airlines,
         'payment_methods': payment_methods,
-        'user': user,
+        'user': finance_user,
     }
     
     return render(request, 'finance/tickets/create.html', context)
@@ -243,17 +264,27 @@ def ticket_create(request):
 @login_required
 def submission_list(request):
     """Submissions List for PC Users"""
-    user = request.user
+    # Get FinanceUser from session
+    finance_user_id = request.session.get('finance_user_id')
+    if not finance_user_id:
+        messages.error(request, 'Session expired. Please login again.')
+        return redirect('finance:login')
     
-    if user.user_type in ['admin', 'manager']:
+    try:
+        finance_user = FinanceUser.objects.get(id=finance_user_id)
+    except FinanceUser.DoesNotExist:
+        messages.error(request, 'User not found. Please login again.')
+        return redirect('finance:login')
+    
+    if finance_user.user_type in ['admin', 'manager']:
         submissions = SalesSubmission.objects.all().order_by('-submitted_at')
     else:
-        submissions = SalesSubmission.objects.filter(user=user).order_by('-submitted_at')
+        submissions = SalesSubmission.objects.filter(user=finance_user).order_by('-submitted_at')
     
     context = {
         'submissions': submissions,
-        'user': user,
-        'is_manager': user.user_type in ['admin', 'manager'],
+        'user': finance_user,
+        'is_manager': finance_user.user_type in ['admin', 'manager'],
     }
     
     return render(request, 'finance/submissions/list.html', context)
@@ -262,37 +293,47 @@ def submission_list(request):
 @login_required
 def submission_detail(request, submission_id):
     """Submission Detail and Approval for PC Users"""
-    user = request.user
+    # Get FinanceUser from session
+    finance_user_id = request.session.get('finance_user_id')
+    if not finance_user_id:
+        messages.error(request, 'Session expired. Please login again.')
+        return redirect('finance:login')
+    
+    try:
+        finance_user = FinanceUser.objects.get(id=finance_user_id)
+    except FinanceUser.DoesNotExist:
+        messages.error(request, 'User not found. Please login again.')
+        return redirect('finance:login')
     
     try:
         submission = SalesSubmission.objects.get(id=submission_id)
         
         # Check permissions
-        if user.user_type not in ['admin', 'manager'] and submission.user != user:
+        if finance_user.user_type not in ['admin', 'manager'] and submission.user != finance_user:
             messages.error(request, 'আপনার এই submission দেখার অনুমতি নেই')
             return redirect('finance:submission_list')
         
-        if request.method == 'POST' and user.user_type in ['admin', 'manager']:
+        if request.method == 'POST' and finance_user.user_type in ['admin', 'manager']:
             action = request.POST.get('action')
             
             if action == 'approve':
                 submission.status = 'approved'
-                submission.reviewed_by = user
+                submission.reviewed_by = finance_user
                 submission.reviewed_at = timezone.now()
                 submission.save()
                 messages.success(request, 'Submission অনুমোদন করা হয়েছে!')
                 
             elif action == 'reject':
                 submission.status = 'rejected'
-                submission.reviewed_by = user
+                submission.reviewed_by = finance_user
                 submission.reviewed_at = timezone.now()
                 submission.save()
                 messages.success(request, 'Submission বাতিল করা হয়েছে!')
         
         context = {
             'submission': submission,
-            'user': user,
-            'can_approve': user.user_type in ['admin', 'manager'],
+            'user': finance_user,
+            'can_approve': finance_user.user_type in ['admin', 'manager'],
         }
         
         return render(request, 'finance/submissions/detail.html', context)
@@ -305,10 +346,20 @@ def submission_detail(request, submission_id):
 @login_required
 def profile_view(request):
     """User Profile for PC Users"""
-    user = request.user
+    # Get FinanceUser from session
+    finance_user_id = request.session.get('finance_user_id')
+    if not finance_user_id:
+        messages.error(request, 'Session expired. Please login again.')
+        return redirect('finance:login')
+    
+    try:
+        finance_user = FinanceUser.objects.get(id=finance_user_id)
+    except FinanceUser.DoesNotExist:
+        messages.error(request, 'User not found. Please login again.')
+        return redirect('finance:login')
     
     context = {
-        'user': user,
+        'user': finance_user,
     }
     
     return render(request, 'finance/profile.html', context)
@@ -317,10 +368,20 @@ def profile_view(request):
 @login_required
 def create_user(request):
     """Create new user (Admin/Manager only)"""
-    user = request.user
+    # Get FinanceUser from session
+    finance_user_id = request.session.get('finance_user_id')
+    if not finance_user_id:
+        messages.error(request, 'Session expired. Please login again.')
+        return redirect('finance:login')
+    
+    try:
+        finance_user = FinanceUser.objects.get(id=finance_user_id)
+    except FinanceUser.DoesNotExist:
+        messages.error(request, 'User not found. Please login again.')
+        return redirect('finance:login')
     
     # Check if user has permission to create users
-    if user.user_type not in ['admin', 'manager']:
+    if finance_user.user_type not in ['admin', 'manager']:
         messages.error(request, 'আপনার ইউজার তৈরির অনুমতি নেই। শুধুমাত্র Admin বা Manager ইউজার তৈরি করতে পারে।')
         return redirect('finance:dashboard')
     
@@ -338,22 +399,32 @@ def create_user(request):
             messages.error(request, f'ইউজার তৈরিতে সমস্যা: {serializer.errors}')
     
     # For GET request, show user creation form
-    return render(request, 'finance/create_user.html', {'user': user})
+    return render(request, 'finance/create_user.html', {'user': finance_user})
 
 @require_POST
 @login_required
 def update_profile(request):
     """Update User Profile"""
-    user = request.user
+    # Get FinanceUser from session
+    finance_user_id = request.session.get('finance_user_id')
+    if not finance_user_id:
+        messages.error(request, 'Session expired. Please login again.')
+        return redirect('finance:login')
+    
+    try:
+        finance_user = FinanceUser.objects.get(id=finance_user_id)
+    except FinanceUser.DoesNotExist:
+        messages.error(request, 'User not found. Please login again.')
+        return redirect('finance:login')
     
     try:
         # Update user fields
-        user.first_name = request.POST.get('first_name', user.first_name)
-        user.last_name = request.POST.get('last_name', user.last_name)
-        user.phone = request.POST.get('phone', user.phone)
-        user.alternative_email = request.POST.get('alternative_email', user.alternative_email)
+        finance_user.first_name = request.POST.get('first_name', finance_user.first_name)
+        finance_user.last_name = request.POST.get('last_name', finance_user.last_name)
+        finance_user.phone = request.POST.get('phone', finance_user.phone)
+        finance_user.alternative_email = request.POST.get('alternative_email', finance_user.alternative_email)
         
-        user.save()
+        finance_user.save()
         
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True, 'message': 'প্রোফাইল সফলভাবে আপডেট হয়েছে!'})

@@ -5,7 +5,7 @@ Flutter mobile app এর পাশাপাশি PC web interface জন্য
 from django.urls import path
 from .views import web_views
 
-app_name = 'finance'
+# app_name is defined in finance/urls.py to avoid conflicts
 
 urlpatterns = [
     # Authentication URLs

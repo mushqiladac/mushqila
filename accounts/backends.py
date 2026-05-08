@@ -90,31 +90,31 @@ class EmailOrUsernameBackend(ModelBackend):
             else:
                  # Invalid password
                  logger.warning(f"Invalid password for {username}")
-                 self._log_failed_attempt(request, username, ip_address, 'invalid_password')
+                 self._log_failed_attempt(request, username, ip_address, 'invalid_credentials')
                  increment_login_attempts(username)
                  return None
                 
-         except UserModel.DoesNotExist:
-             # User not found - run dummy password check to prevent timing attacks
-             UserModel().set_password(password)
-             logger.warning(f"User not found: {username}")
-             self._log_failed_attempt(request, username, ip_address, 'user_not_found')
-             increment_login_attempts(username)
-             return None
+        except UserModel.DoesNotExist:
+            # User not found - run dummy password check to prevent timing attacks
+            UserModel().set_password(password)
+            logger.warning(f"User not found: {username}")
+            self._log_failed_attempt(request, username, ip_address, 'invalid_credentials')
+            increment_login_attempts(username)
+            return None
         
-         except UserModel.MultipleObjectsReturned:
-             # Multiple users found (should not happen with unique email constraint)
-             logger.error(f"Multiple users found for {username}")
-             self._log_failed_attempt(request, username, ip_address, 'multiple_users')
-             increment_login_attempts(username)
-             return None
+        except UserModel.MultipleObjectsReturned:
+            # Multiple users found (should not happen with unique email constraint)
+            logger.error(f"Multiple users found for {username}")
+            self._log_failed_attempt(request, username, ip_address, 'multiple_users')
+            increment_login_attempts(username)
+            return None
         
-         except Exception as e:
-             # Unexpected error
-             logger.error(f"Authentication error for {username}: {str(e)}", exc_info=True)
-             self._log_failed_attempt(request, username, ip_address, 'system_error')
-             increment_login_attempts(username)
-             return None
+        except Exception as e:
+            # Unexpected error
+            logger.error(f"Authentication error for {username}: {str(e)}", exc_info=True)
+            self._log_failed_attempt(request, username, ip_address, 'system_error')
+            increment_login_attempts(username)
+            return None
     
     def get_user(self, user_id: int) -> Optional[AbstractBaseUser]:
         """
@@ -325,12 +325,12 @@ class PhoneNumberBackend(ModelBackend):
                  increment_login_attempts(phone)
                  return None
                 
-         except UserModel.DoesNotExist:
-             # User not found
-             UserModel().set_password(password)
-             logger.warning(f"User not found with phone: {phone}")
-             increment_login_attempts(phone)
-             return None
+        except UserModel.DoesNotExist:
+            # User not found
+            UserModel().set_password(password)
+            logger.warning(f"User not found with phone: {phone}")
+            increment_login_attempts(phone)
+            return None
         
         except Exception as e:
             logger.error(f"Phone authentication error for {phone}: {str(e)}", exc_info=True)

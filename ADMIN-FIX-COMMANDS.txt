@@ -1,0 +1,54 @@
+========================================
+Django Admin 500 Error - Fix Commands
+========================================
+
+Run these commands on production server:
+
+# 1. SSH to server
+ssh ubuntu@ip-172-31-36-20
+
+# 2. Navigate to project
+cd ~/mushqila
+
+# 3. Pull latest code (includes fix script)
+git pull origin main
+
+# 4. Collect static files
+docker-compose exec web python manage.py collectstatic --noinput --clear
+
+# 5. Restart web container
+docker-compose restart web
+
+# 6. Check if working
+curl -I https://mushqila.com/admin/
+
+========================================
+Alternative: One-Line Fix
+========================================
+
+ssh ubuntu@ip-172-31-36-20 "cd ~/mushqila && docker-compose exec -T web python manage.py collectstatic --noinput --clear && docker-compose restart web"
+
+========================================
+Verify Fix
+========================================
+
+Open browser: https://mushqila.com/admin/
+Should show Django admin login page (not 500 error)
+
+========================================
+If Still Not Working
+========================================
+
+Check logs:
+docker-compose logs -f web
+
+Check static files:
+docker-compose exec web ls -la /app/staticfiles/admin/
+
+Check settings:
+docker-compose exec web python manage.py shell
+>>> from django.conf import settings
+>>> print(settings.STATIC_ROOT)
+>>> print(settings.DEBUG)
+
+========================================
