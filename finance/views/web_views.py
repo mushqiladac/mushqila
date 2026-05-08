@@ -6,7 +6,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
@@ -29,55 +30,66 @@ def finance_login(request):
         
         # Try to authenticate with FinanceUser first
         try:
-            from finance.models.user import FinanceUser
             finance_user = FinanceUser.objects.get(email=email)
             
-            if finance_user.check_password(password) and finance_user.is_active:
-                # Check if the selected user type matches
-                if finance_user.user_type == selected_user_type:
-                    # Create or get corresponding accounts.User for session authentication
-                    from accounts.models import User
-                    try:
-                        # Try to get existing User
-                        user = User.objects.get(email=email)
-                    except User.DoesNotExist:
-                        # Create a linked User account for session authentication
-                        user = User.objects.create(
-                            email=email,
-                            username=email,
-                            first_name=finance_user.first_name,
-                            last_name=finance_user.last_name,
-                            phone=finance_user.phone if finance_user.phone else '+966500000000',
-                            user_type='admin',  # Finance users are admins
-                            is_staff=True,
-                            is_active=True
-                        )
-                        user.set_password(password)
-                        user.save()
-                    
-                    # Now login with the accounts.User
-                    # Don't use Django's login() which triggers LOGIN_REDIRECT_URL
-                    # Instead, manually set session
-                    from django.contrib.auth import login as auth_login
-                    auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                    
-                    # Store finance user info in session
-                    request.session['finance_user_id'] = finance_user.id
-                    request.session['finance_user_type'] = finance_user.user_type
-                    
-                    messages.success(request, 'সফলভাবে লগইন হয়েছে!')
-                    
-                    # Explicitly redirect to finance dashboard, ignore LOGIN_REDIRECT_URL
-                    from django.http import HttpResponseRedirect
-                    from django.urls import reverse
-                    return HttpResponseRedirect(reverse('finance:dashboard'))
-                else:
-                    messages.error(request, f'নির্বাচিত ইউজার টাইপ মেলেনি। আপনি {selected_user_type} নির্বাচন করেছেন কিন্তু এই ইউজার {finance_user.get_user_type_display()}।')
-            else:
+            if not finance_user.check_password(password):
                 messages.error(request, 'ভুল ইমেল বা পাসওয়ার্ড')
+                return render(request, 'finance/login.html')
+            
+            if not finance_user.is_active:
+                messages.error(request, 'আপনার অ্যাকাউন্ট নিষ্ক্রিয় করা হয়েছে')
+                return render(request, 'finance/login.html')
+            
+            # Check if the selected user type matches
+            if finance_user.user_type != selected_user_type:
+                messages.error(request, f'নির্বাচিত ইউজার টাইপ মেলেনি। আপনি {selected_user_type} নির্বাচন করেছেন কিন্তু এই ইউজার {finance_user.get_user_type_display()}।')
+                return render(request, 'finance/login.html')
+            
+            # Create or get corresponding accounts.User for session authentication
+            from accounts.models import User
+            try:
+                # Try to get existing User
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                # Create a linked User account for session authentication
+                user = User.objects.create(
+                    email=email,
+                    username=email,
+                    first_name=finance_user.first_name,
+                    last_name=finance_user.last_name,
+                    phone=finance_user.phone if finance_user.phone else '+966500000000',
+                    user_type='admin',  # Finance users are admins
+                    is_staff=True,
+                    is_active=True
+                )
+                user.set_password(password)
+                user.save()
+            
+            # Manually set session data instead of using login()
+            from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, HASH_SESSION_KEY
+            request.session[SESSION_KEY] = user._meta.pk.value_to_string(user)
+            request.session[BACKEND_SESSION_KEY] = 'django.contrib.auth.backends.ModelBackend'
+            request.session[HASH_SESSION_KEY] = user.get_session_auth_hash()
+            
+            # Store finance user info in session
+            request.session['finance_user_id'] = finance_user.id
+            request.session['finance_user_type'] = finance_user.user_type
+            
+            # Force session save
+            request.session.modified = True
+            
+            messages.success(request, 'সফলভাবে লগইন হয়েছে!')
+            
+            # Direct redirect without any middleware interference
+            return HttpResponseRedirect(reverse('finance:dashboard'))
+            
         except FinanceUser.DoesNotExist:
             messages.error(request, 'ভুল ইমেল বা পাসওয়ার্ড')
         except Exception as e:
+            # Log the actual error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f'Finance login error: {str(e)}', exc_info=True)
             messages.error(request, f'লগইন সমস্যা: {str(e)}')
     
     return render(request, 'finance/login.html')
