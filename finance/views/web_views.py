@@ -56,14 +56,21 @@ def finance_login(request):
                         user.save()
                     
                     # Now login with the accounts.User
-                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    # Don't use Django's login() which triggers LOGIN_REDIRECT_URL
+                    # Instead, manually set session
+                    from django.contrib.auth import login as auth_login
+                    auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                     
                     # Store finance user info in session
                     request.session['finance_user_id'] = finance_user.id
                     request.session['finance_user_type'] = finance_user.user_type
                     
                     messages.success(request, 'সফলভাবে লগইন হয়েছে!')
-                    return redirect('finance:dashboard')
+                    
+                    # Explicitly redirect to finance dashboard, ignore LOGIN_REDIRECT_URL
+                    from django.http import HttpResponseRedirect
+                    from django.urls import reverse
+                    return HttpResponseRedirect(reverse('finance:dashboard'))
                 else:
                     messages.error(request, f'নির্বাচিত ইউজার টাইপ মেলেনি। আপনি {selected_user_type} নির্বাচন করেছেন কিন্তু এই ইউজার {finance_user.get_user_type_display()}।')
             else:
