@@ -8,10 +8,10 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4>ইউজার প্রোফাইল</h4>
-                <a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> ড্যাশবোর্ডে ফিরতে যান
-                </a>
+                <h4>User Profile</h4>
+<a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">
+                     <i class="fas fa-arrow-left"></i> Go back to Dashboard
+                 </a>
             </div>
             
             {% if messages %}
@@ -25,7 +25,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">ইউজার তথ্য</h5>
+                    <h5 class="mb-0">User Information</h5>
                 </div>
                 <div class="card-body">
                     <form method="post" action="{% url 'finance:update_profile' %}">
@@ -33,14 +33,14 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="first_name" class="form-label">প্রথম নাম</label>
+                                    <label for="first_name" class="form-label">First Name</label>
                                     <input type="text" class="form-control" id="first_name" name="first_name" 
                                            value="{{ user.first_name }}" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="last_name" class="form-label">শেষ নাম</label>
+                                    <label for="last_name" class="form-label">Last Name</label>
                                     <input type="text" class="form-control" id="last_name" name="last_name" 
                                            value="{{ user.last_name }}" required>
                                 </div>
@@ -50,15 +50,15 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="email" class="form-label">ইমেইল</label>
+                                    <label for="email" class="form-label">Email</label>
                                     <input type="email" class="form-control" id="email" name="email" 
                                            value="{{ user.email }}" readonly>
-                                    <small class="form-text text-muted">ইমেইল পরিবর্তন করা যাবে না</small>
+                                    <small class="form-text text-muted">Email cannot be changed</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="phone" class="form-label">ফোন নম্বর</label>
+                                    <label for="phone" class="form-label">Phone Number</label>
                                     <input type="tel" class="form-control" id="phone" name="phone" 
                                            value="{{ user.phone }}" required>
                                 </div>
@@ -68,17 +68,17 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="alternative_email" class="form-label">বিকল্পনিক ইমেইল</label>
+                                    <label for="alternative_email" class="form-label">Alternative Email</label>
                                     <input type="email" class="form-control" id="alternative_email" name="alternative_email" 
                                            value="{{ user.alternative_email|default:'' }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="user_type" class="form-label">ইউজার টাইপ</label>
+                                    <label for="user_type" class="form-label">User Type</label>
                                     <input type="text" class="form-control" id="user_type" name="user_type" 
                                            value="{{ user.get_user_type_display }}" readonly>
-                                    <small class="form-text text-muted">ইউজার টাইপ পরিবর্তন করা যাবে না</small>
+                                    <small class="form-text text-muted">User type cannot be changed</small>
                                 </div>
                             </div>
                         </div>
@@ -86,7 +86,7 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label for="company_name_en" class="form-label">কোম্পানির নাম (ইংরেজি)</label>
+                                    <label for="company_name_en" class="form-label">Company Name (English)</label>
                                     <input type="text" class="form-control" id="company_name_en" name="company_name_en" 
                                            value="{{ user.company_name_en|default:'' }}">
                                 </div>
@@ -96,24 +96,24 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="status" class="form-label">স্ট্যাটাস</label>
+                                    <label for="status" class="form-label">Status</label>
                                     <input type="text" class="form-control" id="status" name="status" 
                                            value="{{ user.get_status_display }}" readonly>
-                                    <small class="form-text text-muted">স্ট্যাটাস পরিবর্তন করা যাবে না</small>
+                                    <small class="form-text text-muted">Status cannot be changed</small>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="created_at" class="form-label">তৈরি করায়েছে</label>
+                                    <label for="created_at" class="form-label">Created At</label>
                                     <input type="text" class="form-control" id="created_at" name="created_at" 
                                            value="{{ user.created_at|date:'d M Y' }}" readonly>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="last_login" class="form-label">শেষ লগইন</label>
+                                    <label for="last_login" class="form-label">Last Login</label>
                                     <input type="text" class="form-control" id="last_login" name="last_login" 
-                                           value="{{ user.last_login|date:'d M Y, H:i'|default:'কখনো লগইন করেনি' }}" readonly>
+                                           value="{{ user.last_login|date:'d M Y, H:i'|default:'Never logged in' }}" readonly>
                                 </div>
                             </div>
                         </div>
@@ -121,12 +121,12 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save"></i> প্রোফাইল আপডেট করুন
-                                    </button>
-                                    <a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">
-                                        <i class="fas fa-times"></i> বাতিল করুন
-                                    </a>
+<button type="submit" class="btn btn-primary">
+                                     <i class="fas fa-save"></i> Update Profile
+                                 </button>
+<a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">
+                                         <i class="fas fa-times"></i> Cancel
+                                     </a>
                                 </div>
                             </div>
                         </div>
@@ -184,7 +184,7 @@ document.querySelector('form').addEventListener('submit', function(e) {
     const originalText = submitBtn.innerHTML;
     
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হয়ে চলেন...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
     
     fetch('{% url "finance:update_profile" %}', {
         method: 'POST',
@@ -230,13 +230,13 @@ document.querySelector('form').addEventListener('submit', function(e) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
         
-        // Show error message
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-        alertDiv.innerHTML = `
-            প্রোফাইল আপডেট করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
+// Show error message
+             const alertDiv = document.createElement('div');
+             alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+             alertDiv.innerHTML = `
+                 Problem updating profile. Please try again.
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+             `;
         
         const container = document.querySelector('.main-content');
         container.insertBefore(alertDiv, container.firstChild);

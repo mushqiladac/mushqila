@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -120,97 +120,97 @@
                     <form method="post">
                         {% csrf_token %}
                         <div class="form-floating">
-                            <select class="form-select" id="user_type" name="user_type" required>
-                                <option value="" selected disabled>নির্বাচন করুন</option>
-                                <option value="admin">এডমিন</option>
-                                <option value="manager">ম্যানাজার</option>
-                                <option value="user">সাধারণ ইউজার</option>
-                            </select>
-                            <label for="user_type">ইউজার টাইপ</label>
+<select class="form-select" id="user_type" name="user_type" required>
+                                 <option value="" selected disabled>Select</option>
+                                 <option value="admin">Admin</option>
+                                 <option value="manager">Manager</option>
+                                 <option value="user">Regular User</option>
+                             </select>
+                             <label for="user_type">User Type</label>
                         </div>
                         
                         <div class="form-floating">
-                            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
-                            <label for="email">ইমেল ঠিকানা</label>
+<input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                             <label for="email">Email Address</label>
                         </div>
                         
                         <div class="form-floating">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
-                            <label for="password">পাসওয়ার্ড</label>
+<input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                             <label for="password">Password</label>
                         </div>
                         
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="remember">
-                            <label class="form-check-label" for="remember">
-                                আমাকে মনে রাখুন
-                            </label>
-                        </div>
+<div class="form-check mb-3">
+                             <input class="form-check-input" type="checkbox" id="remember">
+                             <label class="form-check-label" for="remember">
+                                 Remember me
+                             </label>
+                         </div>
                         
-                        <button type="submit" class="btn btn-primary btn-login w-100 mb-3">
-                            <i class="fas fa-sign-in-alt me-2"></i> লগইন করুন
-                        </button>
+<button type="submit" class="btn btn-primary btn-login w-100 mb-3">
+                             <i class="fas fa-sign-in-alt me-2"></i> Login
+                         </button>
                         
-                        <div class="text-center">
-                            <a href="#" class="text-decoration-none">
-                                <i class="fas fa-key me-1"></i> পাসওয়ার্ড ভুলে গেছেন?
-                            </a>
-                        </div>
+<div class="text-center">
+                             <a href="#" class="text-decoration-none">
+                                 <i class="fas fa-key me-1"></i> Forgot password?
+                             </a>
+                         </div>
                     </form>
                 </div>
             </div>
             
             <div class="col-lg-6">
                 <div class="p-4">
-                    <div class="features">
-                        <h5><i class="fas fa-star me-2"></i>বৈশিষ্ট্যসমূহ</h5>
+<div class="features">
+                         <h5><i class="fas fa-star me-2"></i>Features</h5>
                         
-                        <div class="feature-item">
-                            <i class="fas fa-ticket-alt"></i>
-                            <div>
-                                <strong>টিকেট বিক্রয় ব্যবস্থাপনা</strong>
-                                <small class="d-block text-muted">PNR এবং এয়ারলাইন সহ সম্পূর্ণ টিকেট ব্যবস্থাপনা</small>
-                            </div>
-                        </div>
+<div class="feature-item">
+                             <i class="fas fa-ticket-alt"></i>
+                             <div>
+                                 <strong>Ticket Sales Management</strong>
+                                 <small class="d-block text-muted">Complete ticket management including PNR and airlines</small>
+                             </div>
+                         </div>
                         
-                        <div class="feature-item">
-                            <i class="fas fa-chart-bar"></i>
-                            <div>
-                                <strong>বিক্রয় রিপোর্ট</strong>
-                                <small class="d-block text-muted">দৈনিক, সাপ্তাহিক এবং মাসিক বিক্রয় রিপোর্ট</small>
-                            </div>
-                        </div>
+<div class="feature-item">
+                             <i class="fas fa-chart-bar"></i>
+                             <div>
+                                 <strong>Sales Report</strong>
+                                 <small class="d-block text-muted">Daily, weekly and monthly sales reports</small>
+                             </div>
+                         </div>
                         
-                        <div class="feature-item">
-                            <i class="fas fa-user-check"></i>
-                            <div>
-                                <strong>ম্যানেজার অনুমোদন</strong>
-                                <small class="d-block text-muted">স্বয়ংক্রিয় অনুমোদন ব্যবস্থা</small>
-                            </div>
-                        </div>
+<div class="feature-item">
+                             <i class="fas fa-user-check"></i>
+                             <div>
+                                 <strong>Manager Approval</strong>
+                                 <small class="d-block text-muted">Automated approval system</small>
+                             </div>
+                         </div>
                         
-                        <div class="feature-item">
-                            <i class="fas fa-credit-card"></i>
-                            <div>
-                                <strong>পেমেন্ট মেথড</strong>
-                                <small class="d-block text-muted">Bank, SPAN, bKash, Nagad, Cash, Card</small>
-                            </div>
-                        </div>
+<div class="feature-item">
+                             <i class="fas fa-credit-card"></i>
+                             <div>
+                                 <strong>Payment Method</strong>
+                                 <small class="d-block text-muted">Bank, SPAN, bKash, Nagad, Cash, Card</small>
+                             </div>
+                         </div>
                         
-                        <div class="feature-item">
-                            <i class="fas fa-mobile-alt"></i>
-                            <div>
-                                <strong>মোবাইল অ্যাপ সাপোর্ট</strong>
-                                <small class="d-block text-muted">Flutter মোবাইল অ্যাপ সাপোর্ট</small>
-                            </div>
-                        </div>
+<div class="feature-item">
+                             <i class="fas fa-mobile-alt"></i>
+                             <div>
+                                 <strong>Mobile App Support</strong>
+                                 <small class="d-block text-muted">Flutter mobile app support</small>
+                             </div>
+                         </div>
                         
-                        <div class="feature-item">
-                            <i class="fas fa-lock"></i>
-                            <div>
-                                <strong>নিরাপত্তা</strong>
-                                <small class="d-block text-muted">OTP পাসওয়ার্ড রিসেট সিস্টেম</small>
-                            </div>
-                        </div>
+<div class="feature-item">
+                             <i class="fas fa-lock"></i>
+                             <div>
+                                 <strong>Security</strong>
+                                 <small class="d-block text-muted">OTP password reset system</small>
+                             </div>
+                         </div>
                     </div>
                 </div>
             </div>
