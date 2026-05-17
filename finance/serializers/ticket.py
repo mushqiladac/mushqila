@@ -54,6 +54,7 @@ class TicketSaleSerializer(serializers.ModelSerializer):
 
 class TicketSaleCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating TicketSale"""
+    payment_method = serializers.PrimaryKeyRelatedField(queryset=PaymentMethod.objects.all())
     
     class Meta:
         model = TicketSale
@@ -111,6 +112,7 @@ class TicketSaleCreateSerializer(serializers.ModelSerializer):
 
 class TicketSaleUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating TicketSale"""
+    payment_method = serializers.PrimaryKeyRelatedField(queryset=PaymentMethod.objects.all())
     
     class Meta:
         model = TicketSale

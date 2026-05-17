@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from datetime import timedelta
-from ..models import TicketSale, Airline, PaymentMethod
+from ..models import TicketSale, Airline, PaymentMethod, CreditSale, FinanceNotification
 from ..models.user import FinanceUser
 from ..serializers import (
     TicketSaleSerializer, 
@@ -51,6 +51,18 @@ class TicketSaleViewSet(viewsets.ModelViewSet):
                 balance_after=request.user.current_balance + ticket_sale.commission_amount,
                 description=f"Ticket sale - {ticket_sale.ticket_number}"
             )
+            
+            # Create credit sale if sale type is credit
+            if ticket_sale.sale_type == ticket_sale.SaleType.CREDIT:
+                from decimal import Decimal
+                CreditSale.objects.create(
+                    ticket_sale=ticket_sale,
+                    user=request.user,
+                    total_amount=ticket_sale.total_amount,
+                    paid_amount=Decimal('0.00'),
+                    remaining_amount=ticket_sale.total_amount,
+                    due_date=ticket_sale.due_date or timezone.now().date()
+                )
             
             # Update user stats
             request.user.total_sales += ticket_sale.total_amount
