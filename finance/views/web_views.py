@@ -217,35 +217,46 @@ def ticket_create(request):
         messages.error(request, 'User not found. Please login again.')
         return redirect('finance:login')
     
-    if request.method == 'POST':
-        # Get form data
-        pnr = request.POST.get('pnr')
-        ticket_number = request.POST.get('ticket_number')
-        airline_id = request.POST.get('airline')
-        passenger_name = request.POST.get('passenger_name')
-        customer_price = request.POST.get('customer_price')
-        airline_cost = request.POST.get('airline_cost')
-        payment_method = request.POST.get('payment_method')
-        
-        # Create ticket
-        try:
-            ticket = TicketSale.objects.create(
-                user=finance_user,
-                pnr=pnr,
-                ticket_number=ticket_number,
-                airline_id=airline_id,
-                passenger_name=passenger_name,
-                customer_price=customer_price,
-                airline_cost=airline_cost,
-                payment_method=payment_method,
-                status='active'
-            )
+        if request.method == 'POST':
+            # Get form data
+            pnr = request.POST.get('pnr')
+            ticket_number = request.POST.get('ticket_number')
+            airline_id = request.POST.get('airline')
+            passenger_name = request.POST.get('passenger_name')
+            customer_price = request.POST.get('customer_price')
+            airline_cost = request.POST.get('airline_cost')
+            payment_method_id = request.POST.get('payment_method')
             
-            messages.success(request, 'টিকেট সফলভাবে তৈরি হয়েছে!')
-            return redirect('finance:ticket_list')
+            # Validate required fields
+            if not all([pnr, ticket_number, airline_id, passenger_name, customer_price, airline_cost, payment_method_id]):
+                messages.error(request, 'সব বাধyak ফিল্ড পূরণ করুন')
+                return render(request, 'finance/tickets/create.html', context)
             
-        except Exception as e:
-            messages.error(request, f'টিকেট তৈরিতে সমস্যা: {str(e)}')
+            # Create ticket
+            try:
+                # Convert payment_method ID to PaymentMethod instance
+                from ..models import PaymentMethod
+                payment_method_instance = PaymentMethod.objects.get(id=payment_method_id)
+                
+                ticket = TicketSale.objects.create(
+                    user=finance_user,
+                    pnr=pnr,
+                    ticket_number=ticket_number,
+                    airline_id=airline_id,
+                    passenger_name=passenger_name,
+                    customer_price=customer_price,
+                    airline_cost=airline_cost,
+                    payment_method=payment_method_instance,
+                    status='active'
+                )
+                
+                messages.success(request, 'টিকেট সফলভাবে তৈরি হয়েছে!')
+                return redirect('finance:ticket_list')
+                
+            except PaymentMethod.DoesNotExist:
+                messages.error(request, 'বাচ désespErro: ভুল পেমেন্ট মেথড')
+            except Exception as e:
+                messages.error(request, f'টিকেট তৈরিতে সমস্যা: {str(e)}')
     
     # Get airlines and payment methods for dropdown
     from ..models import Airline, PaymentMethod
